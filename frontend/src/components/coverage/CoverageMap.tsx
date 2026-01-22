@@ -6,17 +6,20 @@ import { MapPin, CheckCircle, XCircle, Info, MessageCircle, Navigation, X } from
 import { CoverageResultModal } from './CoverageResultModal'
 
 // Importar dinámicamente el mapa para evitar problemas de SSR
-const MapComponent = dynamic(() => import('./MapComponent'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-[600px] bg-neutral-gray-light rounded-xl flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-red mx-auto mb-4"></div>
-        <p className="text-neutral-gray">Cargando mapa...</p>
+const MapComponent = dynamic(
+  () => import('./MapComponent').then((mod) => ({ default: mod.default })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[600px] bg-neutral-gray-light rounded-xl flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-red mx-auto mb-4"></div>
+          <p className="text-neutral-gray">Cargando mapa...</p>
+        </div>
       </div>
-    </div>
-  ),
-})
+    ),
+  }
+)
 
 interface CoverageZone {
   id: number

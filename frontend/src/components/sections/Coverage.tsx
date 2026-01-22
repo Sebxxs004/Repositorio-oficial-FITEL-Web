@@ -1,7 +1,25 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { MapPin, Search, CheckCircle } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
+import { MapPin, Search, CheckCircle, ArrowRight } from 'lucide-react'
+
+// Importar el mapa dinámicamente para evitar problemas de SSR
+const MapComponent = dynamic(
+  () => import('@/components/coverage/MapComponent').then((mod) => ({ default: mod.default })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[400px] bg-neutral-white/10 rounded-xl flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-red mx-auto mb-4"></div>
+          <p className="text-neutral-gray-light">Cargando mapa...</p>
+        </div>
+      </div>
+    ),
+  }
+)
 
 export function Coverage() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -63,51 +81,25 @@ export function Coverage() {
           </p>
         </div>
 
-        <div className="max-w-2xl mx-auto mb-12 animate-on-scroll">
-          <form onSubmit={handleSearch} className="relative">
-            <div className="flex items-center space-x-4">
-              <div className="flex-1 relative">
-                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-gray" />
-                <input
-                  type="text"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  placeholder="Ingresa tu dirección o localidad"
-                  className="w-full pl-12 pr-4 py-4 rounded-lg bg-neutral-white/10 backdrop-blur-sm border-2 border-neutral-gray/30 text-neutral-white placeholder-neutral-gray-light focus:outline-none focus:border-primary-red transition-colors"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isSearching}
-                className="btn-primary px-8 py-4 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Search className="w-5 h-5" />
-                <span>{isSearching ? 'Buscando...' : 'Buscar'}</span>
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-12 animate-on-scroll">
-          {zones.map((zone, index) => (
-            <div
-              key={index}
-              className="p-4 rounded-lg bg-neutral-white/5 backdrop-blur-sm border border-neutral-gray/20 hover:border-primary-red transition-all duration-300 flex items-center space-x-3"
-            >
-              <CheckCircle className="w-5 h-5 text-primary-red flex-shrink-0" />
-              <span className="text-neutral-white font-medium">{zone}</span>
-            </div>
-          ))}
+        {/* Mapa de Cobertura */}
+        <div className="mb-12 animate-on-scroll">
+          <div className="bg-neutral-white/10 backdrop-blur-sm rounded-xl overflow-hidden border border-neutral-gray/20 p-4">
+            <MapComponent geocodedLocation={null} />
+          </div>
         </div>
 
         <div className="text-center animate-on-scroll">
           <div className="inline-block p-6 rounded-xl bg-neutral-white/10 backdrop-blur-sm border border-neutral-gray/20">
-            <p className="text-neutral-gray-light mb-4">
-              ¿No encuentras tu zona? Contáctanos y evaluamos la posibilidad de expandir nuestra cobertura.
+            <p className="text-neutral-gray-light mb-6">
+              Consulta si tu dirección está dentro de nuestra zona de cobertura. Ingresa tu dirección en el módulo completo para verificar disponibilidad.
             </p>
-            <a href="mailto:cobertura@fitel.com.co" className="text-primary-red hover:text-primary-red-light font-semibold">
-              Solicitar evaluación de cobertura →
-            </a>
+            <Link 
+              href="/cobertura"
+              className="inline-flex items-center space-x-2 btn-primary px-8 py-4 text-lg font-semibold"
+            >
+              <span>Consultar si mi dirección está en cobertura</span>
+              <ArrowRight className="w-5 h-5" />
+            </Link>
           </div>
         </div>
       </div>

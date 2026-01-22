@@ -41,11 +41,12 @@ export default function MapComponent({ geocodedLocation }: MapComponentProps) {
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
       })
 
-      // Crear el mapa
+      // Crear el mapa con zoom inicial más bajo
       const map = L.map(mapContainerRef.current!, {
         center: [CENTER_LAT, CENTER_LNG],
-        zoom: 14,
+        zoom: 12, // Zoom inicial reducido para ver más área
         zoomControl: true,
+        minZoom: 11, // Zoom mínimo para evitar acercarse demasiado
       })
 
       // Agregar capa de OpenStreetMap
@@ -112,9 +113,12 @@ export default function MapComponent({ geocodedLocation }: MapComponentProps) {
         )
       }
 
-      // Ajustar el mapa para mostrar todo el área de cobertura
+      // Ajustar el mapa para mostrar todo el área de cobertura con zoom limitado
       const bounds = circles[circles.length - 1].getBounds()
-      map.fitBounds(bounds, { padding: [50, 50] })
+      map.fitBounds(bounds, { 
+        padding: [100, 100], // Más padding para que no ocupe toda la pantalla
+        maxZoom: 13, // Limitar el zoom máximo para evitar que se vea todo rojo
+      })
 
       mapRef.current = map
     }).catch((error) => {

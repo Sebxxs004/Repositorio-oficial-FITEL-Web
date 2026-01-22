@@ -2,8 +2,8 @@ import { Hero } from '@/components/sections/Hero'
 import { About } from '@/components/sections/About'
 import { Plans } from '@/components/sections/Plans'
 import { Coverage } from '@/components/sections/Coverage'
-import { Contact } from '@/components/sections/Contact'
 import { Benefits } from '@/components/sections/Benefits'
+import { ContactPreview } from '@/components/sections/ContactPreview'
 
 export default function HomePage() {
   return (
@@ -13,7 +13,7 @@ export default function HomePage() {
       <Benefits />
       <Plans />
       <Coverage />
-      <Contact />
+      <ContactPreview />
     </>
   )
 }

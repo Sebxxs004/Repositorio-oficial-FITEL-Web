@@ -14,7 +14,7 @@ export class NavigationService {
     { label: 'Inicio', href: '/' },
     { label: 'Planes', href: '/planes' },
     { label: 'Cobertura', href: '/cobertura' },
-    { label: 'Contacto', href: '#contacto' },
+    { label: 'Contacto', href: '/contacto' },
     { label: 'Soporte', href: '/soporte' },
   ]
 

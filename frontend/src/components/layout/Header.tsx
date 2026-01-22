@@ -51,15 +51,19 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-neutral-dark hover:text-primary-red transition-colors duration-200 font-medium"
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navigationItems.map((item) => {
+              // Manejar enlaces con hash para que siempre vayan a la página principal
+              const href = item.href.startsWith('/#') ? item.href : item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={href}
+                  className="text-neutral-dark hover:text-primary-red transition-colors duration-200 font-medium"
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
           </div>
 
           {/* CTA Buttons */}
@@ -99,16 +103,20 @@ export function Header() {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-neutral-gray-light">
             <div className="flex flex-col space-y-4">
-              {navigationItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-neutral-dark hover:text-primary-red transition-colors font-medium"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {navigationItems.map((item) => {
+                // Manejar enlaces con hash para que siempre vayan a la página principal
+                const href = item.href.startsWith('/#') ? item.href : item.href
+                return (
+                  <Link
+                    key={item.href}
+                    href={href}
+                    className="text-neutral-dark hover:text-primary-red transition-colors font-medium"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              })}
               <div className="pt-4 border-t border-neutral-gray-light space-y-3">
                 <button
                   onClick={() => {

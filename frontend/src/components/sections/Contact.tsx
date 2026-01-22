@@ -1,10 +1,39 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { Phone, Mail, MessageCircle, MapPin, Clock } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Phone, Mail, MessageCircle, MapPin, Clock, Send, Loader2, Copy, Check } from 'lucide-react'
+import { ContactForm } from '@/types'
+import { FITEL_PHONE_NUMBER, FITEL_PHONE_DISPLAY, FITEL_EMAIL, FITEL_WHATSAPP_URL, FITEL_PHONE_TEL } from '@/config/constants'
+
+// Esquema de validación con Zod
+const contactFormSchema = z.object({
+  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  email: z.string().email('Ingresa un email válido'),
+  phone: z.string().min(10, 'Ingresa un teléfono válido'),
+  subject: z.string().min(5, 'El asunto debe tener al menos 5 caracteres'),
+  message: z.string().min(10, 'El mensaje debe tener al menos 10 caracteres'),
+})
+
+type ContactFormData = z.infer<typeof contactFormSchema>
 
 export function Contact() {
   const sectionRef = useRef<HTMLElement>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [phoneCopied, setPhoneCopied] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactFormSchema),
+  })
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -26,12 +55,77 @@ export function Contact() {
     return () => observer.disconnect()
   }, [])
 
+  const onSubmit = async (data: ContactFormData) => {
+    setIsSubmitting(true)
+    setSubmitError(null)
+    setSubmitSuccess(false)
+
+    try {
+      // Aquí puedes enviar los datos al backend cuando esté listo
+      // Por ahora, simulamos el envío
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      
+      // Enviar a WhatsApp con el mensaje prellenado
+      const whatsappMessage = `Hola, mi nombre es ${data.name}.\n\nAsunto: ${data.subject}\n\nMensaje: ${data.message}\n\nContacto: ${data.email} - ${data.phone}`
+      const whatsappUrl = `${FITEL_WHATSAPP_URL}?text=${encodeURIComponent(whatsappMessage)}`
+      window.open(whatsappUrl, '_blank')
+      
+      setSubmitSuccess(true)
+      reset()
+      
+      // Ocultar mensaje de éxito después de 5 segundos
+      setTimeout(() => setSubmitSuccess(false), 5000)
+    } catch (error) {
+      setSubmitError('Ocurrió un error al enviar el mensaje. Por favor intenta de nuevo.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCall = () => {
+    window.location.href = FITEL_PHONE_TEL
+  }
+
+  const handleWhatsApp = () => {
+    window.open(FITEL_WHATSAPP_URL, '_blank')
+  }
+
+  const handleCopyPhone = async () => {
+    const phoneNumber = `+${FITEL_PHONE_NUMBER}`
+    try {
+      await navigator.clipboard.writeText(phoneNumber)
+      setPhoneCopied(true)
+      setTimeout(() => {
+        setPhoneCopied(false)
+      }, 2000)
+    } catch (error) {
+      console.error('Error al copiar el teléfono:', error)
+      // Fallback para navegadores que no soportan clipboard API
+      const textArea = document.createElement('textarea')
+      textArea.value = phoneNumber
+      textArea.style.position = 'fixed'
+      textArea.style.opacity = '0'
+      document.body.appendChild(textArea)
+      textArea.select()
+      try {
+        document.execCommand('copy')
+        setPhoneCopied(true)
+        setTimeout(() => {
+          setPhoneCopied(false)
+        }, 2000)
+      } catch (err) {
+        console.error('Error al copiar:', err)
+      }
+      document.body.removeChild(textArea)
+    }
+  }
+
   const contactMethods = [
     {
       icon: Phone,
       title: 'Teléfono',
-      value: '+57 300 123 4567',
-      link: 'tel:+573001234567',
+      value: FITEL_PHONE_DISPLAY,
+      link: FITEL_PHONE_TEL,
       description: 'Llámanos de lunes a domingo',
       color: 'text-primary-red',
       bgColor: 'bg-primary-red/10',
@@ -40,7 +134,7 @@ export function Contact() {
       icon: MessageCircle,
       title: 'WhatsApp',
       value: 'Escribir por WhatsApp',
-      link: 'https://wa.me/573001234567',
+      link: FITEL_WHATSAPP_URL,
       description: 'Atención inmediata',
       color: 'text-secondary-blue',
       bgColor: 'bg-secondary-blue/10',
@@ -48,8 +142,8 @@ export function Contact() {
     {
       icon: Mail,
       title: 'Email',
-      value: 'contacto@fitel.com.co',
-      link: 'mailto:contacto@fitel.com.co',
+      value: FITEL_EMAIL,
+      link: `mailto:${FITEL_EMAIL}`,
       description: 'Respuesta en 24 horas',
       color: 'text-primary-red',
       bgColor: 'bg-primary-red/10',
@@ -66,7 +160,7 @@ export function Contact() {
   ]
 
   return (
-    <section ref={sectionRef} id="contacto" className="section-padding bg-neutral-white">
+    <section ref={sectionRef} id="contacto" className="section-padding bg-transparent">
       <div className="container-custom">
         <div className="text-center mb-16 animate-on-scroll">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
@@ -81,8 +175,42 @@ export function Contact() {
           {contactMethods.map((method, index) => {
             const Icon = method.icon
             const isLink = method.link !== '#'
-            const Component = isLink ? 'a' : 'div'
+            const isPhone = method.title === 'Teléfono'
             
+            // Para el teléfono, usar un div con onClick en lugar de un enlace
+            if (isPhone) {
+              return (
+                <div
+                  key={index}
+                  onClick={handleCopyPhone}
+                  className="p-6 rounded-xl border-2 border-neutral-gray-light hover:border-primary-red transition-all duration-300 transform hover:-translate-y-2 cursor-pointer animate-on-scroll"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className={`w-16 h-16 rounded-full ${method.bgColor} flex items-center justify-center mb-4`}>
+                    <Icon className={`w-8 h-8 ${method.color}`} />
+                  </div>
+                  <h3 className="text-lg font-bold text-neutral-dark mb-2">{method.title}</h3>
+                  <p className="text-primary-red font-semibold mb-2">{method.value}</p>
+                  <div className="flex items-center space-x-2 text-secondary-blue hover:text-secondary-blue-dark transition-colors mt-3">
+                    {phoneCopied ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        <span className="text-sm font-medium">¡Copiado!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        <span className="text-sm font-medium">Dar click aquí para copiar el teléfono</span>
+                      </>
+                    )}
+                  </div>
+                  <p className="text-neutral-gray text-sm mt-2">{method.description}</p>
+                </div>
+              )
+            }
+            
+            // Para los demás métodos, usar el comportamiento original
+            const Component = isLink ? 'a' : 'div'
             return (
               <Component
                 key={index}
@@ -103,6 +231,177 @@ export function Contact() {
               </Component>
             )
           })}
+        </div>
+
+        {/* Formulario de Contacto */}
+        <div className="max-w-4xl mx-auto mb-16">
+          <div className="bg-neutral-white rounded-xl shadow-lg p-8 border border-neutral-gray-light animate-on-scroll">
+            <h3 className="text-2xl font-bold text-neutral-dark mb-6 text-center">
+              <span className="text-gradient">Envíanos un Mensaje</span>
+            </h3>
+            
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Nombre */}
+              <div>
+                <label htmlFor="name" className="block text-sm font-semibold text-neutral-dark mb-2">
+                  Nombre Completo *
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  {...register('name')}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
+                    errors.name
+                      ? 'border-red-500 focus:ring-red-500'
+                      : 'border-neutral-gray-light focus:ring-primary-red focus:border-transparent'
+                  }`}
+                  placeholder="Ej: Juan Pérez"
+                />
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                )}
+              </div>
+
+              {/* Email y Teléfono */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-semibold text-neutral-dark mb-2">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    {...register('email')}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
+                      errors.email
+                        ? 'border-red-500 focus:ring-red-500'
+                        : 'border-neutral-gray-light focus:ring-primary-red focus:border-transparent'
+                    }`}
+                    placeholder="ejemplo@correo.com"
+                  />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-semibold text-neutral-dark mb-2">
+                    Teléfono *
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    {...register('phone')}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
+                      errors.phone
+                        ? 'border-red-500 focus:ring-red-500'
+                        : 'border-neutral-gray-light focus:ring-primary-red focus:border-transparent'
+                    }`}
+                    placeholder="+57 300 123 4567"
+                  />
+                  {errors.phone && (
+                    <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Asunto */}
+              <div>
+                <label htmlFor="subject" className="block text-sm font-semibold text-neutral-dark mb-2">
+                  Asunto *
+                </label>
+                <input
+                  type="text"
+                  id="subject"
+                  {...register('subject')}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
+                    errors.subject
+                      ? 'border-red-500 focus:ring-red-500'
+                      : 'border-neutral-gray-light focus:ring-primary-red focus:border-transparent'
+                  }`}
+                  placeholder="Ej: Consulta sobre planes, Solicitud de instalación, Soporte técnico"
+                />
+                {errors.subject && (
+                  <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
+                )}
+              </div>
+
+              {/* Mensaje */}
+              <div>
+                <label htmlFor="message" className="block text-sm font-semibold text-neutral-dark mb-2">
+                  Mensaje *
+                </label>
+                <textarea
+                  id="message"
+                  {...register('message')}
+                  rows={6}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors resize-none ${
+                    errors.message
+                      ? 'border-red-500 focus:ring-red-500'
+                      : 'border-neutral-gray-light focus:ring-primary-red focus:border-transparent'
+                  }`}
+                  placeholder="Escribe aquí tu mensaje, consulta o razón de contacto..."
+                />
+                {errors.message && (
+                  <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
+                )}
+              </div>
+
+              {/* Mensajes de éxito/error */}
+              {submitSuccess && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-800 text-sm">
+                    ✓ Mensaje enviado correctamente. Te redirigiremos a WhatsApp para continuar la conversación.
+                  </p>
+                </div>
+              )}
+
+              {submitError && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-800 text-sm">{submitError}</p>
+                </div>
+              )}
+
+              {/* Botones de acción */}
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 flex items-center justify-center space-x-2 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Enviando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5" />
+                      <span>Enviar Mensaje</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleWhatsApp}
+                  className="flex items-center justify-center space-x-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span>WhatsApp</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCall}
+                  className="flex items-center justify-center space-x-2 px-6 py-3 bg-primary-red hover:bg-primary-red-dark text-white rounded-lg font-medium transition-colors"
+                >
+                  <Phone className="w-5 h-5" />
+                  <span>Llamar</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
 
         {/* Horarios de Atención */}
