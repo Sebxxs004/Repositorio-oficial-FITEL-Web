@@ -1,14 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Menu, X, Phone, MessageCircle } from 'lucide-react'
 import { NavigationService } from '@/services/navigation/NavigationService'
+import { PQRsDropdown } from './PQRsDropdown'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +20,11 @@ export function Header() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Cerrar menú móvil cuando cambia la ruta
+  useEffect(() => {
+    setIsMenuOpen(false)
+  }, [pathname])
 
   const navigationItems = NavigationService.getNavigationItems()
 
@@ -54,6 +62,12 @@ export function Header() {
             {navigationItems.map((item) => {
               // Manejar enlaces con hash para que siempre vayan a la página principal
               const href = item.href.startsWith('/#') ? item.href : item.href
+              
+              // Si es PQRS, mostrar dropdown
+              if (item.label === 'PQRS') {
+                return <PQRsDropdown key={item.href} />
+              }
+              
               return (
                 <Link
                   key={item.href}
@@ -84,9 +98,6 @@ export function Header() {
               <Phone className="w-5 h-5" />
               <span className="font-medium">Llamar</span>
             </a>
-            <Link href="/solicitar-instalacion" className="btn-primary">
-              Solicitar Instalación
-            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -106,6 +117,17 @@ export function Header() {
               {navigationItems.map((item) => {
                 // Manejar enlaces con hash para que siempre vayan a la página principal
                 const href = item.href.startsWith('/#') ? item.href : item.href
+                
+                // Si es PQRS, mostrar dropdown en mobile
+                if (item.label === 'PQRS') {
+                  return (
+                    <PQRsDropdown
+                      key={item.href}
+                      isMobile
+                    />
+                  )
+                }
+                
                 return (
                   <Link
                     key={item.href}
@@ -136,13 +158,6 @@ export function Header() {
                   <Phone className="w-5 h-5" />
                   <span>Llamar</span>
                 </a>
-                <Link
-                  href="/solicitar-instalacion"
-                  className="w-full btn-outline text-center block"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Solicitar Instalación
-                </Link>
               </div>
             </div>
           </div>

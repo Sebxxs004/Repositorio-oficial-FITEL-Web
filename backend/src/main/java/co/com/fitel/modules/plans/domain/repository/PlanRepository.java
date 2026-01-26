@@ -20,4 +20,6 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
     Optional<Plan> findByNameAndActiveTrue(String name);
     
     List<Plan> findByPopularTrueAndActiveTrue();
+    
+    long countByActiveTrue();
 }

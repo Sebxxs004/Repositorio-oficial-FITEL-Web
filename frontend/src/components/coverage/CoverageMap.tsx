@@ -438,14 +438,7 @@ export function CoverageMap() {
                   {checkResult.message}
                 </p>
                 
-                {checkResult.available ? (
-                  <a
-                    href="/solicitar-instalacion"
-                    className="mt-2 inline-block text-primary-red hover:text-primary-red-dark font-medium"
-                  >
-                    Solicitar instalación →
-                  </a>
-                ) : checkResult.showContactOptions ? (
+                {checkResult.available ? null : checkResult.showContactOptions ? (
                   <div className="mt-4 space-y-3">
                     <p className="text-sm text-yellow-800 font-medium mb-3">
                       ¿Quieres verificar la disponibilidad en tu zona? Contáctanos y te ayudamos:
@@ -671,9 +664,6 @@ export function CoverageMap() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a href="/contacto" className="btn-primary">
               Contactar Asesor
-            </a>
-            <a href="/solicitar-instalacion" className="btn-outline">
-              Solicitar Instalación
             </a>
           </div>
         </div>

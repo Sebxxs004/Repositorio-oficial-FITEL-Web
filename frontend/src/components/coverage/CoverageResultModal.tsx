@@ -137,21 +137,6 @@ export function CoverageResultModal({ isOpen, onClose, result, address }: Covera
               </button>
             </div>
 
-            {/* Información adicional */}
-            {result.available && (
-              <div className="mt-6 pt-6 border-t border-neutral-gray-light">
-                <p className="text-sm text-neutral-gray text-center">
-                  También puedes{' '}
-                  <a 
-                    href="/solicitar-instalacion" 
-                    className="text-primary-red hover:text-primary-red-dark font-semibold"
-                  >
-                    solicitar una instalación
-                  </a>{' '}
-                  directamente desde nuestro sitio.
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>

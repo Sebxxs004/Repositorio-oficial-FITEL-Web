@@ -51,6 +51,10 @@ services:
     container_name: fitel-frontend
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8080/api
+      # Whitelist de IPs para panel admin (separadas por comas)
+      # IPs configuradas: localhost, Wi-Fi (192.168.1.5), y rango de red local (192.168.1.0/24)
+      # Para agregar más IPs, edita esta línea o usa variable de entorno ALLOWED_ADMIN_IPS
+      ALLOWED_ADMIN_IPS: ${ALLOWED_ADMIN_IPS:-127.0.0.1,::1,192.168.1.5,192.168.1.0/24,172.31.176.1}
     ports:
       - "3000:3000"
     depends_on:

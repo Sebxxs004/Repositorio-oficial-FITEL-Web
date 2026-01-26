@@ -8,12 +8,27 @@ import { Phone, Mail, MessageCircle, MapPin, Clock, Send, Loader2, Copy, Check }
 import { ContactForm } from '@/types'
 import { FITEL_PHONE_NUMBER, FITEL_PHONE_DISPLAY, FITEL_EMAIL, FITEL_WHATSAPP_URL, FITEL_PHONE_TEL } from '@/config/constants'
 
+// Opciones de asunto para el formulario de contacto
+export const CONTACT_SUBJECT_OPTIONS = [
+  { value: 'plan-informacion', label: 'Información sobre Planes' },
+  { value: 'plan-contratacion', label: 'Contratar un Plan' },
+  { value: 'cobertura', label: 'Consulta de Cobertura' },
+  { value: 'soporte-tecnico', label: 'Soporte Técnico' },
+  { value: 'facturacion', label: 'Facturación y Pagos' },
+  { value: 'cambio-plan', label: 'Cambio o Actualización de Plan' },
+  { value: 'servicios-adicionales', label: 'Servicios Adicionales' },
+  { value: 'promociones', label: 'Promociones y Ofertas' },
+  { value: 'otro', label: 'Otro' },
+] as const
+
 // Esquema de validación con Zod
 const contactFormSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   email: z.string().email('Ingresa un email válido'),
   phone: z.string().min(10, 'Ingresa un teléfono válido'),
-  subject: z.string().min(5, 'El asunto debe tener al menos 5 caracteres'),
+  subject: z.enum(CONTACT_SUBJECT_OPTIONS.map(opt => opt.value) as [string, ...string[]], {
+    errorMap: () => ({ message: 'Por favor selecciona un asunto' }),
+  }),
   message: z.string().min(10, 'El mensaje debe tener al menos 10 caracteres'),
 })
 
@@ -65,8 +80,12 @@ export function Contact() {
       // Por ahora, simulamos el envío
       await new Promise((resolve) => setTimeout(resolve, 1000))
       
+      // Obtener el label del asunto seleccionado
+      const selectedSubject = CONTACT_SUBJECT_OPTIONS.find(opt => opt.value === data.subject)
+      const subjectLabel = selectedSubject ? selectedSubject.label : data.subject
+      
       // Enviar a WhatsApp con el mensaje prellenado
-      const whatsappMessage = `Hola, mi nombre es ${data.name}.\n\nAsunto: ${data.subject}\n\nMensaje: ${data.message}\n\nContacto: ${data.email} - ${data.phone}`
+      const whatsappMessage = `Hola, mi nombre es ${data.name}.\n\nAsunto: ${subjectLabel}\n\nMensaje: ${data.message}\n\nContacto: ${data.email} - ${data.phone}`
       const whatsappUrl = `${FITEL_WHATSAPP_URL}?text=${encodeURIComponent(whatsappMessage)}`
       window.open(whatsappUrl, '_blank')
       
@@ -181,7 +200,7 @@ export function Contact() {
             if (isPhone) {
               return (
                 <div
-                  key={index}
+                  key={`phone-${index}`}
                   onClick={handleCopyPhone}
                   className="p-6 rounded-xl border-2 border-neutral-gray-light hover:border-primary-red transition-all duration-300 transform hover:-translate-y-2 cursor-pointer animate-on-scroll"
                   style={{ animationDelay: `${index * 100}ms` }}
@@ -191,17 +210,17 @@ export function Contact() {
                   </div>
                   <h3 className="text-lg font-bold text-neutral-dark mb-2">{method.title}</h3>
                   <p className="text-primary-red font-semibold mb-2">{method.value}</p>
-                  <div className="flex items-center space-x-2 text-secondary-blue hover:text-secondary-blue-dark transition-colors mt-3">
+                  <div className="flex items-center space-x-2 text-secondary-blue hover:text-secondary-blue-dark transition-colors mt-3 min-h-[20px]">
                     {phoneCopied ? (
-                      <>
+                      <span className="flex items-center space-x-2">
                         <Check className="w-4 h-4" />
                         <span className="text-sm font-medium">¡Copiado!</span>
-                      </>
+                      </span>
                     ) : (
-                      <>
+                      <span className="flex items-center space-x-2">
                         <Copy className="w-4 h-4" />
                         <span className="text-sm font-medium">Dar click aquí para copiar el teléfono</span>
-                      </>
+                      </span>
                     )}
                   </div>
                   <p className="text-neutral-gray text-sm mt-2">{method.description}</p>
@@ -209,17 +228,31 @@ export function Contact() {
               )
             }
             
-            // Para los demás métodos, usar el comportamiento original
-            const Component = isLink ? 'a' : 'div'
+            // Para los demás métodos, usar renderizado condicional explícito
+            if (isLink) {
+              return (
+                <a
+                  key={`method-${index}`}
+                  href={method.link}
+                  target={method.link.startsWith('http') ? '_blank' : undefined}
+                  rel={method.link.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  className="p-6 rounded-xl border-2 border-neutral-gray-light hover:border-primary-red transition-all duration-300 transform hover:-translate-y-2 cursor-pointer animate-on-scroll"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className={`w-16 h-16 rounded-full ${method.bgColor} flex items-center justify-center mb-4`}>
+                    <Icon className={`w-8 h-8 ${method.color}`} />
+                  </div>
+                  <h3 className="text-lg font-bold text-neutral-dark mb-2">{method.title}</h3>
+                  <p className="text-primary-red font-semibold mb-2">{method.value}</p>
+                  <p className="text-neutral-gray text-sm">{method.description}</p>
+                </a>
+              )
+            }
+            
             return (
-              <Component
-                key={index}
-                href={isLink ? method.link : undefined}
-                target={method.link.startsWith('http') ? '_blank' : undefined}
-                rel={method.link.startsWith('http') ? 'noopener noreferrer' : undefined}
-                className={`p-6 rounded-xl border-2 border-neutral-gray-light hover:border-primary-red transition-all duration-300 transform hover:-translate-y-2 cursor-pointer animate-on-scroll ${
-                  !isLink ? 'cursor-default' : ''
-                }`}
+              <div
+                key={`method-${index}`}
+                className="p-6 rounded-xl border-2 border-neutral-gray-light hover:border-primary-red transition-all duration-300 transform hover:-translate-y-2 cursor-default animate-on-scroll"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className={`w-16 h-16 rounded-full ${method.bgColor} flex items-center justify-center mb-4`}>
@@ -228,7 +261,7 @@ export function Contact() {
                 <h3 className="text-lg font-bold text-neutral-dark mb-2">{method.title}</h3>
                 <p className="text-primary-red font-semibold mb-2">{method.value}</p>
                 <p className="text-neutral-gray text-sm">{method.description}</p>
-              </Component>
+              </div>
             )
           })}
         </div>
@@ -308,19 +341,24 @@ export function Contact() {
               {/* Asunto */}
               <div>
                 <label htmlFor="subject" className="block text-sm font-semibold text-neutral-dark mb-2">
-                  Asunto *
+                  Asunto * <span className="text-neutral-gray font-normal text-xs">(Selecciona el motivo de tu consulta)</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   id="subject"
                   {...register('subject')}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors bg-white ${
                     errors.subject
                       ? 'border-red-500 focus:ring-red-500'
                       : 'border-neutral-gray-light focus:ring-primary-red focus:border-transparent'
                   }`}
-                  placeholder="Ej: Consulta sobre planes, Solicitud de instalación, Soporte técnico"
-                />
+                >
+                  <option value="">Selecciona un asunto...</option>
+                  {CONTACT_SUBJECT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
                 {errors.subject && (
                   <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
                 )}

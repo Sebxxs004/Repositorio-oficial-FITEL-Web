@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { Heart, Shield, Zap, Award } from 'lucide-react'
+import { Shield, Building2, Award, FileCheck, TrendingUp } from 'lucide-react'
 
 export function About() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -26,78 +26,113 @@ export function About() {
     return () => observer.disconnect()
   }, [])
 
-  const values = [
-    {
-      icon: Heart,
-      title: 'Uniendo Familias',
-      description: 'Nuestro compromiso es conectar a las familias bogotanas con servicios de calidad que fortalezcan sus lazos.',
-      color: 'text-primary-red',
-      bgColor: 'bg-primary-red/10',
-    },
+  const credentials = [
     {
       icon: Shield,
-      title: 'Confianza y Seguridad',
-      description: 'Cumplimos con todos los estándares regulatorios y garantizamos la protección de tus datos y privacidad.',
-      color: 'text-secondary-blue',
-      bgColor: 'bg-secondary-blue/10',
+      title: 'Cumplimiento Normativo',
+      description: 'Registrados y autorizados por la CRC (Comisión de Regulación de Comunicaciones) y cumplimos con todas las normativas vigentes del sector de telecomunicaciones en Colombia.',
+      color: 'text-primary-red',
+      bgColor: 'bg-primary-red/5',
+      borderColor: 'border-primary-red/20',
     },
     {
-      icon: Zap,
-      title: 'Tecnología Avanzada',
-      description: 'Utilizamos la última tecnología en fibra óptica para ofrecerte velocidades excepcionales y estabilidad.',
+      icon: FileCheck,
+      title: 'Certificaciones y Garantías',
+      description: 'Contamos con certificaciones de calidad y garantizamos la protección de datos personales según la Ley 1581 de 2012. Todos nuestros procesos están documentados y auditados.',
+      color: 'text-secondary-blue',
+      bgColor: 'bg-secondary-blue/5',
+      borderColor: 'border-secondary-blue/20',
+    },
+    {
+      icon: Building2,
+      title: 'Empresa Establecida',
+      description: 'Somos una empresa legalmente constituida en Colombia, con presencia sólida en Bogotá y comprometida con el crecimiento sostenible del sector de telecomunicaciones.',
       color: 'text-primary-red',
-      bgColor: 'bg-primary-red/10',
+      bgColor: 'bg-primary-red/5',
+      borderColor: 'border-primary-red/20',
     },
     {
       icon: Award,
-      title: 'Excelencia en Servicio',
-      description: 'Atención personalizada, soporte técnico especializado y compromiso con la satisfacción del cliente.',
+      title: 'Excelencia Operacional',
+      description: 'Implementamos estándares internacionales de calidad en nuestros servicios, con procesos optimizados y personal técnico altamente capacitado y certificado.',
       color: 'text-secondary-blue',
-      bgColor: 'bg-secondary-blue/10',
+      bgColor: 'bg-secondary-blue/5',
+      borderColor: 'border-secondary-blue/20',
     },
   ]
 
   return (
-    <section ref={sectionRef} className="section-padding bg-neutral-white">
+    <section ref={sectionRef} className="section-padding bg-neutral-gray-light">
       <div className="container-custom">
+        {/* Header más formal */}
         <div className="text-center mb-16 animate-on-scroll">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            <span className="text-gradient">Sobre FITEL</span>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-neutral-dark">
+            Sobre <span className="text-primary-red">FITEL</span>
           </h2>
-          <p className="text-lg text-neutral-gray max-w-2xl mx-auto">
-            Somos una empresa comprometida con brindar servicios de Internet y Televisión de alta calidad
-            en Bogotá, enfocada en hogares y pequeñas empresas.
-          </p>
+          <div className="max-w-4xl mx-auto">
+            <p className="text-xl text-neutral-dark font-medium mb-4 leading-relaxed">
+              Empresa de telecomunicaciones legalmente constituida, especializada en servicios de Internet y Televisión de alta calidad para el mercado residencial y empresarial en Bogotá.
+            </p>
+            <p className="text-lg text-neutral-gray leading-relaxed">
+              Operamos bajo estrictos estándares regulatorios, garantizando transparencia, seguridad y cumplimiento de todas las normativas vigentes en el sector de telecomunicaciones colombiano.
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {values.map((value, index) => {
-            const Icon = value.icon
-            return (
-              <div
-                key={index}
-                className="p-6 rounded-xl bg-neutral-white border-2 border-neutral-gray-light hover:border-primary-red transition-all duration-300 animate-on-scroll glow-effect"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className={`w-16 h-16 rounded-full ${value.bgColor} flex items-center justify-center mb-4`}>
-                  <Icon className={`w-8 h-8 ${value.color}`} />
+        {/* Credenciales y Certificaciones */}
+        <div className="mb-16">
+          <h3 className="text-2xl font-bold text-neutral-dark mb-8 text-center animate-on-scroll">
+            Credenciales y Certificaciones
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {credentials.map((credential, index) => {
+              const Icon = credential.icon
+              return (
+                <div
+                  key={index}
+                  className={`p-8 bg-neutral-white border-l-4 ${credential.borderColor} rounded-lg shadow-sm hover:shadow-md transition-all duration-300 animate-on-scroll`}
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className={`w-14 h-14 rounded-lg ${credential.bgColor} flex items-center justify-center flex-shrink-0`}>
+                      <Icon className={`w-7 h-7 ${credential.color}`} />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-xl font-bold mb-3 text-neutral-dark">{credential.title}</h4>
+                      <p className="text-neutral-gray leading-relaxed">{credential.description}</p>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-neutral-dark">{value.title}</h3>
-                <p className="text-neutral-gray text-sm leading-relaxed">{value.description}</p>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
 
-        <div className="mt-16 p-8 rounded-xl bg-gradient-to-r from-primary-red/10 to-secondary-blue/10 border border-primary-red/20 animate-on-scroll">
-          <div className="max-w-3xl mx-auto text-center">
-            <h3 className="text-2xl font-bold mb-4 text-neutral-dark">
-              Nuestra Misión
+        {/* Misión y Visión más formales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-neutral-white p-8 rounded-lg border border-neutral-gray-light shadow-sm animate-on-scroll">
+            <h3 className="text-2xl font-bold mb-4 text-neutral-dark flex items-center space-x-2">
+              <Building2 className="w-6 h-6 text-primary-red" />
+              <span>Nuestra Misión</span>
             </h3>
-            <p className="text-neutral-gray text-lg leading-relaxed">
-              Proporcionar servicios de comunicación de excelencia que conecten a las familias y empresas
-              de Bogotá, facilitando el acceso a la información, el entretenimiento y las oportunidades
-              que ofrece el mundo digital, siempre con un enfoque humano y cercano.
+            <p className="text-neutral-gray leading-relaxed">
+              Proporcionar servicios de telecomunicaciones de excelencia técnica y operacional, 
+              cumpliendo estrictamente con las normativas regulatorias colombianas. Nos comprometemos 
+              a ofrecer soluciones confiables, seguras y de alta calidad que satisfagan las necesidades 
+              de comunicación de nuestros clientes en Bogotá.
+            </p>
+          </div>
+
+          <div className="bg-neutral-white p-8 rounded-lg border border-neutral-gray-light shadow-sm animate-on-scroll">
+            <h3 className="text-2xl font-bold mb-4 text-neutral-dark flex items-center space-x-2">
+              <TrendingUp className="w-6 h-6 text-secondary-blue" />
+              <span>Nuestro Compromiso</span>
+            </h3>
+            <p className="text-neutral-gray leading-relaxed">
+              Mantener los más altos estándares de calidad, transparencia y cumplimiento legal. 
+              Garantizamos la protección de datos personales, la continuidad del servicio y 
+              la satisfacción de nuestros clientes mediante procesos documentados, personal 
+              certificado y tecnología de vanguardia.
             </p>
           </div>
         </div>

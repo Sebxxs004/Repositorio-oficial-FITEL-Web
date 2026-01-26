@@ -24,13 +24,22 @@ export default function MapComponent({ geocodedLocation }: MapComponentProps) {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current || typeof window === 'undefined') return
 
+    // Verificar si el contenedor ya tiene un mapa inicializado
+    if ((mapContainerRef.current as any)._leaflet_id) {
+      return
+    }
+
+    let isMounted = true
+
     // Importar Leaflet dinámicamente solo en el cliente
     import('leaflet').then((leafletModule) => {
+      if (!isMounted || !mapContainerRef.current) return
+
       const L = leafletModule.default || leafletModule
       
-      // Importar CSS de Leaflet
-      if (typeof window !== 'undefined') {
-        import('leaflet/dist/leaflet.css')
+      // Verificar nuevamente si el contenedor ya tiene un mapa
+      if ((mapContainerRef.current as any)._leaflet_id) {
+        return
       }
 
       // Fix para los iconos de Leaflet en Next.js
@@ -126,9 +135,18 @@ export default function MapComponent({ geocodedLocation }: MapComponentProps) {
     })
 
     return () => {
+      isMounted = false
       if (mapRef.current) {
-        mapRef.current.remove()
+        try {
+          mapRef.current.remove()
+        } catch (error) {
+          // Ignorar errores al remover el mapa
+        }
         mapRef.current = null
+      }
+      // Limpiar el contenedor
+      if (mapContainerRef.current) {
+        (mapContainerRef.current as any)._leaflet_id = undefined
       }
     }
   }, [])

@@ -1,0 +1,117 @@
+package co.com.fitel.modules.config.infrastructure.controller;
+
+import co.com.fitel.common.dto.ApiResponse;
+import co.com.fitel.modules.config.application.dto.CarouselImageDTO;
+import co.com.fitel.modules.config.application.dto.ContactConfigDTO;
+import co.com.fitel.modules.config.application.service.ConfigService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/config")
+@RequiredArgsConstructor
+@Slf4j
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "http://localhost:*"}, allowCredentials = "true", maxAge = 3600)
+public class ConfigController {
+    
+    private final ConfigService configService;
+    private static final String UPLOAD_DIR = "frontend/public/assets/";
+    
+    @GetMapping("/contact")
+    public ResponseEntity<ApiResponse<ContactConfigDTO>> getContactConfig() {
+        log.info("GET /api/config/contact - Fetching contact config");
+        ContactConfigDTO config = configService.getContactConfig();
+        return ResponseEntity.ok(ApiResponse.success("Configuración de contacto obtenida", config));
+    }
+    
+    @PutMapping("/contact")
+    public ResponseEntity<ApiResponse<ContactConfigDTO>> updateContactConfig(@RequestBody ContactConfigDTO dto) {
+        log.info("PUT /api/config/contact - Updating contact config");
+        ContactConfigDTO updated = configService.updateContactConfig(dto);
+        return ResponseEntity.ok(ApiResponse.success("Configuración de contacto actualizada", updated));
+    }
+    
+    @GetMapping("/carousel")
+    public ResponseEntity<ApiResponse<List<CarouselImageDTO>>> getCarouselImages() {
+        log.info("GET /api/config/carousel - Fetching carousel images");
+        List<CarouselImageDTO> images = configService.getCarouselImages();
+        return ResponseEntity.ok(ApiResponse.success("Imágenes del carrusel obtenidas", images));
+    }
+    
+    @PostMapping("/carousel/upload")
+    public ResponseEntity<ApiResponse<CarouselImageDTO>> uploadCarouselImage(@RequestParam("image") MultipartFile file) {
+        log.info("POST /api/config/carousel/upload - Uploading carousel image");
+        
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("El archivo está vacío"));
+        }
+        
+        try {
+            // Generar nombre único para el archivo
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename != null && originalFilename.contains(".") 
+                    ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
+                    : ".png";
+            String filename = "carrousel_" + UUID.randomUUID().toString() + extension;
+            String filePath = "/assets/" + filename;
+            
+            // Guardar el archivo
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+            
+            Path filePathFull = uploadPath.resolve(filename);
+            Files.copy(file.getInputStream(), filePathFull, StandardCopyOption.REPLACE_EXISTING);
+            
+            // Guardar en la base de datos
+            CarouselImageDTO saved = configService.addCarouselImage(originalFilename != null ? originalFilename : filename, filePath);
+            
+            return ResponseEntity.ok(ApiResponse.success("Imagen subida correctamente", saved));
+        } catch (IOException e) {
+            log.error("Error uploading carousel image", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Error al subir la imagen: " + e.getMessage()));
+        }
+    }
+    
+    @DeleteMapping("/carousel/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteCarouselImage(@PathVariable Long id) {
+        log.info("DELETE /api/config/carousel/{} - Deleting carousel image", id);
+        configService.deleteCarouselImage(id);
+        return ResponseEntity.ok(ApiResponse.success("Imagen eliminada correctamente", null));
+    }
+    
+    @PutMapping("/carousel/reorder")
+    public ResponseEntity<ApiResponse<Void>> reorderCarouselImages(@RequestBody ReorderRequest request) {
+        log.info("PUT /api/config/carousel/reorder - Reordering carousel images");
+        configService.reorderCarouselImages(request.getImageIds());
+        return ResponseEntity.ok(ApiResponse.success("Orden actualizado correctamente", null));
+    }
+    
+    // Clase interna para el request de reordenamiento
+    public static class ReorderRequest {
+        private List<Long> imageIds;
+        
+        public List<Long> getImageIds() {
+            return imageIds;
+        }
+        
+        public void setImageIds(List<Long> imageIds) {
+            this.imageIds = imageIds;
+        }
+    }
+}

@@ -82,17 +82,31 @@ export function ContactPreview() {
           {contactMethods.map((method, index) => {
             const Icon = method.icon
             const isLink = method.link !== '#'
-            const Component = isLink ? 'a' : 'div'
+            
+            if (isLink) {
+              return (
+                <a
+                  key={index}
+                  href={method.link}
+                  target={method.link.startsWith('http') ? '_blank' : undefined}
+                  rel={method.link.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  className="p-6 rounded-xl border-2 border-neutral-gray-light hover:border-primary-red transition-all duration-300 transform hover:-translate-y-2 cursor-pointer animate-on-scroll"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className={`w-16 h-16 rounded-full ${method.bgColor} flex items-center justify-center mb-4`}>
+                    <Icon className={`w-8 h-8 ${method.color}`} />
+                  </div>
+                  <h3 className="text-lg font-bold text-neutral-dark mb-2">{method.title}</h3>
+                  <p className="text-primary-red font-semibold mb-2">{method.value}</p>
+                  <p className="text-neutral-gray text-sm">{method.description}</p>
+                </a>
+              )
+            }
             
             return (
-              <Component
+              <div
                 key={index}
-                href={isLink ? method.link : undefined}
-                target={method.link.startsWith('http') ? '_blank' : undefined}
-                rel={method.link.startsWith('http') ? 'noopener noreferrer' : undefined}
-                className={`p-6 rounded-xl border-2 border-neutral-gray-light hover:border-primary-red transition-all duration-300 transform hover:-translate-y-2 cursor-pointer animate-on-scroll ${
-                  !isLink ? 'cursor-default' : ''
-                }`}
+                className="p-6 rounded-xl border-2 border-neutral-gray-light hover:border-primary-red transition-all duration-300 transform hover:-translate-y-2 cursor-default animate-on-scroll"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className={`w-16 h-16 rounded-full ${method.bgColor} flex items-center justify-center mb-4`}>
@@ -101,7 +115,7 @@ export function ContactPreview() {
                 <h3 className="text-lg font-bold text-neutral-dark mb-2">{method.title}</h3>
                 <p className="text-primary-red font-semibold mb-2">{method.value}</p>
                 <p className="text-neutral-gray text-sm">{method.description}</p>
-              </Component>
+              </div>
             )
           })}
         </div>

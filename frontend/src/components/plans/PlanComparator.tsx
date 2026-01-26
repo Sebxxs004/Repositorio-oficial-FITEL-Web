@@ -297,13 +297,13 @@ export function PlanComparator() {
               </ul>
 
               <Link
-                href="/solicitar-instalacion"
+                href="/contacto"
                 className={`w-full btn-primary flex items-center justify-center space-x-2 ${
                   isSelected ? 'opacity-100' : ''
                 }`}
                 onClick={(e) => e.stopPropagation()}
               >
-                <span>Contratar Ahora</span>
+                <span>Contactar Asesor</span>
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </div>
@@ -412,9 +412,6 @@ export function PlanComparator() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/contacto" className="btn-primary">
               Contactar Asesor
-            </Link>
-            <Link href="/solicitar-instalacion" className="btn-outline">
-              Solicitar Instalación
             </Link>
           </div>
         </div>

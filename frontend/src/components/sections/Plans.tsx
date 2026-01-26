@@ -63,12 +63,12 @@ export function Plans() {
     },
     {
       name: 'Empresarial',
-      internet: '200 Mbps',
+      internet: '500+ Mbps',
       tv: '150 canales',
       price: '$129.900',
       period: 'mes',
       features: [
-        'Internet 200 Mbps simétrico',
+        'Internet 500+ Mbps simétrico',
         '150 canales HD + Premium',
         'Soporte técnico dedicado',
         'Instalación gratuita',

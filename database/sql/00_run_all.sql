@@ -26,6 +26,10 @@ SOURCE 03_create_indexes.sql;
 SOURCE 04_create_views.sql;
 SOURCE 05_create_functions.sql;
 SOURCE 06_create_triggers.sql;
+SOURCE 07_create_admin_users.sql;
+SOURCE 08_create_allowed_ips.sql;
+SOURCE 09_migrate_ips_to_encrypted.sql;
+SOURCE 10_create_config_tables.sql;
 
 -- =====================================================
 -- Verificación Final
