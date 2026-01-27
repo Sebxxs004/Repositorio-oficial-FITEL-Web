@@ -56,7 +56,7 @@ public class PQR extends AuditableEntity {
 
     @Column(nullable = false, length = 50)
     @Builder.Default
-    private String status = "RECIBIDA"; // RECIBIDA, EN_PROCESO, RESUELTA, RECHAZADA
+    private String status = "RECIBIDA"; // RECIBIDA, EN_ANALISIS, EN_RESPUESTA, RESUELTA, CERRADA
 
     @Column(length = 20)
     @Builder.Default
@@ -64,6 +64,24 @@ public class PQR extends AuditableEntity {
 
     @Column(name = "assigned_to", length = 100)
     private String assignedTo;
+
+    @Column(name = "responsible_area", length = 100)
+    private String responsibleArea; // soporte, facturacion, tecnica
+
+    @Column(name = "real_type", length = 20)
+    private String realType; // Tipo real asignado por operador
+
+    @Column(name = "internal_notes", columnDefinition = "TEXT")
+    private String internalNotes; // Notas internas para el operador
+
+    @Column(name = "resource_type", length = 50)
+    private String resourceType; // Tipo de recurso (si aplica)
+
+    @Column(name = "customer_address", length = 500)
+    private String customerAddress;
+
+    @Column(name = "sla_deadline")
+    private LocalDateTime slaDeadline; // Fecha límite de respuesta según SLA
 
     @Column(columnDefinition = "TEXT")
     private String response;
@@ -73,6 +91,13 @@ public class PQR extends AuditableEntity {
 
     @Column(name = "resolution_date")
     private LocalDateTime resolutionDate;
+
+    @Column(name = "constancy_generated")
+    @Builder.Default
+    private Boolean constancyGenerated = false;
+
+    @Column(name = "constancy_sent_at")
+    private LocalDateTime constancySentAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_pqr_id")

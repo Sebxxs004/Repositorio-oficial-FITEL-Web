@@ -3,6 +3,7 @@ package co.com.fitel.modules.config.infrastructure.controller;
 import co.com.fitel.common.dto.ApiResponse;
 import co.com.fitel.modules.config.application.dto.CarouselImageDTO;
 import co.com.fitel.modules.config.application.dto.ContactConfigDTO;
+import co.com.fitel.modules.config.application.dto.EmailConfigDTO;
 import co.com.fitel.modules.config.application.service.ConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -113,5 +114,19 @@ public class ConfigController {
         public void setImageIds(List<Long> imageIds) {
             this.imageIds = imageIds;
         }
+    }
+    
+    @GetMapping("/email")
+    public ResponseEntity<ApiResponse<EmailConfigDTO>> getEmailConfig() {
+        log.info("GET /api/config/email - Fetching email config");
+        EmailConfigDTO config = configService.getEmailConfig();
+        return ResponseEntity.ok(ApiResponse.success("Configuración de email obtenida", config));
+    }
+    
+    @PutMapping("/email")
+    public ResponseEntity<ApiResponse<EmailConfigDTO>> updateEmailConfig(@RequestBody EmailConfigDTO dto) {
+        log.info("PUT /api/config/email - Updating email config");
+        EmailConfigDTO updated = configService.updateEmailConfig(dto);
+        return ResponseEntity.ok(ApiResponse.success("Configuración de email actualizada", updated));
     }
 }

@@ -32,6 +32,23 @@ spring:
     ip:
       encryption:
         key: ${IP_ENCRYPTION_KEY:FITEL-IP-ENC-KEY-32CHARS-LONG!!} # ⚠️ CAMBIAR EN PRODUCCIÓN - Debe tener 32 caracteres
+  
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:} # Contraseña de aplicación de Gmail
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+    from: ${MAIL_FROM:} # Email desde el cual se envían los correos
 
 server:
   port: ${SERVER_PORT:8080}

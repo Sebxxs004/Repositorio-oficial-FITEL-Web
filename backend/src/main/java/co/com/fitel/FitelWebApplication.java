@@ -18,5 +18,6 @@ public class FitelWebApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(FitelWebApplication.class, args);
+        System.out.println("FITEL Web Application started");
     }
 }

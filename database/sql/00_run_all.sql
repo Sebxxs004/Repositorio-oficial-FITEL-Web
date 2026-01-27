@@ -30,6 +30,8 @@ SOURCE 07_create_admin_users.sql;
 SOURCE 08_create_allowed_ips.sql;
 SOURCE 09_migrate_ips_to_encrypted.sql;
 SOURCE 10_create_config_tables.sql;
+SOURCE 11_update_pqr_table.sql;
+SOURCE 12_create_email_config.sql;
 
 -- =====================================================
 -- Verificación Final
@@ -45,6 +47,9 @@ SELECT COUNT(*) AS total FROM coverage_zones;
 
 SELECT 'Configuración del sistema:' AS info;
 SELECT COUNT(*) AS total FROM system_config;
+
+SELECT 'Configuración de email:' AS info;
+SELECT COUNT(*) AS total FROM email_config;
 
 SELECT '✅ Base de datos configurada correctamente' AS status;
 

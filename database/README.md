@@ -1,126 +1,77 @@
-# Base de Datos FITEL Web
+# Base de Datos FITEL
 
-Este directorio contiene todos los scripts SQL para la configuración de la base de datos MariaDB.
-
-## 📁 Estructura de Scripts
+## Estructura
 
 ```
 database/
-├── sql/
-│   ├── 00_run_all.sql          # Script maestro (ejecuta todos)
-│   ├── 01_create_tables.sql    # Creación de tablas
-│   ├── 02_insert_initial_data.sql  # Datos iniciales
-│   ├── 03_create_indexes.sql   # Índices adicionales
-│   ├── 04_create_views.sql     # Vistas útiles
-│   ├── 05_create_functions.sql # Funciones personalizadas
-│   └── 06_create_triggers.sql  # Triggers de auditoría
-└── README.md                    # Este archivo
+├── init/                    # Scripts de inicialización automática
+│   ├── 01-init-database.sql    # Crea la base de datos si no existe
+│   ├── 02-run-all-scripts.sql  # Ejecuta todos los scripts de creación
+│   ├── always-run.sql          # Script que verifica y actualiza siempre
+│   └── init-db.sh              # Script shell de inicialización (opcional)
+└── sql/                     # Scripts SQL de creación/actualización
+    ├── 00_run_all.sql          # Script maestro (ejecutar manualmente)
+    ├── 01_create_tables.sql    # Creación de tablas
+    ├── 02_insert_initial_data.sql
+    ├── 03_create_indexes.sql
+    ├── 04_create_views.sql
+    ├── 05_create_functions.sql
+    ├── 06_create_triggers.sql
+    ├── 07_create_admin_users.sql
+    ├── 08_create_allowed_ips.sql
+    ├── 09_migrate_ips_to_encrypted.sql
+    ├── 10_create_config_tables.sql
+    └── 11_update_pqr_table.sql  # Actualización de tabla PQR
 ```
 
-## 🚀 Uso
+## Inicialización Automática con Docker
 
-### Opción 1: Ejecutar desde DBeaver
+Cuando ejecutas `docker-compose up`, MariaDB:
 
-1. Abre DBeaver y conéctate a la base de datos `fitel_db`
-2. Abre cada archivo `.sql` en orden (01, 02, 03, etc.)
-3. Ejecuta cada script (F5 o botón "Execute")
+1. **Primera vez (base de datos vacía)**:
+   - Ejecuta automáticamente todos los scripts en `/docker-entrypoint-initdb.d/`
+   - Crea la base de datos `fitel_db`
+   - Crea todas las tablas, funciones, triggers, etc.
+   - Inserta datos iniciales
 
-### Opción 2: Ejecutar desde la línea de comandos
+2. **Siguientes veces (base de datos existente)**:
+   - NO ejecuta los scripts automáticamente (comportamiento por defecto de MariaDB)
+   - El script `always-run.sql` se puede ejecutar manualmente para actualizar
+
+## Actualización Manual
+
+Si necesitas actualizar la base de datos después de cambios:
 
 ```bash
-# Desde el directorio database/sql
-docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < 01_create_tables.sql
-docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < 02_insert_initial_data.sql
-docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < 03_create_indexes.sql
-docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < 04_create_views.sql
-docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < 05_create_functions.sql
-docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < 06_create_triggers.sql
+# Opción 1: Ejecutar script de actualización
+docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < database/init/always-run.sql
+
+# Opción 2: Ejecutar script específico
+docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < database/sql/11_update_pqr_table.sql
+
+# Opción 3: Ejecutar todos los scripts
+docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < database/sql/00_run_all.sql
 ```
 
-### Opción 3: Ejecutar todo de una vez
+## Scripts de Actualización
 
-```bash
-# Desde el directorio raíz del proyecto
-docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < database/sql/01_create_tables.sql
-docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < database/sql/02_insert_initial_data.sql
-docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < database/sql/03_create_indexes.sql
-docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < database/sql/04_create_views.sql
-docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < database/sql/05_create_functions.sql
-docker exec -i fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db < database/sql/06_create_triggers.sql
-```
+### `always-run.sql`
+Este script verifica qué columnas/índices faltan en la tabla `pqr` y los crea. Se puede ejecutar múltiples veces sin errores.
 
-## 📊 Tablas Creadas
+### `11_update_pqr_table.sql`
+Agrega los nuevos campos a la tabla PQR:
+- `sla_deadline` - Fecha límite de respuesta
+- `responsible_area` - Área responsable
+- `internal_notes` - Notas internas
+- `resource_type` - Tipo de recurso
+- `real_type` - Tipo real asignado
+- `customer_address` - Dirección del cliente
+- `constancy_generated` - Flag de constancia generada
+- `constancy_sent_at` - Fecha de envío de constancia
 
-### Tablas Principales
+## Notas Importantes
 
-1. **plans** - Planes de Internet y TV
-2. **coverage_zones** - Zonas de cobertura en Bogotá
-3. **installation_requests** - Solicitudes de instalación
-4. **pqr** - Peticiones, Quejas y Recursos
-5. **pqr_appeals** - Apelaciones de PQR
-6. **contact_messages** - Mensajes de contacto
-7. **users** - Usuarios del sistema
-8. **audit_logs** - Logs de auditoría
-9. **system_config** - Configuración del sistema
-
-## 🔍 Vistas Disponibles
-
-- `v_pqr_summary` - Resumen de PQR
-- `v_installation_requests_detail` - Detalle de solicitudes de instalación
-- `v_pqr_statistics` - Estadísticas de PQR
-- `v_plans_active` - Planes activos
-
-## ⚙️ Funciones Disponibles
-
-- `generate_cun()` - Genera Código Único Numérico para PQR
-- `business_days(start_date, end_date)` - Calcula días hábiles entre fechas
-
-## 🔔 Triggers Configurados
-
-- `trg_pqr_generate_cun` - Genera CUN automáticamente
-- `trg_pqr_update_resolution_date` - Actualiza fecha de resolución
-- `trg_pqr_audit_create` - Auditoría al crear PQR
-- `trg_pqr_audit_update` - Auditoría al actualizar PQR
-
-## 📝 Notas Importantes
-
-1. **Orden de ejecución**: Los scripts deben ejecutarse en orden numérico
-2. **Tabla plans**: Ya existe (creada por Hibernate), el script la crea solo si no existe
-3. **CUN**: Se genera automáticamente mediante trigger
-4. **Auditoría**: Todos los cambios en PQR se registran automáticamente
-
-## 🔄 Reiniciar Base de Datos
-
-Si necesitas reiniciar completamente la base de datos:
-
-```bash
-# Eliminar todas las tablas (CUIDADO: Esto borra todos los datos)
-docker exec fitel-mariadb mysql -u fitel -pfiteladmin123 fitel_db -e "DROP DATABASE fitel_db; CREATE DATABASE fitel_db;"
-
-# Luego ejecutar los scripts de nuevo
-```
-
-## ✅ Verificación
-
-Después de ejecutar los scripts, verifica:
-
-```sql
--- Ver todas las tablas
-SHOW TABLES;
-
--- Ver estructura de una tabla
-DESCRIBE pqr;
-
--- Ver datos iniciales
-SELECT * FROM plans;
-SELECT * FROM coverage_zones;
-SELECT * FROM system_config;
-
--- Probar función
-SELECT generate_cun() AS nuevo_cun;
-```
-
-## 📚 Documentación Adicional
-
-- Ver `docs/PROXIMOS_PASOS.md` para más información sobre el desarrollo
-- Ver `docs/CONEXION_DBEAVER_MARIADB.md` para conexión desde DBeaver
+- Todos los scripts usan `IF NOT EXISTS` para evitar errores si ya existen
+- Los scripts están ordenados numéricamente para ejecutarse en el orden correcto
+- El script `00_run_all.sql` es el script maestro que ejecuta todos los demás
+- Los scripts en `init/` se ejecutan automáticamente solo la primera vez

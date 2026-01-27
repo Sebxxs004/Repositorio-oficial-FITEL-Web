@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, Image as ImageIcon } from 'lucide-react'
+import { Phone, Image as ImageIcon, Mail } from 'lucide-react'
 import { AdminLayout } from '@/components/admin/AdminLayout'
 import { ContactConfig } from '@/components/admin/ContactConfig'
 import { CarouselConfig } from '@/components/admin/CarouselConfig'
+import { EmailConfig } from '@/components/admin/EmailConfig'
 
 export default function ConfiguracionPage() {
-  const [activeTab, setActiveTab] = useState<'contact' | 'carousel'>('contact')
+  const [activeTab, setActiveTab] = useState<'contact' | 'email' | 'carousel'>('contact')
 
   return (
     <AdminLayout title="Configuración">
@@ -28,6 +29,19 @@ export default function ConfiguracionPage() {
             </div>
           </button>
           <button
+            onClick={() => setActiveTab('email')}
+            className={`flex-1 px-6 py-4 text-center font-semibold transition-colors ${
+              activeTab === 'email'
+                ? 'text-primary-red border-b-2 border-primary-red bg-primary-red/5'
+                : 'text-neutral-gray hover:text-neutral-dark hover:bg-neutral-gray-light'
+            }`}
+          >
+            <div className="flex items-center justify-center space-x-2">
+              <Mail className="w-5 h-5" />
+              <span>Configuración de Email</span>
+            </div>
+          </button>
+          <button
             onClick={() => setActiveTab('carousel')}
             className={`flex-1 px-6 py-4 text-center font-semibold transition-colors ${
               activeTab === 'carousel'
@@ -45,6 +59,7 @@ export default function ConfiguracionPage() {
         {/* Contenido de las tabs */}
         <div className="p-6">
           {activeTab === 'contact' && <ContactConfig />}
+          {activeTab === 'email' && <EmailConfig />}
           {activeTab === 'carousel' && <CarouselConfig />}
         </div>
       </div>

@@ -12,6 +12,8 @@ services:
       - "3307:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+      - ./database/sql:/docker-entrypoint-initdb.d/sql:ro
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
@@ -32,6 +34,9 @@ services:
       DATABASE_USERNAME: fitel
       DATABASE_PASSWORD: fiteladmin123
       JWT_SECRET: your-secret-key-change-in-production-min-256-bits
+      MAIL_USERNAME: ${MAIL_USERNAME:}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:zspgebdrjeoducpz}
+      MAIL_FROM: ${MAIL_FROM:${MAIL_USERNAME:}}
     ports:
       - "8080:8080"
     depends_on:

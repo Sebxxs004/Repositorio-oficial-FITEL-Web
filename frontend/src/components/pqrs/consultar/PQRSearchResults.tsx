@@ -8,20 +8,23 @@
 'use client'
 
 import { CheckCircle, Clock, XCircle, AlertCircle } from 'lucide-react'
-import type { PQRStatusResponse, PQRStatus } from '@/types/pqr.types'
+import type { PQRResponse, PQRStatus } from '@/types/pqr.types'
 
 interface PQRSearchResultsProps {
-  pqr: PQRStatusResponse
+  pqr: PQRResponse
 }
 
 function getStatusIcon(status: PQRStatus) {
   switch (status) {
-    case 'resuelta':
+    case 'RESUELTA':
       return <CheckCircle className="w-5 h-5 text-green-600" />
-    case 'en_proceso':
+    case 'EN_ANALISIS':
+    case 'EN_RESPUESTA':
       return <Clock className="w-5 h-5 text-yellow-600" />
-    case 'rechazada':
-      return <XCircle className="w-5 h-5 text-red-600" />
+    case 'RECIBIDA':
+      return <AlertCircle className="w-5 h-5 text-blue-600" />
+    case 'CERRADA':
+      return <XCircle className="w-5 h-5 text-gray-600" />
     default:
       return <AlertCircle className="w-5 h-5 text-gray-600" />
   }
@@ -29,14 +32,16 @@ function getStatusIcon(status: PQRStatus) {
 
 function getStatusLabel(status: PQRStatus): string {
   switch (status) {
-    case 'pendiente':
-      return 'Pendiente'
-    case 'en_proceso':
-      return 'En Proceso'
-    case 'resuelta':
+    case 'RECIBIDA':
+      return 'Recibida'
+    case 'EN_ANALISIS':
+      return 'En Análisis'
+    case 'EN_RESPUESTA':
+      return 'En Respuesta'
+    case 'RESUELTA':
       return 'Resuelta'
-    case 'rechazada':
-      return 'Rechazada'
+    case 'CERRADA':
+      return 'Cerrada'
     default:
       return status
   }
@@ -44,12 +49,16 @@ function getStatusLabel(status: PQRStatus): string {
 
 function getStatusColor(status: PQRStatus): string {
   switch (status) {
-    case 'resuelta':
-      return 'bg-green-100 text-green-800 border-green-200'
-    case 'en_proceso':
+    case 'RECIBIDA':
+      return 'bg-blue-100 text-blue-800 border-blue-200'
+    case 'EN_ANALISIS':
       return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-    case 'rechazada':
-      return 'bg-red-100 text-red-800 border-red-200'
+    case 'EN_RESPUESTA':
+      return 'bg-orange-100 text-orange-800 border-orange-200'
+    case 'RESUELTA':
+      return 'bg-green-100 text-green-800 border-green-200'
+    case 'CERRADA':
+      return 'bg-gray-100 text-gray-800 border-gray-200'
     default:
       return 'bg-gray-100 text-gray-800 border-gray-200'
   }
@@ -63,8 +72,11 @@ export function PQRSearchResults({ pqr }: PQRSearchResultsProps) {
           <h2 className="text-2xl font-bold text-neutral-dark mb-2">
             PQR #{pqr.id}
           </h2>
+          <p className="text-neutral-gray mb-1">
+            <span className="font-semibold">CUN:</span> {pqr.cun}
+          </p>
           <p className="text-neutral-gray">
-            {pqr.type.charAt(0).toUpperCase() + pqr.type.slice(1)} - {pqr.category}
+            {pqr.type} - {pqr.subject}
           </p>
         </div>
         <div className={`flex items-center space-x-2 px-4 py-2 rounded-lg border ${getStatusColor(pqr.status)}`}>
@@ -87,6 +99,8 @@ export function PQRSearchResults({ pqr }: PQRSearchResultsProps) {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
               })}
             </p>
           </div>
@@ -97,10 +111,46 @@ export function PQRSearchResults({ pqr }: PQRSearchResultsProps) {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
               })}
             </p>
           </div>
+          {pqr.slaDeadline && (
+            <div>
+              <h3 className="text-sm font-semibold text-neutral-gray mb-1">Fecha Límite de Respuesta (SLA)</h3>
+              <p className="text-neutral-dark font-semibold text-primary-red">
+                {new Date(pqr.slaDeadline).toLocaleDateString('es-CO', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </p>
+            </div>
+          )}
         </div>
+
+        {pqr.response && (
+          <div className="pt-4 border-t border-neutral-gray-light">
+            <h3 className="text-sm font-semibold text-neutral-gray mb-2">Respuesta</h3>
+            <p className="text-neutral-dark">{pqr.response}</p>
+          </div>
+        )}
+
+        {pqr.responseDate && (
+          <div className="pt-4 border-t border-neutral-gray-light">
+            <h3 className="text-sm font-semibold text-neutral-gray mb-1">Fecha de Respuesta</h3>
+            <p className="text-neutral-dark">
+              {new Date(pqr.responseDate).toLocaleDateString('es-CO', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </p>
+          </div>
+        )}
 
         {pqr.resolutionDate && (
           <div className="pt-4 border-t border-neutral-gray-light">
@@ -110,15 +160,10 @@ export function PQRSearchResults({ pqr }: PQRSearchResultsProps) {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
               })}
             </p>
-          </div>
-        )}
-
-        {pqr.resolutionNotes && (
-          <div className="pt-4 border-t border-neutral-gray-light">
-            <h3 className="text-sm font-semibold text-neutral-gray mb-2">Notas de Resolución</h3>
-            <p className="text-neutral-dark">{pqr.resolutionNotes}</p>
           </div>
         )}
       </div>

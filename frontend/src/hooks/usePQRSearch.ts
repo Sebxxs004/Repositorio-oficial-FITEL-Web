@@ -8,12 +8,12 @@
 
 import { useState, useCallback } from 'react'
 import { PQRService } from '@/services/pqr/PQRService'
-import type { PQRStatusResponse, PQRSearchResponse } from '@/types/pqr.types'
+import type { PQRResponse, PQRSearchResponse } from '@/types/pqr.types'
 
 interface UsePQRSearchReturn {
   searchValue: string
   isSearching: boolean
-  pqrResult: PQRStatusResponse | null
+  pqrResult: PQRResponse | null
   error: string | null
   setSearchValue: (value: string) => void
   handleSearch: (query: string) => Promise<void>
@@ -24,7 +24,7 @@ interface UsePQRSearchReturn {
 export function usePQRSearch(): UsePQRSearchReturn {
   const [searchValue, setSearchValue] = useState('')
   const [isSearching, setIsSearching] = useState(false)
-  const [pqrResult, setPqrResult] = useState<PQRStatusResponse | null>(null)
+  const [pqrResult, setPqrResult] = useState<PQRResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleSearch = useCallback(async (query: string) => {
