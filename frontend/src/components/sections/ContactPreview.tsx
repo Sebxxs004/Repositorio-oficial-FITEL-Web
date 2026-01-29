@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Phone, Mail, MessageCircle, MapPin, ArrowRight } from 'lucide-react'
+import { FITEL_PHONE_DISPLAY, FITEL_PHONE_TEL, FITEL_EMAIL, FITEL_WHATSAPP_URL } from '@/config/constants'
 
 export function ContactPreview() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -31,8 +32,8 @@ export function ContactPreview() {
     {
       icon: Phone,
       title: 'Teléfono',
-      value: '+57 300 123 4567',
-      link: 'tel:+573001234567',
+      value: FITEL_PHONE_DISPLAY,
+      link: FITEL_PHONE_TEL,
       description: 'Llámanos de lunes a domingo',
       color: 'text-primary-red',
       bgColor: 'bg-primary-red/10',
@@ -41,7 +42,7 @@ export function ContactPreview() {
       icon: MessageCircle,
       title: 'WhatsApp',
       value: 'Escribir por WhatsApp',
-      link: 'https://wa.me/573001234567',
+      link: FITEL_WHATSAPP_URL,
       description: 'Atención inmediata',
       color: 'text-secondary-blue',
       bgColor: 'bg-secondary-blue/10',
@@ -49,8 +50,8 @@ export function ContactPreview() {
     {
       icon: Mail,
       title: 'Email',
-      value: 'contacto@fitel.com.co',
-      link: 'mailto:contacto@fitel.com.co',
+      value: FITEL_EMAIL,
+      link: `mailto:${FITEL_EMAIL}`,
       description: 'Respuesta en 24 horas',
       color: 'text-primary-red',
       bgColor: 'bg-primary-red/10',

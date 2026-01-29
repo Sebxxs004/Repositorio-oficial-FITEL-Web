@@ -330,7 +330,7 @@ export function Contact() {
                         ? 'border-red-500 focus:ring-red-500'
                         : 'border-neutral-gray-light focus:ring-primary-red focus:border-transparent'
                     }`}
-                    placeholder="+57 300 123 4567"
+                    placeholder={FITEL_PHONE_DISPLAY}
                   />
                   {errors.phone && (
                     <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>

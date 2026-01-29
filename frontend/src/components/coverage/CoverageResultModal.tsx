@@ -2,6 +2,7 @@
 
 import { X, CheckCircle, Info, MessageCircle, Phone } from 'lucide-react'
 import { useEffect } from 'react'
+import { FITEL_WHATSAPP_URL } from '@/config/constants'
 
 interface CoverageResultModalProps {
   isOpen: boolean
@@ -34,7 +35,7 @@ export function CoverageResultModal({ isOpen, onClose, result, address }: Covera
       : `Hola, acabo de verificar mi dirección "${address}" y me gustaría saber si tienen planes para expandir la cobertura a mi zona o si hay alguna alternativa disponible.`
     
     window.open(
-      `https://wa.me/573001234567?text=${encodeURIComponent(message)}`,
+      `${FITEL_WHATSAPP_URL}?text=${encodeURIComponent(message)}`,
       '_blank'
     )
   }

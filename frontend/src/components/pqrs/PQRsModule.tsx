@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { FileText, Send, Loader2, AlertCircle, CheckCircle, Info, Download } from 'lucide-react'
 import { PQRService } from '@/services/pqr/PQRService'
 import type { PQRConstancy } from '@/types/pqr.types'
+import { FITEL_PHONE_DISPLAY } from '@/config/constants'
 
 // Opciones de tipo de PQR
 export const PQR_TYPE_OPTIONS = [
@@ -260,7 +261,7 @@ export function PQRsModule() {
                         ? 'border-red-500 focus:ring-red-500'
                         : 'border-neutral-gray-light focus:ring-primary-red focus:border-transparent'
                     }`}
-                    placeholder="+57 300 123 4567"
+                    placeholder={FITEL_PHONE_DISPLAY}
                   />
                   {errors.customerPhone && (
                     <p className="mt-1 text-sm text-red-600">{errors.customerPhone.message}</p>

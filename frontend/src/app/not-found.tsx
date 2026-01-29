@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Home, ArrowLeft, Search, Phone, MessageCircle } from 'lucide-react'
 import { FITEL_PHONE_NUMBER, FITEL_WHATSAPP_URL } from '@/config/constants'

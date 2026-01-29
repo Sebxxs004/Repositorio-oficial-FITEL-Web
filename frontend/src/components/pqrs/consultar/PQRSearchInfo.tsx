@@ -9,6 +9,7 @@
 
 import { Info } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { FITEL_PHONE_DISPLAY, FITEL_PHONE_TEL, FITEL_WHATSAPP_URL } from '@/config/constants'
 
 export function PQRSearchInfo() {
   const [mounted, setMounted] = useState(false)
@@ -31,11 +32,11 @@ export function PQRSearchInfo() {
             Si no encuentras tu PQR o tienes alguna duda, puedes contactarnos directamente:
           </p>
           <div className="flex flex-wrap gap-4 text-sm">
-            <a href="tel:+573001234567" className="text-primary-red hover:underline font-medium">
-              📞 Llamar: +57 300 123 4567
+            <a href={FITEL_PHONE_TEL} className="text-primary-red hover:underline font-medium">
+              📞 Llamar: {FITEL_PHONE_DISPLAY}
             </a>
             <a
-              href="https://wa.me/573001234567"
+              href={FITEL_WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary-red hover:underline font-medium"

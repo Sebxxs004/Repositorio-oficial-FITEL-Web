@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { MapPin, CheckCircle, XCircle, Info, MessageCircle, Navigation, X } from 'lucide-react'
 import { CoverageResultModal } from './CoverageResultModal'
+import { FITEL_WHATSAPP_URL } from '@/config/constants'
 
 // Importar dinámicamente el mapa para evitar problemas de SSR
 const MapComponent = dynamic(
@@ -445,7 +446,7 @@ export function CoverageMap() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3">
                       <a
-                        href="https://wa.me/573001234567?text=Hola,%20quiero%20saber%20si%20tienen%20cobertura%20en%20mi%20zona"
+                        href={`${FITEL_WHATSAPP_URL}?text=${encodeURIComponent('Hola, quiero saber si tienen cobertura en mi zona')}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-center space-x-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors"

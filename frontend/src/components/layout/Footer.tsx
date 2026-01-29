@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Facebook, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
+import { FITEL_PHONE_DISPLAY, FITEL_PHONE_TEL, FITEL_EMAIL } from '@/config/constants'
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -117,14 +118,14 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start space-x-3">
                 <Phone className="w-5 h-5 text-primary-red flex-shrink-0 mt-0.5" />
-                <a href="tel:+573001234567" className="text-neutral-gray-light hover:text-primary-red transition-colors text-sm">
-                  +57 300 123 4567
+                <a href={FITEL_PHONE_TEL} className="text-neutral-gray-light hover:text-primary-red transition-colors text-sm">
+                  {FITEL_PHONE_DISPLAY}
                 </a>
               </li>
               <li className="flex items-start space-x-3">
                 <Mail className="w-5 h-5 text-primary-red flex-shrink-0 mt-0.5" />
-                <a href="mailto:contacto@fitel.com.co" className="text-neutral-gray-light hover:text-primary-red transition-colors text-sm">
-                  contacto@fitel.com.co
+                <a href={`mailto:${FITEL_EMAIL}`} className="text-neutral-gray-light hover:text-primary-red transition-colors text-sm">
+                  {FITEL_EMAIL}
                 </a>
               </li>
               <li className="flex items-start space-x-3">

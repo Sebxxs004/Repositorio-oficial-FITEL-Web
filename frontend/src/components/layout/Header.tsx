@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Menu, X, Phone, MessageCircle } from 'lucide-react'
 import { NavigationService } from '@/services/navigation/NavigationService'
 import { PQRsDropdown } from './PQRsDropdown'
+import { FITEL_PHONE_NUMBER, FITEL_PHONE_TEL, FITEL_WHATSAPP_URL } from '@/config/constants'
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -29,7 +30,7 @@ export function Header() {
   const navigationItems = NavigationService.getNavigationItems()
 
   const handleWhatsApp = () => {
-    window.open('https://wa.me/573001234567', '_blank')
+    window.open(FITEL_WHATSAPP_URL, '_blank')
   }
 
   return (
@@ -91,7 +92,7 @@ export function Header() {
               <span className="font-medium">WhatsApp</span>
             </button>
             <a
-              href="tel:+573001234567"
+              href={FITEL_PHONE_TEL}
               className="flex items-center space-x-2 text-primary-red hover:text-primary-red-dark transition-colors"
               aria-label="Llamar"
             >
@@ -151,7 +152,7 @@ export function Header() {
                   <span>WhatsApp</span>
                 </button>
                 <a
-                  href="tel:+573001234567"
+                  href={FITEL_PHONE_TEL}
                   className="w-full flex items-center justify-center space-x-2 btn-primary"
                   onClick={() => setIsMenuOpen(false)}
                 >
