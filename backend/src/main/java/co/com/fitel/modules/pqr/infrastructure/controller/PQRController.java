@@ -26,20 +26,49 @@ public class PQRController {
     
     private final PQRService pqrService;
     
+    // Método PostConstruct para logging de inicialización
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        log.info("PQRController inicializado - Endpoint: /api/pqrs");
+    }
+    
+    /**
+     * Endpoint de prueba para verificar que el controlador está registrado
+     */
+    @GetMapping("/test")
+    public ResponseEntity<ApiResponse<String>> test() {
+        log.info("GET /api/pqrs/test - Test endpoint");
+        return ResponseEntity.ok(ApiResponse.success("Controlador PQR funcionando correctamente", "OK"));
+    }
+    
     /**
      * Crea una nueva PQR
      */
     @PostMapping
     public ResponseEntity<ApiResponse<PQRResponseDTO>> createPQR(@Valid @RequestBody CreatePQRRequest request) {
-        log.info("POST /api/pqrs - Creating new PQR");
+        log.info("POST /api/pqrs - Creating new PQR for customer: {}", request != null ? request.getCustomerEmail() : "null request");
         try {
+            if (request == null) {
+                log.error("Request body is null");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("El cuerpo de la petición está vacío"));
+            }
+            
+            log.debug("PQR Request details - Type: {}, Name: {}, Email: {}", 
+                request.getType(), request.getCustomerName(), request.getCustomerEmail());
+            
             PQRResponseDTO pqr = pqrService.createPQR(request);
+            log.info("PQR created successfully with CUN: {}", pqr.getCun());
             return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("PQR creada exitosamente", pqr));
-        } catch (Exception e) {
-            log.error("Error creating PQR: {}", e.getMessage(), e);
+        } catch (RuntimeException e) {
+            log.error("Runtime error creating PQR: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("Error al crear PQR: " + e.getMessage()));
+        } catch (Exception e) {
+            log.error("Unexpected error creating PQR: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Error inesperado al crear PQR. Por favor contacte al soporte."));
         }
     }
     

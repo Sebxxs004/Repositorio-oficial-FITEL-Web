@@ -6,6 +6,7 @@ import co.com.fitel.modules.pqr.application.dto.PQRConstancyDTO;
 import co.com.fitel.modules.pqr.application.dto.PQRResponseDTO;
 import co.com.fitel.modules.pqr.domain.model.PQR;
 import co.com.fitel.modules.pqr.domain.repository.PQRRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class PQRService {
     
     private final PQRRepository pqrRepository;
     private final EmailService emailService;
+    private final EntityManager entityManager;
     
     // SLA: 15 días hábiles para respuesta
     private static final int SLA_DAYS = 15;
@@ -56,36 +58,88 @@ public class PQRService {
         
         PQR savedPQR = pqrRepository.save(pqr);
         
-        // El CUN se asigna después del save por el trigger
-        // Necesitamos recargar la entidad para obtener el CUN generado
+        // El CUN se asigna después del save por el trigger SQL
+        // Necesitamos hacer flush para asegurar que el INSERT se ejecute en la BD
+        pqrRepository.flush();
+        
+        // Limpiar el contexto de persistencia para forzar una nueva consulta
+        entityManager.clear();
+        
+        // Recargar la entidad desde la base de datos para obtener el CUN generado por el trigger
         savedPQR = pqrRepository.findById(savedPQR.getId())
             .orElseThrow(() -> new RuntimeException("Error al guardar PQR"));
+        
+        // Verificar que el CUN fue generado por el trigger
+        if (savedPQR.getCun() == null || savedPQR.getCun().isEmpty()) {
+            log.error("El CUN no fue generado por el trigger para la PQR ID: {}", savedPQR.getId());
+            throw new RuntimeException("Error: El CUN no fue generado automáticamente. Por favor contacte al administrador.");
+        }
         
         log.info("PQR created successfully with ID: {}, CUN: {}", savedPQR.getId(), savedPQR.getCun());
         
         // Enviar constancia por correo
         try {
             PQRConstancyDTO constancy = generateConstancy(savedPQR.getCun());
-            emailService.sendPQRConstancy(
-                savedPQR.getCustomerEmail(),
-                savedPQR.getCustomerName(),
-                constancy.getCun(),
-                constancy.getType(),
-                savedPQR.getSubject(),
-                constancy.getRadicationDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
-                constancy.getMaxResponseDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-                constancy.getSilenceAdministrativeText()
-            );
             
-            // Marcar constancia como enviada
-            savedPQR.setConstancyGenerated(true);
-            savedPQR.setConstancySentAt(LocalDateTime.now());
-            pqrRepository.save(savedPQR);
-            
-            log.info("Constancia enviada por correo a: {}", savedPQR.getCustomerEmail());
+            if (constancy != null && constancy.getCun() != null) {
+                try {
+                    emailService.sendPQRConstancy(
+                        savedPQR.getCustomerEmail(),
+                        savedPQR.getCustomerName(),
+                        constancy.getCun(),
+                        constancy.getType(),
+                        savedPQR.getSubject(),
+                        constancy.getRadicationDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                        constancy.getMaxResponseDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                        constancy.getSilenceAdministrativeText()
+                    );
+                    
+                    // Marcar constancia como enviada
+                    savedPQR.setConstancyGenerated(true);
+                    savedPQR.setConstancySentAt(LocalDateTime.now());
+                    pqrRepository.save(savedPQR);
+                    
+                    log.info("Constancia enviada por correo a: {}", savedPQR.getCustomerEmail());
+                    
+                    // Enviar notificación a la empresa
+                    try {
+                        emailService.sendPQRNotificationToCompany(
+                            savedPQR.getCustomerName(),
+                            savedPQR.getCustomerEmail(),
+                            savedPQR.getCustomerPhone(),
+                            savedPQR.getCustomerDocumentType(),
+                            savedPQR.getCustomerDocumentNumber(),
+                            savedPQR.getCustomerAddress(),
+                            constancy.getCun(),
+                            constancy.getType(),
+                            savedPQR.getSubject(),
+                            savedPQR.getDescription(),
+                            constancy.getRadicationDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                            constancy.getMaxResponseDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                        );
+                        log.info("Notificación de PQR enviada a la empresa");
+                    } catch (Exception companyEmailEx) {
+                        log.warn("No se pudo enviar la notificación a la empresa: {}", companyEmailEx.getMessage());
+                        // No fallar si no se puede enviar a la empresa
+                    }
+                } catch (RuntimeException emailEx) {
+                    // Si el email está deshabilitado o no configurado, solo loguear el warning
+                    if (emailEx.getMessage() != null && 
+                        (emailEx.getMessage().contains("no encontrada") || 
+                         emailEx.getMessage().contains("deshabilitado"))) {
+                        log.warn("No se pudo enviar el correo (configuración no disponible): {}", emailEx.getMessage());
+                    } else {
+                        log.error("Error enviando constancia por correo: {}", emailEx.getMessage(), emailEx);
+                    }
+                    // No fallar la creación de PQR si falla el envío de email
+                }
+            } else {
+                log.warn("No se pudo generar la constancia para la PQR CUN: {}", savedPQR.getCun());
+            }
         } catch (Exception e) {
-            log.error("Error enviando constancia por correo: {}", e.getMessage(), e);
+            log.error("Error procesando constancia por correo: {}", e.getMessage(), e);
             // No fallar la creación de PQR si falla el envío de email
+            // La PQR ya fue creada exitosamente, solo falló el envío del correo
         }
         
         return mapToDTO(savedPQR);
@@ -120,8 +174,16 @@ public class PQRService {
      */
     @Transactional(readOnly = true)
     public PQRConstancyDTO generateConstancy(String cun) {
+        if (cun == null || cun.isEmpty()) {
+            throw new RuntimeException("El CUN no puede ser nulo o vacío");
+        }
+        
         PQR pqr = pqrRepository.findByCun(cun)
-            .orElseThrow(() -> new RuntimeException("PQR no encontrada"));
+            .orElseThrow(() -> new RuntimeException("PQR no encontrada con CUN: " + cun));
+        
+        if (pqr.getCun() == null) {
+            throw new RuntimeException("La PQR encontrada no tiene CUN asignado");
+        }
         
         LocalDateTime maxResponseDate = pqr.getSlaDeadline() != null 
             ? pqr.getSlaDeadline() 
@@ -136,7 +198,7 @@ public class PQRService {
             .customerName(pqr.getCustomerName())
             .type(pqr.getType())
             .subject(pqr.getSubject())
-            .radicationDate(pqr.getCreatedAt())
+            .radicationDate(pqr.getCreatedAt() != null ? pqr.getCreatedAt() : LocalDateTime.now())
             .maxResponseDate(maxResponseDate)
             .silenceAdministrativeText(silenceText)
             .build();

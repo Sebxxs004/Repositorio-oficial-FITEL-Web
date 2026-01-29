@@ -93,6 +93,8 @@ body.admin-route main {
   }
 }
 
+/* Estilos para Leaflet - Los estilos se importan en el componente */
+
 /* Estilos para popups de Leaflet */
 :global(.fitel-popup) {
   text-align: center;
@@ -106,6 +108,47 @@ body.admin-route main {
 :global(.leaflet-popup-tip) {
   background: white;
   border: 1px solid #ccc;
+}
+
+/* Asegurar que los tiles del mapa se muestren correctamente */
+:global(.leaflet-container) {
+  background-color: #e5e5e5;
+  font-family: inherit;
+}
+
+:global(.leaflet-tile-container img) {
+  max-width: none !important;
+  max-height: none !important;
+  width: 256px !important;
+  height: 256px !important;
+}
+
+:global(.leaflet-tile) {
+  border: none;
+  visibility: visible;
+}
+
+:global(.leaflet-tile-pane) {
+  z-index: 2;
+}
+
+:global(.leaflet-overlay-pane) {
+  z-index: 4;
+}
+
+:global(.leaflet-marker-pane) {
+  z-index: 5;
+}
+
+:global(.leaflet-popup-pane) {
+  z-index: 6;
+}
+
+/* Ocultar cualquier texto que pueda aparecer en los tiles */
+:global(.leaflet-tile-pane *) {
+  text-indent: -9999px;
+  font-size: 0;
+  line-height: 0;
 }
 
 /* Animaciones para modales */

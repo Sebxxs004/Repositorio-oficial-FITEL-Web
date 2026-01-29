@@ -1,6 +1,7 @@
 package co.com.fitel.modules.config.infrastructure.controller;
 
 import co.com.fitel.common.dto.ApiResponse;
+import co.com.fitel.common.service.EmailService;
 import co.com.fitel.modules.config.application.dto.CarouselImageDTO;
 import co.com.fitel.modules.config.application.dto.ContactConfigDTO;
 import co.com.fitel.modules.config.application.dto.EmailConfigDTO;
@@ -28,6 +29,7 @@ import java.util.UUID;
 public class ConfigController {
     
     private final ConfigService configService;
+    private final EmailService emailService;
     private static final String UPLOAD_DIR = "frontend/public/assets/";
     
     @GetMapping("/contact")
@@ -128,5 +130,62 @@ public class ConfigController {
         log.info("PUT /api/config/email - Updating email config");
         EmailConfigDTO updated = configService.updateEmailConfig(dto);
         return ResponseEntity.ok(ApiResponse.success("Configuración de email actualizada", updated));
+    }
+    
+    @PostMapping("/email/test")
+    public ResponseEntity<ApiResponse<String>> testEmail(@RequestParam String to) {
+        log.info("POST /api/config/email/test - Testing email to: {}", to);
+        try {
+            String subject = "Correo de Prueba - FITEL Web";
+            String htmlContent = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .header { background-color: #dc2626; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                        .content { background-color: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; }
+                        .success-box { background-color: #d1fae5; border: 2px solid #10b981; padding: 15px; margin: 20px 0; text-align: center; border-radius: 8px; }
+                        .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 12px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>FITEL - Correo de Prueba</h1>
+                        </div>
+                        <div class="content">
+                            <p>Estimado/a usuario,</p>
+                            <div class="success-box">
+                                <h2 style="margin: 0; color: #065f46;">✓ Correo de Prueba Exitoso</h2>
+                                <p style="margin: 10px 0 0 0; color: #047857;">El sistema de envío de correos electrónicos está funcionando correctamente.</p>
+                            </div>
+                            <p>Este es un correo de prueba enviado desde el sistema FITEL Web para verificar que la configuración de email está funcionando correctamente.</p>
+                            <p>Si recibió este correo, significa que:</p>
+                            <ul>
+                                <li>La configuración de SMTP es correcta</li>
+                                <li>Las credenciales de email son válidas</li>
+                                <li>El servicio de correo está operativo</li>
+                            </ul>
+                            <p>Atentamente,<br><strong>Equipo FITEL</strong></p>
+                        </div>
+                        <div class="footer">
+                            <p>Este es un correo automático de prueba, por favor no responda a este mensaje.</p>
+                            <p>FITEL - Uniendo Familias</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """;
+            
+            emailService.sendHtmlEmail(to, subject, htmlContent);
+            return ResponseEntity.ok(ApiResponse.success("Correo de prueba enviado exitosamente a: " + to, "OK"));
+        } catch (Exception e) {
+            log.error("Error enviando correo de prueba a {}: {}", to, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Error al enviar correo de prueba: " + e.getMessage()));
+        }
     }
 }

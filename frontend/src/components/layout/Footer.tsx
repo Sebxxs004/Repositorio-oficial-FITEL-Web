@@ -81,11 +81,6 @@ export function Footer() {
                   Contacto
                 </Link>
               </li>
-              <li>
-                <Link href="/soporte" className="text-neutral-gray-light hover:text-primary-red transition-colors text-sm">
-                  Soporte Técnico
-                </Link>
-              </li>
             </ul>
           </div>
 

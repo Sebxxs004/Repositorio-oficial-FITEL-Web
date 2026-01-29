@@ -43,6 +43,10 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
+                // Permitir acceso a todos los endpoints de API
+                .requestMatchers("/api/**").permitAll()
+                // Permitir acceso a recursos estáticos
+                .requestMatchers("/**").permitAll()
                 .anyRequest().permitAll()
             );
 

@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  * - Inversión de dependencias
  * - Abierto para extensión, cerrado para modificación
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "co.com.fitel")
 @EnableJpaAuditing
 public class FitelWebApplication {
 

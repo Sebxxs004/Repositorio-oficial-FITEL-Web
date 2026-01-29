@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import 'leaflet/dist/leaflet.css'
 
 // Coordenadas del Parque Gaitán Cortés, San Cristóbal, Bogotá
 // Coordenadas exactas: 4°33'28.2"N 74°05'19.4"W
@@ -58,12 +59,46 @@ export default function MapComponent({ geocodedLocation }: MapComponentProps) {
         minZoom: 11, // Zoom mínimo para evitar acercarse demasiado
       })
 
-      // Agregar capa de OpenStreetMap
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      // Agregar capa de OpenStreetMap con configuración mejorada
+      const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19,
-      }).addTo(map)
+        minZoom: 11,
+        tileSize: 256,
+        zoomOffset: 0,
+        noWrap: false,
+        updateWhenZooming: true,
+        updateWhenIdle: true,
+        keepBuffer: 2,
+        crossOrigin: true,
+      })
+      
+      osmLayer.addTo(map)
+      
+      // Manejar errores de carga de tiles
+      osmLayer.on('tileerror', (error: any, tile: any) => {
+        console.warn('Error cargando tile:', error, tile)
+        // Intentar recargar el tile
+        if (tile && tile.el) {
+          tile.el.style.display = 'none'
+        }
+      })
+      
+      // Manejar carga exitosa de tiles
+      osmLayer.on('tileload', (event: any) => {
+        if (event.tile && event.tile.el) {
+          event.tile.el.style.display = 'block'
+        }
+      })
+      
+      // Asegurar que los tiles se carguen correctamente
+      map.whenReady(() => {
+        // Esperar un momento para que el contenedor tenga dimensiones
+        setTimeout(() => {
+          map.invalidateSize()
+        }, 100)
+      })
 
       // Crear icono personalizado para el marcador (rojo FITEL)
       const customIcon = L.icon({

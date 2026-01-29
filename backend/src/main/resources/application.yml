@@ -2,6 +2,18 @@ spring:
   application:
     name: fitel-web-backend
   
+  web:
+    resources:
+      # Configurar recursos estáticos pero excluir /api/**
+      add-mappings: true
+      static-locations: classpath:/static/,classpath:/public/
+      chain:
+        strategy:
+          # Los controladores REST tienen prioridad sobre recursos estáticos
+          content-negotiation:
+            favor-parameter: false
+            favor-path-extension: false
+  
   datasource:
     url: ${DATABASE_URL:jdbc:mariadb://localhost:3307/fitel_db}
     username: ${DATABASE_USERNAME:fitel}

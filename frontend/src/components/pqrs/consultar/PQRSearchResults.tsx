@@ -9,6 +9,7 @@
 
 import { CheckCircle, Clock, XCircle, AlertCircle } from 'lucide-react'
 import type { PQRResponse, PQRStatus } from '@/types/pqr.types'
+import { PQRTimeline } from './PQRTimeline'
 
 interface PQRSearchResultsProps {
   pqr: PQRResponse
@@ -66,26 +67,29 @@ function getStatusColor(status: PQRStatus): string {
 
 export function PQRSearchResults({ pqr }: PQRSearchResultsProps) {
   return (
-    <div className="bg-neutral-white rounded-xl shadow-lg p-8">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-neutral-dark mb-2">
-            PQR #{pqr.id}
-          </h2>
-          <p className="text-neutral-gray mb-1">
-            <span className="font-semibold">CUN:</span> {pqr.cun}
-          </p>
-          <p className="text-neutral-gray">
-            {pqr.type} - {pqr.subject}
-          </p>
-        </div>
-        <div className={`flex items-center space-x-2 px-4 py-2 rounded-lg border ${getStatusColor(pqr.status)}`}>
-          {getStatusIcon(pqr.status)}
-          <span className="font-semibold">{getStatusLabel(pqr.status)}</span>
-        </div>
-      </div>
+    <div className="space-y-6">
+      {/* Timeline visual del progreso */}
+      <PQRTimeline pqr={pqr} />
 
-      <div className="space-y-4">
+      {/* Detalles de la PQR */}
+      <div className="bg-neutral-white rounded-xl shadow-lg p-8">
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-neutral-dark mb-2">
+              Detalles de la PQR #{pqr.id}
+            </h2>
+            <p className="text-neutral-gray">
+              {pqr.type === 'PETICION' ? 'Petición' : 
+               pqr.type === 'QUEJA' ? 'Queja' : 'Recurso'} - {pqr.subject}
+            </p>
+          </div>
+          <div className={`flex items-center space-x-2 px-4 py-2 rounded-lg border ${getStatusColor(pqr.status)}`}>
+            {getStatusIcon(pqr.status)}
+            <span className="font-semibold">{getStatusLabel(pqr.status)}</span>
+          </div>
+        </div>
+
+        <div className="space-y-4">
         <div>
           <h3 className="text-sm font-semibold text-neutral-gray mb-2">Descripción</h3>
           <p className="text-neutral-dark">{pqr.description}</p>
@@ -166,6 +170,7 @@ export function PQRSearchResults({ pqr }: PQRSearchResultsProps) {
             </p>
           </div>
         )}
+        </div>
       </div>
     </div>
   )
