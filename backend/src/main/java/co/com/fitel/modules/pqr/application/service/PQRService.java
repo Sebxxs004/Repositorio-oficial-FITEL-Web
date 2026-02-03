@@ -83,23 +83,23 @@ public class PQRService {
             
             if (constancy != null && constancy.getCun() != null) {
                 try {
-                    emailService.sendPQRConstancy(
-                        savedPQR.getCustomerEmail(),
-                        savedPQR.getCustomerName(),
-                        constancy.getCun(),
-                        constancy.getType(),
-                        savedPQR.getSubject(),
-                        constancy.getRadicationDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
-                        constancy.getMaxResponseDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-                        constancy.getSilenceAdministrativeText()
-                    );
-                    
-                    // Marcar constancia como enviada
-                    savedPQR.setConstancyGenerated(true);
-                    savedPQR.setConstancySentAt(LocalDateTime.now());
-                    pqrRepository.save(savedPQR);
-                    
-                    log.info("Constancia enviada por correo a: {}", savedPQR.getCustomerEmail());
+            emailService.sendPQRConstancy(
+                savedPQR.getCustomerEmail(),
+                savedPQR.getCustomerName(),
+                constancy.getCun(),
+                constancy.getType(),
+                savedPQR.getSubject(),
+                constancy.getRadicationDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                constancy.getMaxResponseDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                constancy.getSilenceAdministrativeText()
+            );
+            
+            // Marcar constancia como enviada
+            savedPQR.setConstancyGenerated(true);
+            savedPQR.setConstancySentAt(LocalDateTime.now());
+            pqrRepository.save(savedPQR);
+            
+            log.info("Constancia enviada por correo a: {}", savedPQR.getCustomerEmail());
                     
                     // Enviar notificación a la empresa
                     try {

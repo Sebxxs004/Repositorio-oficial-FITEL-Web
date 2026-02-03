@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import 'leaflet/dist/leaflet.css'
+import { useEffect, useRef, useState } from 'react'
 
 // Coordenadas del Parque Gaitán Cortés, San Cristóbal, Bogotá
 // Coordenadas exactas: 4°33'28.2"N 74°05'19.4"W
@@ -17,10 +16,46 @@ interface MapComponentProps {
   } | null
 }
 
+// Función helper para cargar leaflet de forma segura
+let leafletPromise: Promise<any> | null = null
+let leafletLib: any = null
+
+function loadLeaflet(): Promise<any> {
+  if (typeof window === 'undefined') {
+    return Promise.resolve(null)
+  }
+  
+  // Si ya está cargado, devolver directamente
+  if (leafletLib) {
+    return Promise.resolve(leafletLib)
+  }
+  
+  // Si hay una promesa en curso, devolverla
+  if (leafletPromise) {
+    return leafletPromise
+  }
+  
+  // Usar import dinámico estándar
+  // Next.js debería poder resolverlo con transpilePackages configurado
+  leafletPromise = import('leaflet')
+    .then((module: any) => {
+      leafletLib = module.default || module
+      return leafletLib
+    })
+    .catch((error) => {
+      console.error('Error loading leaflet:', error)
+      leafletPromise = null // Reset para permitir reintentos
+      throw error
+    })
+  
+  return leafletPromise
+}
+
 export default function MapComponent({ geocodedLocation }: MapComponentProps) {
   const mapRef = useRef<any>(null)
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const addressMarkerRef = useRef<any>(null)
+  const [leafletLoaded, setLeafletLoaded] = useState(false)
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current || typeof window === 'undefined') return
@@ -33,10 +68,10 @@ export default function MapComponent({ geocodedLocation }: MapComponentProps) {
     let isMounted = true
 
     // Importar Leaflet dinámicamente solo en el cliente
-    import('leaflet').then((leafletModule) => {
-      if (!isMounted || !mapContainerRef.current) return
-
-      const L = leafletModule.default || leafletModule
+    loadLeaflet().then((L) => {
+      if (!L || !isMounted || !mapContainerRef.current) return
+      
+      setLeafletLoaded(true)
       
       // Verificar nuevamente si el contenedor ya tiene un mapa
       if ((mapContainerRef.current as any)._leaflet_id) {
@@ -197,8 +232,10 @@ export default function MapComponent({ geocodedLocation }: MapComponentProps) {
       return
     }
 
-    import('leaflet').then((leafletModule) => {
-      const L = leafletModule.default || leafletModule
+    if (!leafletLoaded || !mapRef.current) return
+
+    loadLeaflet().then((L) => {
+      if (!L) return
 
       // Remover marcador anterior si existe
       if (addressMarkerRef.current) {

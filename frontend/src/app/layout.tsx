@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import 'leaflet/dist/leaflet.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { AdminRouteHandler } from '@/components/admin/AdminRouteHandler'
+import { ChatBot } from '@/components/chatbot/ChatBot'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -30,6 +32,7 @@ export default function RootLayout({
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <ChatBot />
       </body>
     </html>
   )

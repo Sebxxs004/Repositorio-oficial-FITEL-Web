@@ -725,4 +725,229 @@ public class EmailService {
                 .replace("{{MAX_DATE}}", maxResponseDate != null ? maxResponseDate : "")
                 .replace("{{SILENCE}}", silenceText != null ? silenceText : "");
     }
+    
+    /**
+     * Envía notificación de formulario de contacto a la empresa
+     */
+    public void sendContactFormNotification(String customerName, String customerEmail,
+                                           String customerPhone, String subject, String message) {
+        try {
+            // Obtener el email de la empresa desde la configuración
+            EmailConfig config = getEmailConfig();
+            String companyEmail = config.getEmail();
+            
+            String htmlContent = buildContactFormNotificationEmail(customerName, customerEmail,
+                customerPhone, subject, message);
+            
+            sendHtmlEmail(companyEmail, "Nuevo Mensaje de Contacto - " + subject, htmlContent);
+            log.info("Notificación de formulario de contacto enviada a la empresa: {}", companyEmail);
+        } catch (RuntimeException e) {
+            // Re-lanzar para que el controlador maneje el error
+            throw e;
+        }
+    }
+    
+    /**
+     * Construye el HTML del correo de notificación de formulario de contacto
+     */
+    private String buildContactFormNotificationEmail(String customerName, String customerEmail,
+                                                    String customerPhone, String subject, String message) {
+        String template = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        line-height: 1.6;
+                        color: #1f2937;
+                        background-color: #f3f4f6;
+                        padding: 20px;
+                    }
+                    .email-wrapper {
+                        max-width: 700px;
+                        margin: 0 auto;
+                        background-color: #ffffff;
+                        border-radius: 12px;
+                        overflow: hidden;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    }
+                    .header {
+                        background: linear-gradient(135deg, #dc2626, #b91c1c);
+                        color: white;
+                        padding: 30px;
+                        text-align: center;
+                    }
+                    .header-title {
+                        font-size: 24px;
+                        font-weight: 600;
+                        margin-top: 10px;
+                    }
+                    .alert-badge {
+                        background-color: #fef3c7;
+                        color: #92400e;
+                        padding: 8px 16px;
+                        border-radius: 20px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        display: inline-block;
+                        margin-top: 10px;
+                    }
+                    .content {
+                        padding: 40px 30px;
+                        background-color: #ffffff;
+                    }
+                    .section {
+                        margin: 25px 0;
+                        padding: 20px;
+                        background-color: #f9fafb;
+                        border-left: 5px solid #dc2626;
+                        border-radius: 6px;
+                    }
+                    .section-title {
+                        color: #dc2626;
+                        font-size: 18px;
+                        font-weight: 600;
+                        margin-bottom: 15px;
+                        display: flex;
+                        align-items: center;
+                    }
+                    .info-row {
+                        display: flex;
+                        margin: 10px 0;
+                        padding: 8px 0;
+                        border-bottom: 1px solid #e5e7eb;
+                    }
+                    .info-row:last-child {
+                        border-bottom: none;
+                    }
+                    .info-label {
+                        font-weight: 600;
+                        color: #374151;
+                        min-width: 200px;
+                        flex-shrink: 0;
+                    }
+                    .info-value {
+                        color: #1f2937;
+                        flex: 1;
+                    }
+                    .message-box {
+                        background-color: #ffffff;
+                        border: 2px solid #e5e7eb;
+                        padding: 20px;
+                        margin: 15px 0;
+                        border-radius: 8px;
+                        border-left: 4px solid #3b82f6;
+                    }
+                    .message-text {
+                        color: #374151;
+                        line-height: 1.8;
+                        white-space: pre-wrap;
+                    }
+                    .action-box {
+                        background-color: #eff6ff;
+                        border: 2px solid #3b82f6;
+                        padding: 20px;
+                        margin: 25px 0;
+                        border-radius: 8px;
+                    }
+                    .action-text {
+                        color: #1e40af;
+                        font-size: 14px;
+                    }
+                    .footer {
+                        background-color: #1f2937;
+                        color: #9ca3af;
+                        text-align: center;
+                        padding: 25px 20px;
+                        font-size: 12px;
+                        line-height: 1.8;
+                    }
+                    .footer-brand {
+                        color: #ffffff;
+                        font-weight: 600;
+                        font-size: 14px;
+                        margin-bottom: 10px;
+                    }
+                    @media only screen and (max-width: 600px) {
+                        .content { padding: 25px 20px; }
+                        .header { padding: 25px 20px; }
+                        .info-row { flex-direction: column; }
+                        .info-label { min-width: auto; margin-bottom: 5px; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="email-wrapper">
+                    <div class="header">
+                        <div style="font-size: 40px; font-weight: bold; letter-spacing: 3px;">FITEL</div>
+                        <div class="header-title">Nuevo Mensaje de Contacto</div>
+                        <div class="alert-badge">📧 Requiere Respuesta</div>
+                    </div>
+                    
+                    <div class="content">
+                        <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+                            Se ha recibido un nuevo mensaje a través del formulario de contacto del sitio web.
+                        </p>
+                        
+                        <div class="section">
+                            <div class="section-title">👤 Información del Cliente</div>
+                            <div class="info-row">
+                                <span class="info-label">Nombre:</span>
+                                <span class="info-value"><strong>{{CUSTOMER_NAME}}</strong></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Email:</span>
+                                <span class="info-value"><a href="mailto:{{CUSTOMER_EMAIL}}" style="color: #3b82f6; text-decoration: none;">{{CUSTOMER_EMAIL}}</a></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Teléfono:</span>
+                                <span class="info-value"><a href="tel:{{CUSTOMER_PHONE}}" style="color: #3b82f6; text-decoration: none;">{{CUSTOMER_PHONE}}</a></span>
+                            </div>
+                        </div>
+                        
+                        <div class="section">
+                            <div class="section-title">📋 Detalles del Mensaje</div>
+                            <div class="info-row">
+                                <span class="info-label">Asunto:</span>
+                                <span class="info-value"><strong style="color: #dc2626;">{{SUBJECT}}</strong></span>
+                            </div>
+                        </div>
+                        
+                        <div class="message-box">
+                            <div style="color: #3b82f6; font-weight: 600; margin-bottom: 10px; font-size: 15px;">
+                                💬 Mensaje:
+                            </div>
+                            <div class="message-text">{{MESSAGE}}</div>
+                        </div>
+                        
+                        <div class="action-box">
+                            <div class="action-text">
+                                💡 <strong>Acción Requerida:</strong> Por favor, responda al cliente a la brevedad posible utilizando el email o teléfono proporcionado.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="footer">
+                        <div class="footer-brand">FITEL - Sistema de Gestión de Contacto</div>
+                        <div style="color: #9ca3af; font-size: 11px;">
+                            Este es un correo automático del sistema.<br>
+                            El mensaje fue enviado desde el formulario de contacto del sitio web.
+                        </div>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """;
+        
+        return template
+                .replace("{{CUSTOMER_NAME}}", customerName != null ? customerName : "")
+                .replace("{{CUSTOMER_EMAIL}}", customerEmail != null ? customerEmail : "")
+                .replace("{{CUSTOMER_PHONE}}", customerPhone != null ? customerPhone : "")
+                .replace("{{SUBJECT}}", subject != null ? subject : "")
+                .replace("{{MESSAGE}}", message != null ? message.replace("\n", "<br>") : "");
+    }
 }

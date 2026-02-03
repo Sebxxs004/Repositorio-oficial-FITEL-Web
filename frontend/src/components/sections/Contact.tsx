@@ -76,15 +76,34 @@ export function Contact() {
     setSubmitSuccess(false)
 
     try {
-      // Aquí puedes enviar los datos al backend cuando esté listo
-      // Por ahora, simulamos el envío
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Enviar los datos al backend
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
+      const response = await fetch(`${apiUrl}/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          subject: data.subject,
+          message: data.message,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Error al enviar el mensaje')
+      }
+
+      const result = await response.json()
       
       // Obtener el label del asunto seleccionado
       const selectedSubject = CONTACT_SUBJECT_OPTIONS.find(opt => opt.value === data.subject)
       const subjectLabel = selectedSubject ? selectedSubject.label : data.subject
       
-      // Enviar a WhatsApp con el mensaje prellenado
+      // También abrir WhatsApp con el mensaje prellenado (opcional)
       const whatsappMessage = `Hola, mi nombre es ${data.name}.\n\nAsunto: ${subjectLabel}\n\nMensaje: ${data.message}\n\nContacto: ${data.email} - ${data.phone}`
       const whatsappUrl = `${FITEL_WHATSAPP_URL}?text=${encodeURIComponent(whatsappMessage)}`
       window.open(whatsappUrl, '_blank')
@@ -95,7 +114,8 @@ export function Contact() {
       // Ocultar mensaje de éxito después de 5 segundos
       setTimeout(() => setSubmitSuccess(false), 5000)
     } catch (error) {
-      setSubmitError('Ocurrió un error al enviar el mensaje. Por favor intenta de nuevo.')
+      console.error('Error enviando formulario de contacto:', error)
+      setSubmitError(error instanceof Error ? error.message : 'Ocurrió un error al enviar el mensaje. Por favor intenta de nuevo.')
     } finally {
       setIsSubmitting(false)
     }
@@ -389,7 +409,7 @@ export function Contact() {
               {submitSuccess && (
                 <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                   <p className="text-green-800 text-sm">
-                    ✓ Mensaje enviado correctamente. Te redirigiremos a WhatsApp para continuar la conversación.
+                    ✓ Mensaje enviado correctamente. Hemos recibido tu consulta y nos pondremos en contacto pronto. También puedes continuar la conversación por WhatsApp.
                   </p>
                 </div>
               )}

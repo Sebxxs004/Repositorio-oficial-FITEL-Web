@@ -3,8 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
   // Solo usar standalone en producción
   ...(process.env.NODE_ENV === 'production' && { output: 'standalone' }),
-  // Transpilar recharts para que funcione con Next.js
-  transpilePackages: ['recharts'],
+  // Transpilar recharts y leaflet para que funcionen con Next.js
+  transpilePackages: ['recharts', 'leaflet', '@react-leaflet/core'],
   images: {
     unoptimized: true,
   },
@@ -13,17 +13,43 @@ const nextConfig = {
     ALLOWED_ADMIN_IPS: process.env.ALLOWED_ADMIN_IPS || '', // IPs permitidas para panel admin
   },
   // Optimizaciones para desarrollo más rápido
-  ...(process.env.NODE_ENV === 'development' && {
-    webpack: (config, { dev, isServer }) => {
-      if (dev && !isServer) {
-        config.watchOptions = {
-          poll: 1000, // Verificar cambios cada segundo
-          aggregateTimeout: 300, // Esperar 300ms antes de recompilar
-        }
+  webpack: (config, { dev, isServer }) => {
+    // Configurar webpack para resolver correctamente leaflet
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+    }
+    
+    // Asegurar que webpack pueda resolver módulos de node_modules
+    if (!config.resolve.modules) {
+      config.resolve.modules = []
+    }
+    if (!config.resolve.modules.includes('node_modules')) {
+      config.resolve.modules.push('node_modules')
+    }
+    
+    // Configurar para que webpack pueda resolver importaciones dinámicas
+    // No marcar leaflet como externo para que webpack pueda resolverlo
+    config.externals = config.externals || []
+    config.externals = config.externals.filter((external) => {
+      if (typeof external === 'string' && external === 'leaflet') {
+        return false // No excluir leaflet
       }
-      return config
-    },
-  }),
+      if (typeof external === 'function') {
+        // Filtrar funciones que excluyan leaflet
+        return true
+      }
+      return true
+    })
+    
+    if (dev && !isServer) {
+      config.watchOptions = {
+        poll: 1000, // Verificar cambios cada segundo
+        aggregateTimeout: 300, // Esperar 300ms antes de recompilar
+      }
+    }
+    return config
+  },
 }
 
 module.exports = nextConfig
