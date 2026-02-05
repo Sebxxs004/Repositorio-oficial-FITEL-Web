@@ -34,4 +34,6 @@ public class UpdatePQRRequest {
     private String response; // Respuesta formal
     
     private Boolean skipStatusChangeEmail; // Si es true, no se envía correo de cambio de estado
+    
+    private Boolean skipResponseEmail; // Si es true, no se envía correo de respuesta
 }

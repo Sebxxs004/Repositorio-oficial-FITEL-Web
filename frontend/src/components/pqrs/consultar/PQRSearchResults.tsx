@@ -66,10 +66,12 @@ function getStatusColor(status: PQRStatus): string {
 }
 
 export function PQRSearchResults({ pqr }: PQRSearchResultsProps) {
+  const isReceived = pqr.status === 'RECIBIDA'
+
   return (
     <div className="space-y-6">
-      {/* Timeline visual del progreso */}
-      <PQRTimeline pqr={pqr} />
+      {/* Timeline visual del progreso - Solo mostrar si NO está en RECIBIDA */}
+      {!isReceived && <PQRTimeline pqr={pqr} />}
 
       {/* Detalles de la PQR */}
       <div className="bg-neutral-white rounded-xl shadow-lg p-8">
@@ -90,86 +92,133 @@ export function PQRSearchResults({ pqr }: PQRSearchResultsProps) {
         </div>
 
         <div className="space-y-4">
-        <div>
-          <h3 className="text-sm font-semibold text-neutral-gray mb-2">Descripción</h3>
-          <p className="text-neutral-dark">{pqr.description}</p>
-        </div>
+          {/* Información del Usuario - Solo mostrar si está en RECIBIDA */}
+          {isReceived && (
+            <div className="pt-4 border-t border-neutral-gray-light">
+              <h3 className="text-lg font-semibold text-neutral-dark mb-4">Información del Usuario</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-semibold text-neutral-gray mb-1">Nombre Completo</h4>
+                  <p className="text-neutral-dark">{pqr.customerName}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-neutral-gray mb-1">Correo Electrónico</h4>
+                  <p className="text-neutral-dark">{pqr.customerEmail}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-neutral-gray mb-1">Teléfono</h4>
+                  <p className="text-neutral-dark">{pqr.customerPhone}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-neutral-gray mb-1">Documento de Identidad</h4>
+                  <p className="text-neutral-dark">
+                    {pqr.customerDocumentType} - {pqr.customerDocumentNumber}
+                  </p>
+                </div>
+                {pqr.customerAddress && (
+                  <div className="md:col-span-2">
+                    <h4 className="text-sm font-semibold text-neutral-gray mb-1">Dirección</h4>
+                    <p className="text-neutral-dark">{pqr.customerAddress}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-neutral-gray-light">
+          {/* Descripción de la PQR */}
           <div>
-            <h3 className="text-sm font-semibold text-neutral-gray mb-1">Fecha de Creación</h3>
-            <p className="text-neutral-dark">
-              {new Date(pqr.createdAt).toLocaleDateString('es-CO', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </p>
+            <h3 className="text-sm font-semibold text-neutral-gray mb-2">Descripción</h3>
+            <p className="text-neutral-dark">{pqr.description}</p>
           </div>
-          <div>
-            <h3 className="text-sm font-semibold text-neutral-gray mb-1">Última Actualización</h3>
-            <p className="text-neutral-dark">
-              {new Date(pqr.updatedAt).toLocaleDateString('es-CO', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </p>
-          </div>
-          {pqr.slaDeadline && (
+
+          {/* Información de Fechas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-neutral-gray-light">
             <div>
-              <h3 className="text-sm font-semibold text-neutral-gray mb-1">Fecha Límite de Respuesta (SLA)</h3>
-              <p className="text-neutral-dark font-semibold text-primary-red">
-                {new Date(pqr.slaDeadline).toLocaleDateString('es-CO', {
+              <h3 className="text-sm font-semibold text-neutral-gray mb-1">Fecha de Creación</h3>
+              <p className="text-neutral-dark">
+                {new Date(pqr.createdAt).toLocaleDateString('es-CO', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </p>
+            </div>
+            {!isReceived && (
+              <div>
+                <h3 className="text-sm font-semibold text-neutral-gray mb-1">Última Actualización</h3>
+                <p className="text-neutral-dark">
+                  {new Date(pqr.updatedAt).toLocaleDateString('es-CO', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+              </div>
+            )}
+            {pqr.slaDeadline && (
+              <div>
+                <h3 className="text-sm font-semibold text-neutral-gray mb-1">Fecha Límite de Respuesta (SLA)</h3>
+                <p className="text-neutral-dark font-semibold text-primary-red">
+                  {new Date(pqr.slaDeadline).toLocaleDateString('es-CO', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* CUN - Mostrar siempre */}
+          <div className="pt-4 border-t border-neutral-gray-light">
+            <h3 className="text-sm font-semibold text-neutral-gray mb-1">Código Único Numérico (CUN)</h3>
+            <p className="text-neutral-dark font-mono text-lg font-bold text-primary-red">{pqr.cun}</p>
+            <p className="text-xs text-neutral-gray mt-1">Guarda este código para futuras consultas</p>
+          </div>
+
+          {/* Respuesta - Solo mostrar si NO está en RECIBIDA */}
+          {!isReceived && pqr.response && (
+            <div className="pt-4 border-t border-neutral-gray-light">
+              <h3 className="text-sm font-semibold text-neutral-gray mb-2">Respuesta</h3>
+              <p className="text-neutral-dark">{pqr.response}</p>
+            </div>
+          )}
+
+          {/* Fecha de Respuesta - Solo mostrar si NO está en RECIBIDA */}
+          {!isReceived && pqr.responseDate && (
+            <div className="pt-4 border-t border-neutral-gray-light">
+              <h3 className="text-sm font-semibold text-neutral-gray mb-1">Fecha de Respuesta</h3>
+              <p className="text-neutral-dark">
+                {new Date(pqr.responseDate).toLocaleDateString('es-CO', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
                 })}
               </p>
             </div>
           )}
-        </div>
 
-        {pqr.response && (
-          <div className="pt-4 border-t border-neutral-gray-light">
-            <h3 className="text-sm font-semibold text-neutral-gray mb-2">Respuesta</h3>
-            <p className="text-neutral-dark">{pqr.response}</p>
-          </div>
-        )}
-
-        {pqr.responseDate && (
-          <div className="pt-4 border-t border-neutral-gray-light">
-            <h3 className="text-sm font-semibold text-neutral-gray mb-1">Fecha de Respuesta</h3>
-            <p className="text-neutral-dark">
-              {new Date(pqr.responseDate).toLocaleDateString('es-CO', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </p>
-          </div>
-        )}
-
-        {pqr.resolutionDate && (
-          <div className="pt-4 border-t border-neutral-gray-light">
-            <h3 className="text-sm font-semibold text-neutral-gray mb-1">Fecha de Resolución</h3>
-            <p className="text-neutral-dark">
-              {new Date(pqr.resolutionDate).toLocaleDateString('es-CO', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </p>
-          </div>
-        )}
+          {/* Fecha de Resolución - Solo mostrar si NO está en RECIBIDA */}
+          {!isReceived && pqr.resolutionDate && (
+            <div className="pt-4 border-t border-neutral-gray-light">
+              <h3 className="text-sm font-semibold text-neutral-gray mb-1">Fecha de Resolución</h3>
+              <p className="text-neutral-dark">
+                {new Date(pqr.resolutionDate).toLocaleDateString('es-CO', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Save, AlertTriangle, Calendar, User, Mail, Phone, FileText, Paperclip } from 'lucide-react'
+import { X, Save, AlertTriangle, Calendar, User, Mail, Phone, FileText, Paperclip, ArrowRight } from 'lucide-react'
 
 interface PQR {
   id: number
@@ -41,6 +41,7 @@ function createSafeRequestBody(data: {
   internalNotes?: string
   response?: string
   skipStatusChangeEmail?: boolean
+  skipResponseEmail?: boolean
 }): Record<string, string | boolean> {
   const safe: Record<string, string | boolean> = {}
   
@@ -65,6 +66,9 @@ function createSafeRequestBody(data: {
   if (data.skipStatusChangeEmail !== undefined) {
     safe.skipStatusChangeEmail = Boolean(data.skipStatusChangeEmail)
   }
+  if (data.skipResponseEmail !== undefined) {
+    safe.skipResponseEmail = Boolean(data.skipResponseEmail)
+  }
   
   return safe
 }
@@ -83,6 +87,9 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
   const [isOverdue, setIsOverdue] = useState(false)
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null)
   const [showResolveModal, setShowResolveModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showStatusChangeModal, setShowStatusChangeModal] = useState(false)
+  const [pendingStatusChange, setPendingStatusChange] = useState<string | null>(null)
 
   useEffect(() => {
     if (pqr) {
@@ -95,6 +102,8 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
         response: String(pqr.response || ''),
       })
       setShowResolveModal(false) // Resetear el modal cuando cambia la PQR
+      setShowStatusChangeModal(false) // Resetear el modal de cambio de estado
+      setPendingStatusChange(null) // Resetear el estado pendiente
       
       // Verificar si está vencida
       if (pqr.slaDeadline) {
@@ -104,7 +113,7 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
     }
   }, [pqr])
 
-  const handleSaveWithStatus = useCallback(async (status: string, skipStatusChangeEmail: boolean) => {
+  const handleSaveWithStatus = useCallback(async (status: string, skipStatusChangeEmail: boolean, skipResponseEmail: boolean = false) => {
     setIsSaving(true)
     setError(null)
 
@@ -154,7 +163,8 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
         realType: currentFormData.realType,
         internalNotes: currentFormData.internalNotes,
         response: currentFormData.response,
-        skipStatusChangeEmail: skipStatusChangeEmail
+        skipStatusChangeEmail: skipStatusChangeEmail,
+        skipResponseEmail: skipResponseEmail
       })
 
       const requestBodyString = JSON.stringify(requestBody)
@@ -176,9 +186,23 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
         throw new Error(errorData.message || 'Error al actualizar PQR')
       }
 
+      // Mostrar modal de éxito
+      setShowSuccessModal(true)
       onUpdate()
-      onClose()
       setAttachmentFile(null)
+      
+      // Si se cambió el estado, forzar actualización de la PQR para reflejar los nuevos campos
+      if (status && status !== currentPqr.status) {
+        // Esperar un momento para que el backend procese y luego actualizar
+        setTimeout(() => {
+          onUpdate()
+        }, 300)
+      }
+      
+      // Ocultar modal de éxito después de 4 segundos (sin cerrar el modal de detalles)
+      setTimeout(() => {
+        setShowSuccessModal(false)
+      }, 4000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar cambios')
     } finally {
@@ -186,7 +210,7 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
     }
   }, [pqr, formData, attachmentFile, onUpdate, onClose])
 
-  const handleSave = useCallback(async (skipStatusChangeEmail = false) => {
+  const handleSave = useCallback(async (skipStatusChangeEmail = false, skipResponseEmail = false) => {
     setIsSaving(true)
     setError(null)
 
@@ -198,19 +222,12 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
 
       // Obtener valores primitivos directamente del estado actual
       const currentFormData = formData
-      // Usar el estado del formulario, o si está vacío, usar el estado original de la PQR
-      const currentStatus = String(currentFormData.status || currentPqr.status || '').trim()
+      // Para "Guardar Cambios", mantener el estado original de la PQR (no cambiarlo)
+      const currentStatus = currentPqr.status
       const currentResponse = String(currentFormData.response || '').trim()
 
-      // Validar que no se cierre fuera del SLA
-      if (currentStatus === 'CERRADA' && currentPqr.slaDeadline) {
-        const deadline = new Date(currentPqr.slaDeadline)
-        if (deadline > new Date()) {
-          setError('No se puede cerrar la PQR antes de la fecha límite del SLA')
-          setIsSaving(false)
-          return
-        }
-      }
+      // Validar que no se cierre fuera del SLA (solo si se intenta cambiar a CERRADA)
+      // Como estamos manteniendo el estado original, esta validación no aplica para "Guardar Cambios"
 
       // Verificar si está en EN_RESPUESTA, tiene respuesta y se está guardando sin cambiar estado
       // Si es así, mostrar modal para preguntar si quiere marcarla como RESUELTA
@@ -220,15 +237,7 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
       // 3. El estado no ha sido cambiado manualmente a otro valor diferente de EN_RESPUESTA
       const isInEnRespuesta = currentPqr.status === 'EN_RESPUESTA'
       const hasResponse = currentResponse && currentResponse.trim().length > 0
-      
-      // El estado sigue siendo EN_RESPUESTA si:
-      // - currentStatus es 'EN_RESPUESTA' (explícitamente)
-      // - currentStatus está vacío o es igual al estado original
-      // - currentStatus es igual al estado original de la PQR (que es 'EN_RESPUESTA')
-      const normalizedCurrentStatus = currentStatus || currentPqr.status
-      const statusStillEnRespuesta = 
-        normalizedCurrentStatus === 'EN_RESPUESTA' || 
-        normalizedCurrentStatus === currentPqr.status
+      const statusStillEnRespuesta = true // Siempre es true porque no cambiamos el estado
       
       // Debug: verificar condiciones
       console.log('🔍 Modal check:', {
@@ -237,7 +246,6 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
         hasResponse,
         statusStillEnRespuesta,
         currentStatus: currentStatus || '(vacío)',
-        normalizedCurrentStatus,
         currentPqrStatus: currentPqr.status,
         currentResponseLength: currentResponse?.length,
         currentResponsePreview: currentResponse?.substring(0, 50),
@@ -259,7 +267,6 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
           hasResponse: hasResponse ? 'true' : 'false',
           statusStillEnRespuesta: statusStillEnRespuesta ? 'true' : 'false',
           currentStatusValue: currentStatus || '(vacío)',
-          normalizedCurrentStatus,
           originalStatus: currentPqr.status
         })
       }
@@ -285,19 +292,21 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
         }
       }
 
-      // Si se está marcando como RESUELTA y hay respuesta, no enviar correo de cambio de estado
-      const shouldSkipStatusChangeEmail = skipStatusChangeEmail || 
-        (currentStatus === 'RESUELTA' && currentResponse !== '')
+      // Para "Guardar Cambios", siempre saltar correos (no cambiar estado, no enviar correos)
+      const shouldSkipStatusChangeEmail = true
+      const shouldSkipResponseEmail = true
 
       // Crear objeto seguro usando la función helper
+      // No incluir status para que no se cambie el estado
       const requestBody = createSafeRequestBody({
-        status: currentStatus || currentFormData.status,
+        // status: NO se incluye para mantener el estado original
         priority: currentFormData.priority,
         responsibleArea: currentFormData.responsibleArea,
         realType: currentFormData.realType,
         internalNotes: currentFormData.internalNotes,
         response: currentFormData.response,
-        skipStatusChangeEmail: shouldSkipStatusChangeEmail
+        skipStatusChangeEmail: shouldSkipStatusChangeEmail,
+        skipResponseEmail: shouldSkipResponseEmail
       })
 
       const requestBodyString = JSON.stringify(requestBody)
@@ -319,9 +328,15 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
         throw new Error(errorData.message || 'Error al actualizar PQR')
       }
 
+      // Mostrar modal de éxito
+      setShowSuccessModal(true)
       onUpdate()
-      onClose()
       setAttachmentFile(null)
+      
+      // Ocultar modal de éxito después de 4 segundos (sin cerrar el modal de detalles)
+      setTimeout(() => {
+        setShowSuccessModal(false)
+      }, 4000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar cambios')
     } finally {
@@ -429,135 +444,271 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
           {/* Formulario de Gestión */}
           <div className="border-t border-neutral-gray-light pt-6">
             <h3 className="font-semibold text-neutral-dark mb-4">Gestión de PQR</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Estado */}
-              <div>
-                <label className="block text-sm font-semibold text-neutral-dark mb-2">Estado *</label>
-                <select
-                  value={formData.status}
+            
+            {/* Si está en RECIBIDA, no mostrar formulario */}
+            {pqr.status === 'RECIBIDA' ? null : pqr.status === 'EN_ANALISIS' ? (
+              /* Si está en EN_ANALISIS, solo mostrar Notas Internas */
+              <div className="mt-4">
+                <label className="block text-sm font-semibold text-neutral-dark mb-2">Notas del Caso</label>
+                <textarea
+                  value={formData.internalNotes}
                   onChange={(e) => {
                     const value = String(e.target.value || '').trim()
-                    setFormData(prev => ({ ...prev, status: value }))
+                    setFormData(prev => ({ ...prev, internalNotes: value }))
                   }}
-                  className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
-                >
-                  <option value="RECIBIDA">Recibida</option>
-                  <option value="EN_ANALISIS">En Análisis</option>
-                  <option value="EN_RESPUESTA">En Respuesta</option>
-                  <option value="RESUELTA">Resuelta</option>
-                  <option value="CERRADA">Cerrada</option>
-                </select>
+                  rows={6}
+                  className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"
+                  placeholder="Agregar notas sobre el análisis del caso..."
+                />
               </div>
+            ) : pqr.status === 'EN_RESPUESTA' ? (
+              /* Si está en EN_RESPUESTA, mostrar todos los campos excepto Estado */
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Prioridad */}
+                  <div>
+                    <label className="block text-sm font-semibold text-neutral-dark mb-2">Prioridad</label>
+                    <select
+                      value={formData.priority}
+                      onChange={(e) => {
+                        const value = String(e.target.value || '').trim()
+                        setFormData(prev => ({ ...prev, priority: value }))
+                      }}
+                      className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
+                    >
+                      <option value="BAJA">Baja</option>
+                      <option value="NORMAL">Normal</option>
+                      <option value="ALTA">Alta</option>
+                      <option value="URGENTE">Urgente</option>
+                    </select>
+                  </div>
 
-              {/* Prioridad */}
-              <div>
-                <label className="block text-sm font-semibold text-neutral-dark mb-2">Prioridad</label>
-                <select
-                  value={formData.priority}
-                  onChange={(e) => {
-                    const value = String(e.target.value || '').trim()
-                    setFormData(prev => ({ ...prev, priority: value }))
-                  }}
-                  className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
-                >
-                  <option value="BAJA">Baja</option>
-                  <option value="NORMAL">Normal</option>
-                  <option value="ALTA">Alta</option>
-                  <option value="URGENTE">Urgente</option>
-                </select>
-              </div>
+                  {/* Área Responsable */}
+                  <div>
+                    <label className="block text-sm font-semibold text-neutral-dark mb-2">Área Responsable</label>
+                    <select
+                      value={formData.responsibleArea}
+                      onChange={(e) => {
+                        const value = String(e.target.value || '').trim()
+                        setFormData(prev => ({ ...prev, responsibleArea: value }))
+                      }}
+                      className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
+                    >
+                      <option value="">Seleccionar área...</option>
+                      <option value="soporte">Soporte</option>
+                      <option value="facturacion">Facturación</option>
+                      <option value="tecnica">Técnica</option>
+                    </select>
+                  </div>
 
-              {/* Área Responsable */}
-              <div>
-                <label className="block text-sm font-semibold text-neutral-dark mb-2">Área Responsable</label>
-                <select
-                  value={formData.responsibleArea}
-                  onChange={(e) => {
-                    const value = String(e.target.value || '').trim()
-                    setFormData(prev => ({ ...prev, responsibleArea: value }))
-                  }}
-                  className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
-                >
-                  <option value="">Seleccionar área...</option>
-                  <option value="soporte">Soporte</option>
-                  <option value="facturacion">Facturación</option>
-                  <option value="tecnica">Técnica</option>
-                </select>
-              </div>
+                  {/* Tipo Real */}
+                  <div>
+                    <label className="block text-sm font-semibold text-neutral-dark mb-2">Tipo Real</label>
+                    <select
+                      value={formData.realType}
+                      onChange={(e) => {
+                        const value = String(e.target.value || '').trim()
+                        setFormData(prev => ({ ...prev, realType: value }))
+                      }}
+                      className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
+                    >
+                      <option value="">Seleccionar tipo...</option>
+                      <option value="PETICION">Petición</option>
+                      <option value="QUEJA">Queja</option>
+                      <option value="RECURSO">Recurso</option>
+                    </select>
+                  </div>
+                </div>
 
-              {/* Tipo Real */}
-              <div>
-                <label className="block text-sm font-semibold text-neutral-dark mb-2">Tipo Real</label>
-                <select
-                  value={formData.realType}
-                  onChange={(e) => {
-                    const value = String(e.target.value || '').trim()
-                    setFormData(prev => ({ ...prev, realType: value }))
-                  }}
-                  className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
-                >
-                  <option value="">Seleccionar tipo...</option>
-                  <option value="PETICION">Petición</option>
-                  <option value="QUEJA">Queja</option>
-                  <option value="RECURSO">Recurso</option>
-                </select>
-              </div>
-            </div>
+                {/* Notas Internas */}
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold text-neutral-dark mb-2">Notas Internas</label>
+                  <textarea
+                    value={formData.internalNotes}
+                    onChange={(e) => {
+                      const value = String(e.target.value || '').trim()
+                      setFormData(prev => ({ ...prev, internalNotes: value }))
+                    }}
+                    rows={4}
+                    className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"
+                    placeholder="Notas internas para el equipo..."
+                  />
+                </div>
 
-            {/* Notas Internas */}
-            <div className="mt-4">
-              <label className="block text-sm font-semibold text-neutral-dark mb-2">Notas Internas</label>
-              <textarea
-                value={formData.internalNotes}
-                onChange={(e) => {
-                  const value = String(e.target.value || '').trim()
-                  setFormData(prev => ({ ...prev, internalNotes: value }))
-                }}
-                rows={4}
-                className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"
-                placeholder="Notas internas para el equipo..."
-              />
-            </div>
+                {/* Archivo adjunto en la respuesta */}
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                    <Paperclip className="w-4 h-4" />
+                    <span>Adjuntar archivo a la respuesta</span>
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt"
+                    onChange={(e) => setAttachmentFile(e.target.files?.[0] || null)}
+                    className="block w-full text-sm text-neutral-dark
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-md file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-primary-red file:text-white
+                      hover:file:bg-primary-red/90
+                      cursor-pointer"
+                  />
+                  {pqr.responseAttachmentPath && !attachmentFile && (
+                    <p className="mt-2 text-xs text-neutral-gray">
+                      Ya existe un archivo adjunto para esta PQR.
+                    </p>
+                  )}
+                </div>
 
-            {/* Archivo adjunto en la respuesta */}
-            <div className="mt-4">
-              <label className="block text-sm font-semibold text-neutral-dark mb-2 flex items-center gap-2">
-                <Paperclip className="w-4 h-4" />
-                <span>Adjuntar archivo a la respuesta</span>
-              </label>
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt"
-                onChange={(e) => setAttachmentFile(e.target.files?.[0] || null)}
-                className="block w-full text-sm text-neutral-dark
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-md file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-primary-red file:text-white
-                  hover:file:bg-primary-red/90
-                  cursor-pointer"
-              />
-              {pqr.responseAttachmentPath && !attachmentFile && (
-                <p className="mt-2 text-xs text-neutral-gray">
-                  Ya existe un archivo adjunto para esta PQR.
-                </p>
-              )}
-            </div>
+                {/* Respuesta Formal */}
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold text-neutral-dark mb-2">Respuesta Formal</label>
+                  <textarea
+                    value={formData.response}
+                    onChange={(e) => {
+                      const value = String(e.target.value || '').trim()
+                      setFormData(prev => ({ ...prev, response: value }))
+                    }}
+                    rows={6}
+                    className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"
+                    placeholder="Respuesta formal para el cliente..."
+                  />
+                </div>
+              </>
+            ) : (
+              /* Para otros estados (RESUELTA, CERRADA), mostrar formulario completo */
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Estado */}
+                  <div>
+                    <label className="block text-sm font-semibold text-neutral-dark mb-2">Estado *</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => {
+                        const value = String(e.target.value || '').trim()
+                        setFormData(prev => ({ ...prev, status: value }))
+                      }}
+                      className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
+                    >
+                      <option value="RECIBIDA">Recibida</option>
+                      <option value="EN_ANALISIS">En Análisis</option>
+                      <option value="EN_RESPUESTA">En Respuesta</option>
+                      <option value="RESUELTA">Resuelta</option>
+                      <option value="CERRADA">Cerrada</option>
+                    </select>
+                  </div>
 
-            {/* Respuesta Formal */}
-            <div className="mt-4">
-              <label className="block text-sm font-semibold text-neutral-dark mb-2">Respuesta Formal</label>
-              <textarea
-                value={formData.response}
-                onChange={(e) => {
-                  const value = String(e.target.value || '').trim()
-                  setFormData(prev => ({ ...prev, response: value }))
-                }}
-                rows={6}
-                className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"
-                placeholder="Respuesta formal para el cliente..."
-              />
-            </div>
+                  {/* Prioridad */}
+                  <div>
+                    <label className="block text-sm font-semibold text-neutral-dark mb-2">Prioridad</label>
+                    <select
+                      value={formData.priority}
+                      onChange={(e) => {
+                        const value = String(e.target.value || '').trim()
+                        setFormData(prev => ({ ...prev, priority: value }))
+                      }}
+                      className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
+                    >
+                      <option value="BAJA">Baja</option>
+                      <option value="NORMAL">Normal</option>
+                      <option value="ALTA">Alta</option>
+                      <option value="URGENTE">Urgente</option>
+                    </select>
+                  </div>
+
+                  {/* Área Responsable */}
+                  <div>
+                    <label className="block text-sm font-semibold text-neutral-dark mb-2">Área Responsable</label>
+                    <select
+                      value={formData.responsibleArea}
+                      onChange={(e) => {
+                        const value = String(e.target.value || '').trim()
+                        setFormData(prev => ({ ...prev, responsibleArea: value }))
+                      }}
+                      className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
+                    >
+                      <option value="">Seleccionar área...</option>
+                      <option value="soporte">Soporte</option>
+                      <option value="facturacion">Facturación</option>
+                      <option value="tecnica">Técnica</option>
+                    </select>
+                  </div>
+
+                  {/* Tipo Real */}
+                  <div>
+                    <label className="block text-sm font-semibold text-neutral-dark mb-2">Tipo Real</label>
+                    <select
+                      value={formData.realType}
+                      onChange={(e) => {
+                        const value = String(e.target.value || '').trim()
+                        setFormData(prev => ({ ...prev, realType: value }))
+                      }}
+                      className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
+                    >
+                      <option value="">Seleccionar tipo...</option>
+                      <option value="PETICION">Petición</option>
+                      <option value="QUEJA">Queja</option>
+                      <option value="RECURSO">Recurso</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Notas Internas */}
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold text-neutral-dark mb-2">Notas Internas</label>
+                  <textarea
+                    value={formData.internalNotes}
+                    onChange={(e) => {
+                      const value = String(e.target.value || '').trim()
+                      setFormData(prev => ({ ...prev, internalNotes: value }))
+                    }}
+                    rows={4}
+                    className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"
+                    placeholder="Notas internas para el equipo..."
+                  />
+                </div>
+
+                {/* Archivo adjunto en la respuesta */}
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                    <Paperclip className="w-4 h-4" />
+                    <span>Adjuntar archivo a la respuesta</span>
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt"
+                    onChange={(e) => setAttachmentFile(e.target.files?.[0] || null)}
+                    className="block w-full text-sm text-neutral-dark
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-md file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-primary-red file:text-white
+                      hover:file:bg-primary-red/90
+                      cursor-pointer"
+                  />
+                  {pqr.responseAttachmentPath && !attachmentFile && (
+                    <p className="mt-2 text-xs text-neutral-gray">
+                      Ya existe un archivo adjunto para esta PQR.
+                    </p>
+                  )}
+                </div>
+
+                {/* Respuesta Formal */}
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold text-neutral-dark mb-2">Respuesta Formal</label>
+                  <textarea
+                    value={formData.response}
+                    onChange={(e) => {
+                      const value = String(e.target.value || '').trim()
+                      setFormData(prev => ({ ...prev, response: value }))
+                    }}
+                    rows={6}
+                    className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"
+                    placeholder="Respuesta formal para el cliente..."
+                  />
+                </div>
+              </>
+            )}
           </div>
 
           {/* Error */}
@@ -569,51 +720,201 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
 
           {/* Botones */}
           <div className="flex items-center justify-end space-x-4 pt-4 border-t border-neutral-gray-light">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 border border-neutral-gray-light rounded-lg text-neutral-dark hover:bg-neutral-gray-light transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={isSaving}
-              className="px-6 py-2 bg-primary-red text-white rounded-lg hover:bg-primary-red/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-            >
-              <Save className="w-4 h-4" />
-              <span>{isSaving ? 'Guardando...' : 'Guardar Cambios'}</span>
-            </button>
+            {pqr.status === 'RECIBIDA' ? (
+              <>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-6 py-2 border border-neutral-gray-light rounded-lg text-neutral-dark hover:bg-neutral-gray-light transition-colors"
+                >
+                  Cerrar
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleSaveWithStatus('EN_ANALISIS', false, false).catch(err => {
+                      console.error('Error al actualizar:', err)
+                    })
+                  }}
+                  disabled={isSaving}
+                  className="px-6 py-2 bg-primary-red text-white rounded-lg hover:bg-primary-red/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  <span>{isSaving ? 'Actualizando...' : 'Actualizar a Revisión'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </>
+            ) : pqr.status === 'EN_ANALISIS' ? (
+              <>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-6 py-2 border border-neutral-gray-light rounded-lg text-neutral-dark hover:bg-neutral-gray-light transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="px-6 py-2 border border-primary-red text-primary-red rounded-lg hover:bg-primary-red/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSaving ? 'Guardando...' : 'Guardar Cambios'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setPendingStatusChange('EN_RESPUESTA')
+                    setShowStatusChangeModal(true)
+                  }}
+                  disabled={isSaving}
+                  className="px-6 py-2 bg-primary-red text-white rounded-lg hover:bg-primary-red/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  <span>{isSaving ? 'Actualizando...' : 'Actualizar a En Respuesta'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </>
+            ) : pqr.status === 'EN_RESPUESTA' ? (
+              <>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-6 py-2 border border-neutral-gray-light rounded-lg text-neutral-dark hover:bg-neutral-gray-light transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="px-6 py-2 border border-primary-red text-primary-red rounded-lg hover:bg-primary-red/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSaving ? 'Guardando...' : 'Guardar Cambios'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setPendingStatusChange('RESUELTA')
+                    setShowStatusChangeModal(true)
+                  }}
+                  disabled={isSaving}
+                  className="px-6 py-2 bg-primary-red text-white rounded-lg hover:bg-primary-red/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  <span>{isSaving ? 'Actualizando...' : 'Actualizar a Resuelta'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-6 py-2 border border-neutral-gray-light rounded-lg text-neutral-dark hover:bg-neutral-gray-light transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="px-6 py-2 bg-primary-red text-white rounded-lg hover:bg-primary-red/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSaving ? 'Guardando...' : 'Guardar Cambios'}</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Modal para preguntar si quiere marcar como RESUELTA */}
-      {showResolveModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+      {/* Modal de éxito con animación de check */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[70] p-4 animate-fade-in">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-8 flex flex-col items-center animate-scale-in">
+            {/* Círculo con check animado */}
+            <div className="relative w-20 h-20 mb-4">
+              <svg className="w-20 h-20 transform rotate-[-90deg]" viewBox="0 0 100 100">
+                {/* Círculo de fondo */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  fill="none"
+                  stroke="#e5e7eb"
+                  strokeWidth="4"
+                />
+                {/* Círculo animado */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  fill="none"
+                  stroke="#22c55e"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeDasharray="283"
+                  strokeDashoffset="283"
+                  className="animate-draw-circle"
+                />
+              </svg>
+              {/* Check animado */}
+              <svg
+                className="absolute top-0 left-0 w-20 h-20"
+                viewBox="0 0 100 100"
+              >
+                <path
+                  d="M 25 50 L 45 70 L 75 30"
+                  fill="none"
+                  stroke="#22c55e"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeDasharray="60"
+                  strokeDashoffset="60"
+                  className="animate-draw-check"
+                />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-neutral-dark mb-2">¡Actualizado exitosamente!</h3>
+            <p className="text-neutral-gray text-center">Los cambios se han actualizado correctamente</p>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación de cambio de estado */}
+      {showStatusChangeModal && pendingStatusChange && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[70] p-4 animate-fade-in">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-primary-red/10 rounded-full flex items-center justify-center">
                 <AlertTriangle className="w-6 h-6 text-primary-red" />
               </div>
-              <h3 className="text-xl font-bold text-neutral-dark">Marcar como Resuelta</h3>
+              <h3 className="text-xl font-bold text-neutral-dark">Confirmar Cambio de Estado</h3>
             </div>
             
             <p className="text-neutral-gray mb-6">
-              Esta PQR tiene una respuesta y está en estado "EN_RESPUESTA". 
-              ¿Deseas marcarla como "RESUELTA" y enviar la respuesta al cliente?
+              ¿Está seguro de que desea actualizar el estado de esta PQR a <strong>"{pendingStatusChange === 'EN_RESPUESTA' ? 'En Respuesta' : pendingStatusChange === 'RESUELTA' ? 'Resuelta' : pendingStatusChange}"</strong>?
             </p>
             <p className="text-sm text-neutral-gray mb-6">
-              <strong>Nota:</strong> Solo se enviará el correo con la respuesta, no se notificará el cambio de estado.
+              Se enviará una notificación al cliente sobre el cambio de estado.
             </p>
 
             <div className="flex gap-3 justify-end">
               <button
                 type="button"
-                onClick={() => {
-                  setShowResolveModal(false)
-                  setIsSaving(false)
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setShowStatusChangeModal(false)
+                  setPendingStatusChange(null)
                 }}
                 className="px-4 py-2 border border-neutral-gray-light rounded-lg text-neutral-dark hover:bg-neutral-gray-light transition-colors"
               >
@@ -624,15 +925,54 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  setShowResolveModal(false)
-                  // Llamar directamente a handleSaveWithStatus con el estado actualizado
-                  handleSaveWithStatus('RESUELTA', true).catch(err => {
-                    console.error('Error al guardar:', err)
-                  })
+                  setShowStatusChangeModal(false)
+                  const statusToChange = pendingStatusChange
+                  setPendingStatusChange(null)
+                  if (statusToChange) {
+                    handleSaveWithStatus(statusToChange, false, false).catch(err => {
+                      console.error('Error al actualizar:', err)
+                    })
+                  }
                 }}
                 className="px-4 py-2 bg-primary-red text-white rounded-lg hover:bg-primary-red-dark transition-colors"
               >
-                Sí, marcar como Resuelta
+                Sí, actualizar estado
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para preguntar si quiere enviar la respuesta y dejarla como recibida */}
+      {showResolveModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-primary-red/10 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-primary-red" />
+              </div>
+              <h3 className="text-xl font-bold text-neutral-dark">Enviar Respuesta</h3>
+            </div>
+            
+            <p className="text-neutral-gray mb-6">
+              ¿Quiere enviar la respuesta y dejarla como recibida?
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setShowResolveModal(false)
+                  // Guardar sin enviar correo (ni de respuesta ni de cambio de estado)
+                  handleSave(true, true).catch(err => {
+                    console.error('Error al guardar:', err)
+                  })
+                }}
+                className="px-4 py-2 border border-neutral-gray-light rounded-lg text-neutral-dark hover:bg-neutral-gray-light transition-colors"
+              >
+                No, solo guardar
               </button>
               <button
                 type="button"
@@ -640,14 +980,14 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                   e.preventDefault()
                   e.stopPropagation()
                   setShowResolveModal(false)
-                  // Guardar sin cambiar el estado (no enviar correo de cambio de estado)
-                  handleSave(false).catch(err => {
+                  // Cambiar estado a RECIBIDA y enviar correo de respuesta (no enviar correo de cambio de estado)
+                  handleSaveWithStatus('RECIBIDA', true, false).catch(err => {
                     console.error('Error al guardar:', err)
                   })
                 }}
-                className="px-4 py-2 bg-neutral-gray-light text-neutral-dark rounded-lg hover:bg-neutral-gray transition-colors"
+                className="px-4 py-2 bg-primary-red text-white rounded-lg hover:bg-primary-red-dark transition-colors"
               >
-                No, solo guardar
+                Sí, enviar
               </button>
             </div>
           </div>

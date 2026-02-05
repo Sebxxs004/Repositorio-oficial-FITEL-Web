@@ -133,30 +133,36 @@ public class PQRManagementService {
             }
 
             // Enviar respuesta por correo al cliente, incluyendo adjunto si existe
-            try {
-                String attachmentPath = pqr.getResponseAttachmentPath();
-                // Si guardamos rutas relativas, construir la ruta absoluta
-                String absolutePath = null;
-                if (attachmentPath != null && !attachmentPath.isBlank()) {
-                    java.nio.file.Path path = java.nio.file.Paths.get(attachmentPath);
-                    if (!path.isAbsolute()) {
-                        path = java.nio.file.Paths.get("").toAbsolutePath().resolve(path);
+            // Solo si no se ha solicitado omitir el envío del correo de respuesta
+            if (request.getSkipResponseEmail() == null || !request.getSkipResponseEmail()) {
+                try {
+                    String attachmentPath = pqr.getResponseAttachmentPath();
+                    // Si guardamos rutas relativas, construir la ruta absoluta
+                    String absolutePath = null;
+                    if (attachmentPath != null && !attachmentPath.isBlank()) {
+                        java.nio.file.Path path = java.nio.file.Paths.get(attachmentPath);
+                        if (!path.isAbsolute()) {
+                            path = java.nio.file.Paths.get("").toAbsolutePath().resolve(path);
+                        }
+                        absolutePath = path.toString();
                     }
-                    absolutePath = path.toString();
-                }
 
-                emailService.sendPQRResponseToCustomer(
-                    pqr.getCustomerEmail(),
-                    pqr.getCustomerName(),
-                    pqr.getCun(),
-                    pqr.getType(),
-                    pqr.getSubject(),
-                    request.getResponse(),
-                    absolutePath
-                );
-            } catch (Exception e) {
-                log.error("Error enviando correo de respuesta de PQR {}: {}", pqr.getId(), e.getMessage(), e);
-                // No revertir la actualización de la PQR si falla el correo
+                    emailService.sendPQRResponseToCustomer(
+                        pqr.getCustomerEmail(),
+                        pqr.getCustomerName(),
+                        pqr.getCun(),
+                        pqr.getType(),
+                        pqr.getSubject(),
+                        request.getResponse(),
+                        absolutePath
+                    );
+                    log.info("Correo de respuesta enviado para PQR {}", pqr.getId());
+                } catch (Exception e) {
+                    log.error("Error enviando correo de respuesta de PQR {}: {}", pqr.getId(), e.getMessage(), e);
+                    // No revertir la actualización de la PQR si falla el correo
+                }
+            } else {
+                log.info("Omitiendo envío de correo de respuesta para PQR {} según solicitud", pqr.getId());
             }
         }
         

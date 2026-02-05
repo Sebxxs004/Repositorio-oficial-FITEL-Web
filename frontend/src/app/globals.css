@@ -179,3 +179,32 @@ body.admin-route main {
 .animate-scale-in {
   animation: scale-in 0.3s ease-out;
 }
+
+/* Animaciones para el modal de éxito con check */
+@keyframes drawCircle {
+  from {
+    stroke-dashoffset: 283;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes drawCheck {
+  from {
+    stroke-dashoffset: 60;
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.animate-draw-circle {
+  animation: drawCircle 0.6s ease-out forwards;
+}
+
+.animate-draw-check {
+  animation: drawCheck 0.4s ease-out 0.6s forwards;
+}
