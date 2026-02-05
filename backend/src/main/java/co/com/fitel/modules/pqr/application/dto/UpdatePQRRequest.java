@@ -22,9 +22,6 @@ public class UpdatePQRRequest {
     private String priority; // BAJA, NORMAL, ALTA, URGENTE
     
     @Size(max = 100)
-    private String assignedTo; // Usuario asignado
-    
-    @Size(max = 100)
     private String responsibleArea; // soporte, facturacion, tecnica
     
     @Size(max = 20)
@@ -35,4 +32,6 @@ public class UpdatePQRRequest {
     
     @Size(max = 5000)
     private String response; // Respuesta formal
+    
+    private Boolean skipStatusChangeEmail; // Si es true, no se envía correo de cambio de estado
 }

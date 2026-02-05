@@ -25,7 +25,6 @@ export interface PQRResponse {
   description: string
   status: PQRStatus
   priority: string
-  assignedTo?: string
   responsibleArea?: string
   realType?: string
   resourceType?: string

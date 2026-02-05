@@ -33,6 +33,225 @@ public class EmailService {
                     return new RuntimeException("Configuración de email no encontrada");
                 });
     }
+
+    /**
+     * Envía al cliente la respuesta de su PQR, opcionalmente con un archivo adjunto.
+     */
+    public void sendPQRResponseToCustomer(String to,
+                                          String customerName,
+                                          String cun,
+                                          String type,
+                                          String subject,
+                                          String responseText,
+                                          String attachmentAbsolutePath) {
+        try {
+            EmailConfig config = getEmailConfig();
+            JavaMailSender configuredSender = getConfiguredMailSender();
+
+            MimeMessage message = configuredSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, attachmentAbsolutePath != null && !attachmentAbsolutePath.isBlank());
+
+            helper.setFrom(config.getEmail());
+            helper.setTo(to);
+            helper.setSubject("Respuesta a su PQR - CUN: " + cun);
+
+            String typeSpanish = switch (type.toUpperCase()) {
+                case "PETICION" -> "Petición";
+                case "QUEJA" -> "Queja";
+                case "RECURSO" -> "Recurso";
+                default -> type;
+            };
+
+            String htmlContent = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        body {
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            line-height: 1.6;
+                            color: #1f2937;
+                            background-color: #f3f4f6;
+                            padding: 20px;
+                        }
+                        .email-wrapper {
+                            max-width: 650px;
+                            margin: 0 auto;
+                            background-color: #ffffff;
+                            border-radius: 12px;
+                            overflow: hidden;
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        }
+                        .header {
+                            background: linear-gradient(135deg, #dc2626, #b91c1c);
+                            color: white;
+                            padding: 30px;
+                            text-align: center;
+                        }
+                        .header-title {
+                            font-size: 22px;
+                            font-weight: 600;
+                            margin-top: 8px;
+                        }
+                        .content {
+                            padding: 30px;
+                        }
+                        .greeting {
+                            font-size: 16px;
+                            margin-bottom: 12px;
+                        }
+                        .pqr-info {
+                            margin: 16px 0;
+                            padding: 12px 16px;
+                            background-color: #fef2f2;
+                            border-radius: 8px;
+                            border-left: 4px solid #dc2626;
+                            font-size: 14px;
+                        }
+                        .response-box {
+                            margin-top: 20px;
+                            padding: 16px;
+                            background-color: #f9fafb;
+                            border-radius: 8px;
+                            border: 1px solid #e5e7eb;
+                            font-size: 14px;
+                        }
+                        .footer {
+                            margin-top: 24px;
+                            font-size: 12px;
+                            color: #6b7280;
+                            text-align: center;
+                            padding: 16px 24px 24px;
+                            border-top: 1px solid #e5e7eb;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-wrapper">
+                        <div class="header">
+                            <div class="header-title">Respuesta a su PQR</div>
+                        </div>
+                        <div class="content">
+                            <p class="greeting">Hola %s,</p>
+                            <p>Hemos revisado su <strong>%s</strong> con CUN <strong>%s</strong> y a continuación encontrará nuestra respuesta:</p>
+                            <div class="pqr-info">
+                                <div><strong>Asunto:</strong> %s</div>
+                            </div>
+                            <div class="response-box">
+                                %s
+                            </div>
+                            <p style="margin-top: 18px;">
+                                Si tiene dudas adicionales o requiere más información, puede responder a este correo
+                                o comunicarse con nosotros a través de nuestros canales de atención.
+                            </p>
+                        </div>
+                        <div class="footer">
+                            Este es un correo automático del sistema de PQR de FITEL.
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """.formatted(customerName, typeSpanish, cun, subject, responseText != null ? responseText.replace("\n", "<br/>") : "");
+
+            helper.setText(htmlContent, true);
+
+            if (attachmentAbsolutePath != null && !attachmentAbsolutePath.isBlank()) {
+                java.io.File file = new java.io.File(attachmentAbsolutePath);
+                if (file.exists()) {
+                    helper.addAttachment(file.getName(), file);
+                }
+            }
+
+            configuredSender.send(message);
+            log.info("Respuesta de PQR enviada a cliente {} para CUN {}", to, cun);
+        } catch (Exception e) {
+            log.error("Error enviando respuesta de PQR al cliente {}: {}", to, e.getMessage(), e);
+            throw new RuntimeException("Error al enviar la respuesta de PQR por correo: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Notifica al cliente que el estado de su PQR ha cambiado.
+     */
+    public void sendPQRStatusChangeToCustomer(String to,
+                                              String customerName,
+                                              String cun,
+                                              String type,
+                                              String subject,
+                                              String oldStatus,
+                                              String newStatus) {
+        try {
+            String typeSpanish = switch (type.toUpperCase()) {
+                case "PETICION" -> "Petición";
+                case "QUEJA" -> "Queja";
+                case "RECURSO" -> "Recurso";
+                default -> type;
+            };
+
+            String statusSpanishOld = translateStatus(oldStatus);
+            String statusSpanishNew = translateStatus(newStatus);
+
+            String html = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; padding: 20px; }
+                        .wrapper { max-width: 650px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                        .header { background: linear-gradient(135deg, #dc2626, #b91c1c); color: #fff; padding: 24px 30px; text-align: center; }
+                        .header-title { font-size: 20px; font-weight: 600; }
+                        .content { padding: 26px 30px 24px; font-size: 14px; color: #111827; }
+                        .status-box { margin: 18px 0; padding: 14px 16px; background: #eff6ff; border-radius: 8px; border-left: 4px solid #2563eb; }
+                        .footer { border-top: 1px solid #e5e7eb; padding: 14px 24px 20px; font-size: 12px; color: #6b7280; text-align: center; }
+                    </style>
+                </head>
+                <body>
+                    <div class="wrapper">
+                        <div class="header">
+                            <div class="header-title">Actualización del estado de su PQR</div>
+                        </div>
+                        <div class="content">
+                            <p>Hola %s,</p>
+                            <p>Te informamos que el estado de tu <strong>%s</strong> con CUN <strong>%s</strong> ha sido actualizado.</p>
+                            <div class="status-box">
+                                <div><strong>Asunto:</strong> %s</div>
+                                <div style="margin-top:8px;">
+                                    <strong>Estado anterior:</strong> %s<br/>
+                                    <strong>Nuevo estado:</strong> %s
+                                </div>
+                            </div>
+                            <p>Si tienes dudas sobre esta actualización, puedes responder a este correo o consultar el estado de tu PQR en nuestro sitio web.</p>
+                        </div>
+                        <div class="footer">
+                            Este es un correo automático del sistema de PQR de FITEL.
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """.formatted(customerName, typeSpanish, cun, subject, statusSpanishOld, statusSpanishNew);
+
+            sendHtmlEmail(to, "Actualización del estado de su PQR - CUN: " + cun, html);
+        } catch (Exception e) {
+            log.error("Error enviando notificación de cambio de estado de PQR al cliente {}: {}", to, e.getMessage(), e);
+            throw new RuntimeException("Error al enviar notificación de cambio de estado de PQR: " + e.getMessage(), e);
+        }
+    }
+
+    private String translateStatus(String status) {
+        if (status == null) return "Desconocido";
+        return switch (status) {
+            case "RECIBIDA" -> "Recibida";
+            case "EN_ANALISIS" -> "En análisis";
+            case "EN_RESPUESTA" -> "En respuesta";
+            case "RESUELTA" -> "Resuelta";
+            case "CERRADA" -> "Cerrada";
+            default -> status;
+        };
+    }
     
     /**
      * Crea un JavaMailSender dinámico basado en la configuración de la BD

@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { AdminRouteHandler } from '@/components/admin/AdminRouteHandler'
-import { ChatBot } from '@/components/chatbot/ChatBot'
+import { ChatBotWrapper } from '@/components/chatbot/ChatBotWrapper'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -32,7 +32,8 @@ export default function RootLayout({
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
-        <ChatBot />
+        {/* ChatBot envuelto para ocultarse en login y rutas de administración */}
+        <ChatBotWrapper />
       </body>
     </html>
   )

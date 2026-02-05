@@ -243,7 +243,6 @@ public class PQRService {
             .description(pqr.getDescription())
             .status(pqr.getStatus())
             .priority(pqr.getPriority())
-            .assignedTo(pqr.getAssignedTo())
             .responsibleArea(pqr.getResponsibleArea())
             .realType(pqr.getRealType())
             .resourceType(pqr.getResourceType())

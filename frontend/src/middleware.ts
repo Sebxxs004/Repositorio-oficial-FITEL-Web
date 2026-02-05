@@ -5,6 +5,10 @@ import type { NextRequest } from 'next/server'
 const ADMIN_ROUTES = ['/operaciones-internas']
 const PUBLIC_ADMIN_ROUTES = ['/operaciones-internas/login']
 
+// Flag global para habilitar/deshabilitar temporalmente la restricción por IP
+// Mientras esté en false, NO se hará ningún filtro por IP para rutas admin.
+const ENABLE_ADMIN_IP_WHITELIST = false
+
 // Función para obtener las IPs permitidas desde variables de entorno
 // Si está vacío, se permiten todas las IPs (solo para desarrollo)
 function getAllowedIPs(): string[] {
@@ -67,15 +71,18 @@ export function middleware(request: NextRequest) {
   const isPublicAdminRoute = PUBLIC_ADMIN_ROUTES.some((route) => pathname === route)
 
   if (isAdminRoute) {
-    // Verificar IP solo si hay IPs configuradas (aplica a todas las rutas admin, incluyendo login)
-    const allowedIPs = getAllowedIPs()
-    if (allowedIPs.length > 0) {
-      const clientIP = getClientIP(request)
-      
-      if (!isIPAllowed(clientIP, allowedIPs)) {
-        // IP no permitida - devolver 404 para ocultar la ruta
-        console.warn(`Acceso denegado desde IP: ${clientIP} a ruta: ${pathname}`)
-        return new NextResponse(null, { status: 404 })
+    // Restricción por IP DESHABILITADA mientras ENABLE_ADMIN_IP_WHITELIST sea false
+    if (ENABLE_ADMIN_IP_WHITELIST) {
+      // Verificar IP solo si hay IPs configuradas (aplica a todas las rutas admin, incluyendo login)
+      const allowedIPs = getAllowedIPs()
+      if (allowedIPs.length > 0) {
+        const clientIP = getClientIP(request)
+        
+        if (!isIPAllowed(clientIP, allowedIPs)) {
+          // IP no permitida - devolver 404 para ocultar la ruta
+          console.warn(`Acceso denegado desde IP: ${clientIP} a ruta: ${pathname}`)
+          return new NextResponse(null, { status: 404 })
+        }
       }
     }
 

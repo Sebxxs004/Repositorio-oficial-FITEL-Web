@@ -19,7 +19,6 @@ interface PQR {
   description: string
   status: string
   priority: string
-  assignedTo?: string
   responsibleArea?: string
   realType?: string
   resourceType?: string

@@ -61,10 +61,7 @@ public class PQR extends AuditableEntity {
     @Column(length = 20)
     @Builder.Default
     private String priority = "NORMAL";
-
-    @Column(name = "assigned_to", length = 100)
-    private String assignedTo;
-
+    
     @Column(name = "responsible_area", length = 100)
     private String responsibleArea; // soporte, facturacion, tecnica
 
@@ -91,6 +88,9 @@ public class PQR extends AuditableEntity {
 
     @Column(name = "resolution_date")
     private LocalDateTime resolutionDate;
+
+    @Column(name = "response_attachment_path", length = 500)
+    private String responseAttachmentPath; // Ruta/URL del archivo adjunto a la respuesta
 
     @Column(name = "constancy_generated")
     @Builder.Default

@@ -30,12 +30,12 @@ public class PQRResponseDTO {
     private String description;
     private String status;
     private String priority;
-    private String assignedTo;
     private String responsibleArea;
     private String realType;
     private String resourceType;
     private String internalNotes;
     private String response;
+    private String responseAttachmentPath;
     
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
