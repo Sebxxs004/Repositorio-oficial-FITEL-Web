@@ -25,6 +25,7 @@ interface PlanDTO {
   active: boolean
   popular: boolean
   planType: string
+  backgroundImage?: string
   createdAt?: string
   updatedAt?: string
 }
@@ -45,7 +46,8 @@ export class PlanService {
         : dto.monthlyPrice,
       active: dto.active,
       popular: dto.popular,
-      planType: dto.planType as 'BASIC' | 'FAMILY' | 'BUSINESS',
+      planType: dto.planType as 'BASIC' | 'FAMILY' | 'BUSINESS' | 'GAMING',
+      backgroundImage: dto.backgroundImage,
       createdAt: dto.createdAt,
       updatedAt: dto.updatedAt,
     }
@@ -69,6 +71,7 @@ export class PlanService {
       }
 
       const result: PlanResponse = await response.json()
+      
       if (result.data && Array.isArray(result.data)) {
         return result.data.map((dto) => this.mapDTOToPlan(dto))
       }
@@ -118,7 +121,7 @@ export class PlanService {
         name: 'Básico',
         description: 'Plan básico de Internet y TV para uso familiar',
         internetSpeedMbps: 50,
-        tvChannels: 80,
+        tvChannels: 84,
         monthlyPrice: 49900,
         active: true,
         popular: false,
@@ -129,7 +132,7 @@ export class PlanService {
         name: 'Familiar',
         description: 'Plan familiar con más velocidad y canales premium',
         internetSpeedMbps: 100,
-        tvChannels: 120,
+        tvChannels: 84,
         monthlyPrice: 79900,
         active: true,
         popular: true,
@@ -137,10 +140,21 @@ export class PlanService {
       },
       {
         id: 3,
+        name: 'Gaming',
+        description: 'Plan gaming con latencia ultra baja para videojuegos',
+        internetSpeedMbps: 200,
+        tvChannels: 84,
+        monthlyPrice: 99900,
+        active: true,
+        popular: false,
+        planType: 'GAMING',
+      },
+      {
+        id: 4,
         name: 'Empresarial',
         description: 'Plan empresarial con velocidad dedicada e IP estática',
-        internetSpeedMbps: 200,
-        tvChannels: 150,
+        internetSpeedMbps: 500,
+        tvChannels: 84,
         monthlyPrice: 129900,
         active: true,
         popular: false,

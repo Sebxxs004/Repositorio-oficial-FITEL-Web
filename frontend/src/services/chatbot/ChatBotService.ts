@@ -150,6 +150,66 @@ export class ChatBotService {
     ['home', [
       { label: 'Ir al Inicio', href: '/', description: 'Volver a la página principal' }
     ]],
+    ['canales', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta todos los canales disponibles' },
+      { label: 'Información para Usuarios', href: '/informacion-usuarios', description: 'Información importante sobre nuestros servicios' }
+    ]],
+    ['canal', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta todos los canales disponibles' },
+      { label: 'Información para Usuarios', href: '/informacion-usuarios', description: 'Información importante sobre nuestros servicios' }
+    ]],
+    ['malla', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta todos los canales disponibles' },
+      { label: 'Información para Usuarios', href: '/informacion-usuarios', description: 'Información importante sobre nuestros servicios' }
+    ]],
+    ['programacion', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta la programación de canales' },
+      { label: 'Información para Usuarios', href: '/informacion-usuarios', description: 'Información importante sobre nuestros servicios' }
+    ]],
+    ['programación', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta la programación de canales' },
+      { label: 'Información para Usuarios', href: '/informacion-usuarios', description: 'Información importante sobre nuestros servicios' }
+    ]],
+    ['televisión', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta todos los canales disponibles' },
+      { label: 'Información para Usuarios', href: '/informacion-usuarios', description: 'Información importante sobre nuestros servicios' }
+    ]],
+    ['television', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta todos los canales disponibles' },
+      { label: 'Información para Usuarios', href: '/informacion-usuarios', description: 'Información importante sobre nuestros servicios' }
+    ]],
+    ['servicios', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta nuestros canales' },
+      { label: 'Ver Planes', href: '/planes', description: 'Consulta nuestros planes' },
+      { label: 'Información para Usuarios', href: '/informacion-usuarios', description: 'Información importante sobre nuestros servicios' }
+    ]],
+    ['deportes', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta canales de deportes disponibles' }
+    ]],
+    ['peliculas', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta canales de películas y series' }
+    ]],
+    ['películas', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta canales de películas y series' }
+    ]],
+    ['series', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta canales de series y películas' }
+    ]],
+    ['infantiles', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta canales infantiles disponibles' }
+    ]],
+    ['niños', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta canales para niños' }
+    ]],
+    ['musica', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta canales de música disponibles' }
+    ]],
+    ['música', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta canales de música disponibles' }
+    ]],
+    ['documentales', [
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta canales de documentales' }
+    ]],
   ])
 
   // Saludos y respuestas del bot
@@ -160,8 +220,8 @@ export class ChatBotService {
   ]
 
   private static readonly DEFAULT_RESPONSES = [
-    'Puedo ayudarte con información sobre nuestros planes, cobertura, contacto, PQRs y más. ¿Qué te gustaría saber?',
-    'Estoy aquí para ayudarte. Puedes preguntarme sobre planes, cobertura, cómo contactarnos o realizar una PQR.',
+    'Puedo ayudarte con información sobre nuestros planes, malla de canales, cobertura, contacto, PQRs y más. ¿Qué te gustaría saber?',
+    'Estoy aquí para ayudarte. Puedes preguntarme sobre planes, canales disponibles, cobertura, cómo contactarnos o realizar una PQR.',
     'Puedo guiarte a diferentes secciones de nuestro sitio. ¿Qué necesitas?',
   ]
 
@@ -221,6 +281,7 @@ export class ChatBotService {
   static getQuickActions(): RouteSuggestion[] {
     return [
       { label: 'Ver Planes', href: '/planes', description: 'Planes de Internet y TV' },
+      { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta todos los canales disponibles' },
       { label: 'Verificar Cobertura', href: '/cobertura', description: 'Consulta si tenemos cobertura en tu zona' },
       { label: 'Contacto', href: '/contacto', description: 'Contáctanos' },
       { label: 'Realizar PQR', href: '/pqrs/realizar', description: 'Crear una nueva PQR' },
@@ -272,6 +333,14 @@ export class ChatBotService {
       return `¡Perfecto! Te puedo ayudar con eso. Te sugiero visitar: ${suggestions[0].label}. ${suggestions[0].description || ''}`
     }
     if (suggestions.length === 2) {
+      // Respuesta especial para canales con información de usuarios
+      const hasMallaCanales = suggestions.some(s => s.href === '/malla-canales')
+      const hasInfoUsuarios = suggestions.some(s => s.href === '/informacion-usuarios')
+      
+      if (hasMallaCanales && hasInfoUsuarios) {
+        return `Te puedo ayudar con información sobre nuestros canales. Puedes consultar la malla completa de canales disponibles o revisar información importante para usuarios sobre nuestros servicios. ¿Qué prefieres?`
+      }
+      
       return `Encontré ${suggestions.length} opciones que podrían ayudarte. ¿Cuál te interesa más?`
     }
     return `Encontré varias opciones que podrían ayudarte. ¿Cuál te interesa?`

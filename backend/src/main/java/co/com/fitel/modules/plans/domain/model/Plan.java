@@ -52,4 +52,7 @@ public class Plan extends AuditableEntity {
 
     @Column(length = 50)
     private String planType; // BASIC, FAMILY, BUSINESS
+
+    @Column(length = 500)
+    private String backgroundImage; // URL o ruta de la imagen de fondo
 }

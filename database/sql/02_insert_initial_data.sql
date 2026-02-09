@@ -7,11 +7,13 @@
 -- =====================================================
 INSERT INTO plans (name, description, internet_speed_mbps, tv_channels, monthly_price, active, popular, plan_type, created_by, created_at)
 VALUES 
-    ('Basico', 'Plan basico de Internet y TV para uso familiar', 50, 80, 49900.00, TRUE, FALSE, 'BASIC', 'system', NOW()),
-    ('Familiar', 'Plan familiar con mas velocidad y canales premium', 100, 120, 79900.00, TRUE, TRUE, 'FAMILY', 'system', NOW()),
-    ('Empresarial', 'Plan empresarial con velocidad dedicada e IP estatica', 200, 150, 129900.00, TRUE, FALSE, 'BUSINESS', 'system', NOW())
+    ('Basico', 'Plan basico de Internet y TV para uso familiar', 50, 84, 49900.00, TRUE, FALSE, 'BASIC', 'system', NOW()),
+    ('Familiar', 'Plan familiar con mas velocidad y canales premium', 100, 84, 79900.00, TRUE, TRUE, 'FAMILY', 'system', NOW()),
+    ('Gaming', 'Plan gaming con latencia ultra baja para videojuegos', 200, 84, 99900.00, TRUE, FALSE, 'GAMING', 'system', NOW()),
+    ('Empresarial', 'Plan empresarial con velocidad dedicada e IP estatica', 500, 84, 129900.00, TRUE, FALSE, 'BUSINESS', 'system', NOW())
 ON DUPLICATE KEY UPDATE 
     description = VALUES(description),
+    tv_channels = VALUES(tv_channels),
     updated_at = CURRENT_TIMESTAMP;
 
 -- =====================================================

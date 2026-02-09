@@ -27,6 +27,7 @@ public class PlanDTO {
     private Boolean active;
     private Boolean popular;
     private String planType;
+    private String backgroundImage;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -27,6 +27,7 @@ public class PlanMapper {
                 .active(plan.getActive())
                 .popular(plan.getPopular())
                 .planType(plan.getPlanType())
+                .backgroundImage(plan.getBackgroundImage())
                 .createdAt(plan.getCreatedAt())
                 .updatedAt(plan.getUpdatedAt())
                 .build();
@@ -47,6 +48,7 @@ public class PlanMapper {
                 .active(dto.getActive())
                 .popular(dto.getPopular())
                 .planType(dto.getPlanType())
+                .backgroundImage(dto.getBackgroundImage())
                 .build();
     }
 }

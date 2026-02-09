@@ -12,7 +12,7 @@ export interface NavigationItem {
 export class NavigationService {
   private static readonly NAVIGATION_ITEMS: NavigationItem[] = [
     { label: 'Inicio', href: '/' },
-    { label: 'Planes', href: '/planes' },
+    { label: 'Servicios', href: '/servicios' },
     { label: 'Cobertura', href: '/cobertura' },
     { label: 'Contacto', href: '/contacto' },
     { label: 'PQRS', href: '/pqrs' },

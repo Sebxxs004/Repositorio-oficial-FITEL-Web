@@ -13,7 +13,8 @@ export interface Plan {
   monthlyPrice: number
   active: boolean
   popular: boolean
-  planType: 'BASIC' | 'FAMILY' | 'BUSINESS'
+  planType: 'BASIC' | 'FAMILY' | 'BUSINESS' | 'GAMING'
+  backgroundImage?: string
   createdAt?: string
   updatedAt?: string
 }
