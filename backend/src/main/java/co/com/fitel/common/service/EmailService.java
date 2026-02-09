@@ -663,8 +663,8 @@ public class EmailService {
      * Nota: usamos placeholders de texto en lugar de %s para evitar errores de formateo
      * con String.formatted cuando el HTML/CSS contiene caracteres especiales.
      */
-    private String buildPQRConstancyEmail(String customerName, String cun, String type,
-                                         String subject, String radicationDate,
+    private String buildPQRConstancyEmail(String customerName, String cun, String type, 
+                                         String subject, String radicationDate, 
                                          String maxResponseDate, String silenceText) {
         String template = """
             <!DOCTYPE html>

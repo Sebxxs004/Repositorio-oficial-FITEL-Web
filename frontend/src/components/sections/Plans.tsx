@@ -290,7 +290,7 @@ export function Plans() {
             ¿Necesitas un plan personalizado? Contáctanos y te ayudamos a encontrar la mejor opción.
           </p>
           <Link href="/contacto" className="btn-outline">
-            Consultar Plan Personalizado
+            Solicitar Plan Personalizado
           </Link>
         </div>
       </div>

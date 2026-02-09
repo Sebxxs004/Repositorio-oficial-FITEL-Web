@@ -112,20 +112,23 @@ export function PlanManagement() {
     setShowForm(true)
     setMessage(null)
   }
+  
+  // Asegurar que backgroundImage siempre sea una cadena
+  const safeBackgroundImage = formData.backgroundImage || ''
 
   const handleEdit = (plan: Plan) => {
     setEditingPlan(plan)
     const isFullGrid = plan.tvChannels === totalChannels
     setUseFullChannelGrid(isFullGrid)
     setFormData({
-      name: plan.name,
+      name: plan.name || '',
       description: plan.description || '',
-      internetSpeedMbps: plan.internetSpeedMbps,
-      tvChannels: plan.tvChannels,
-      monthlyPrice: plan.monthlyPrice,
+      internetSpeedMbps: plan.internetSpeedMbps || 0,
+      tvChannels: plan.tvChannels || 0,
+      monthlyPrice: plan.monthlyPrice || 0,
       backgroundImage: plan.backgroundImage || '',
-      active: plan.active,
-      popular: plan.popular,
+      active: plan.active ?? true,
+      popular: plan.popular ?? false,
     })
     setShowForm(true)
     setMessage(null)
@@ -202,7 +205,7 @@ export function PlanManagement() {
 
       if (response.ok) {
         const data = await response.json()
-        setFormData({ ...formData, backgroundImage: data.data })
+        setFormData((prev) => ({ ...prev, backgroundImage: data.data || '' }))
         setMessage({ type: 'success', text: 'Imagen subida correctamente' })
       } else {
         const errorData = await response.json()
@@ -232,13 +235,25 @@ export function PlanManagement() {
 
       const method = editingPlan ? 'PUT' : 'POST'
 
+      // Asegurar que todos los campos estén definidos antes de enviar
+      const dataToSend = {
+        name: formData.name,
+        description: formData.description || '',
+        internetSpeedMbps: formData.internetSpeedMbps || 0,
+        tvChannels: formData.tvChannels || 0,
+        monthlyPrice: formData.monthlyPrice || 0,
+        active: formData.active ?? true,
+        popular: formData.popular ?? false,
+        backgroundImage: formData.backgroundImage || '',
+      }
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       })
 
       if (response.ok) {
@@ -421,10 +436,10 @@ export function PlanManagement() {
                     <Loader2 className="w-8 h-8 text-primary-red animate-spin mb-2" />
                     <p className="text-sm text-neutral-gray">Subiendo imagen...</p>
                   </div>
-                ) : formData.backgroundImage ? (
+                ) : safeBackgroundImage ? (
                   <div className="relative">
                     <img
-                      src={formData.backgroundImage}
+                      src={safeBackgroundImage}
                       alt="Vista previa"
                       className="w-full h-48 object-cover rounded-lg border border-neutral-gray-light"
                       onError={(e) => {
@@ -451,12 +466,12 @@ export function PlanManagement() {
                 )}
               </div>
               
-              {formData.backgroundImage && (
+              {safeBackgroundImage && (
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation()
-                    setFormData({ ...formData, backgroundImage: '' })
+                    setFormData((prev) => ({ ...prev, backgroundImage: '' }))
                   }}
                   className="mt-2 text-sm text-primary-red hover:text-primary-red/80"
                 >
@@ -491,7 +506,7 @@ export function PlanManagement() {
                     onChange={(e) => {
                       setUseFullChannelGrid(e.target.checked)
                       if (e.target.checked) {
-                        setFormData({ ...formData, tvChannels: totalChannels })
+                        setFormData((prev) => ({ ...prev, tvChannels: totalChannels }))
                       }
                     }}
                     className="w-5 h-5 text-primary-red border-neutral-gray-light rounded focus:ring-primary-red cursor-pointer"
@@ -502,10 +517,10 @@ export function PlanManagement() {
                 </div>
                 <input
                   type="number"
-                  value={formData.tvChannels}
+                  value={formData.tvChannels || 0}
                   onChange={(e) => {
                     const newValue = parseInt(e.target.value) || 0
-                    setFormData({ ...formData, tvChannels: newValue })
+                    setFormData((prev) => ({ ...prev, tvChannels: newValue }))
                     // Si el usuario cambia manualmente y no coincide con el total, desmarcar el checkbox
                     if (useFullChannelGrid && newValue !== totalChannels) {
                       setUseFullChannelGrid(false)

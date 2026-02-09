@@ -170,6 +170,43 @@ export function PlanComparator() {
     fetchPlans()
   }, [])
 
+  // IntersectionObserver para animaciones al hacer scroll
+  useEffect(() => {
+    // Pequeño delay para asegurar que el DOM esté completamente renderizado
+    const timer = setTimeout(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible')
+            }
+          })
+        },
+        { threshold: 0.1 }
+      )
+
+      if (containerRef.current) {
+        const elements = containerRef.current.querySelectorAll('.animate-on-scroll')
+        elements.forEach((el) => {
+          // Si el elemento ya está en el viewport, hacerlo visible inmediatamente
+          const rect = el.getBoundingClientRect()
+          const isInViewport = rect.top < window.innerHeight && rect.bottom > 0
+          if (isInViewport) {
+            el.classList.add('visible')
+          } else {
+            observer.observe(el)
+          }
+        })
+      }
+
+      return () => observer.disconnect()
+    }, 100)
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [plans, loading]) // Re-observar cuando cambien los planes o el estado de carga
+
 
 
   if (loading) {
@@ -508,8 +545,19 @@ export function PlanComparator() {
         </div>
       )}
 
+      {/* Botón Solicitar Plan Personalizado */}
+      <div className="mt-12 text-center">
+        <Link 
+          href="/contacto" 
+          className="inline-flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-primary-red to-primary-red-dark text-white rounded-lg font-semibold text-lg hover:shadow-lg transition-all duration-300 hover:scale-105"
+        >
+          <span>Solicitar Plan Personalizado</span>
+          <ArrowRight className="w-5 h-5" />
+        </Link>
+      </div>
+
       {/* CTA Final */}
-      <div className="mt-16 text-center animate-on-scroll">
+      <div className="mt-16 text-center">
         <div className="inline-block p-8 rounded-xl bg-gradient-to-r from-primary-red/10 to-secondary-blue/10 border border-primary-red/20">
           <h3 className="text-2xl font-bold text-neutral-dark mb-4">
             ¿No encuentras el plan ideal?

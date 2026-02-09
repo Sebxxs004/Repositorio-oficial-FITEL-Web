@@ -43,6 +43,7 @@ services:
         condition: service_healthy
     volumes:
       - ./backend/logs:/app/logs
+      - ./frontend/public:/app/frontend/public
     networks:
       - fitel-network
     restart: unless-stopped
