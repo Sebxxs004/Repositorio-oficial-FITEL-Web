@@ -25,12 +25,12 @@ import java.util.UUID;
 @RequestMapping("/api/config")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "http://localhost:*"}, allowCredentials = "true", maxAge = 3600)
+@CrossOrigin(originPatterns = "*", allowCredentials = "true", maxAge = 3600)
 public class ConfigController {
     
     private final ConfigService configService;
     private final EmailService emailService;
-    private static final String UPLOAD_DIR = "frontend/public/assets/";
+    private static final String UPLOAD_DIR = "uploads/assets/";
     
     @GetMapping("/contact")
     public ResponseEntity<ApiResponse<ContactConfigDTO>> getContactConfig() {

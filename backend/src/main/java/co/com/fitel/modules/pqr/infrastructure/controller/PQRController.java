@@ -5,6 +5,8 @@ import co.com.fitel.modules.pqr.application.dto.CreatePQRRequest;
 import co.com.fitel.modules.pqr.application.dto.PQRConstancyDTO;
 import co.com.fitel.modules.pqr.application.dto.PQRResponseDTO;
 import co.com.fitel.modules.pqr.application.service.PQRService;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,11 +44,17 @@ public class PQRController {
     }
     
     /**
-     * Crea una nueva PQR
+     * Crea una nueva PQR con soporte para archivos adjuntos
      */
-    @PostMapping
-    public ResponseEntity<ApiResponse<PQRResponseDTO>> createPQR(@Valid @RequestBody CreatePQRRequest request) {
-        log.info("POST /api/pqrs - Creating new PQR for customer: {}", request != null ? request.getCustomerEmail() : "null request");
+    @PostMapping(consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<PQRResponseDTO>> createPQR(
+            @RequestPart("data") @Valid CreatePQRRequest request,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+            
+        log.info("POST /api/pqrs - Creating new PQR for customer: {} with {} files", 
+            request != null ? request.getCustomerEmail() : "null request",
+            files != null ? files.size() : 0);
+            
         try {
             if (request == null) {
                 log.error("Request body is null");
@@ -57,7 +65,7 @@ public class PQRController {
             log.debug("PQR Request details - Type: {}, Name: {}, Email: {}", 
                 request.getType(), request.getCustomerName(), request.getCustomerEmail());
             
-            PQRResponseDTO pqr = pqrService.createPQR(request);
+            PQRResponseDTO pqr = pqrService.createPQR(request, files);
             log.info("PQR created successfully with CUN: {}", pqr.getCun());
             return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("PQR creada exitosamente", pqr));
@@ -73,14 +81,22 @@ public class PQRController {
     }
     
     /**
+     * Endpoint legacy para soporte JSON puro (sin archivos)
+     */
+    @PostMapping(consumes = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponse<PQRResponseDTO>> createPQRJson(@Valid @RequestBody CreatePQRRequest request) {
+        return createPQR(request, null);
+    }
+    
+    /**
      * Consulta una PQR por CUN o documento
      */
     @GetMapping("/consultar")
-    public ResponseEntity<ApiResponse<PQRResponseDTO>> consultPQR(@RequestParam String query) {
+    public ResponseEntity<ApiResponse<List<PQRResponseDTO>>> consultPQR(@RequestParam String query) {
         log.info("GET /api/pqrs/consultar?query={}", query);
         try {
-            PQRResponseDTO pqr = pqrService.searchPQR(query);
-            return ResponseEntity.ok(ApiResponse.success("PQR encontrada", pqr));
+            List<PQRResponseDTO> pqrs = pqrService.searchPQR(query);
+            return ResponseEntity.ok(ApiResponse.success("PQR encontrada", pqrs));
         } catch (Exception e) {
             log.error("Error searching PQR: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

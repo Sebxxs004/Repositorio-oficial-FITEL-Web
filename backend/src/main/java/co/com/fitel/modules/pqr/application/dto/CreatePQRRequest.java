@@ -49,6 +49,10 @@ public class CreatePQRRequest {
     @NotBlank(message = "El asunto es requerido")
     @Size(max = 500)
     private String subject;
+
+    // Campos temporales para soportar la recepción de archivos desde el frontend
+    // En una implementación completa esto se manejaría vía Multipart o un servicio de storage separado
+    private java.util.List<String> attachments; 
     
     @NotBlank(message = "La descripción es requerida")
     @Size(min = 20, message = "La descripción debe tener al menos 20 caracteres")

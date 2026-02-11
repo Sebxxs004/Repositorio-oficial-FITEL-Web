@@ -40,13 +40,13 @@ export function PQRSearchForm({
   }
 
   return (
-    <div className="bg-neutral-white rounded-xl shadow-lg p-8 mb-8">
+    <div className="bg-neutral-white rounded-xl shadow-lg p-6 sm:p-8 mb-8">
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div>
           <label htmlFor="search" className="block text-sm font-semibold text-neutral-dark mb-2">
             Número de PQR o Documento de Identidad
           </label>
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <input
               type="text"
               id="search"
@@ -54,14 +54,14 @@ export function PQRSearchForm({
               value={searchValue}
               onChange={handleInputChange}
               placeholder="Ej: PQR-12345 o 1234567890"
-              className="flex-1 px-4 py-3 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red focus:border-transparent"
+              className="w-full sm:flex-1 px-4 py-3 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red focus:border-transparent"
               disabled={mounted && isSearching}
               autoComplete="off"
             />
             <button
               type="submit"
               disabled={mounted && isSearching}
-              className="btn-primary px-8 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px]"
+              className="w-full sm:w-auto btn-primary px-8 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px]"
               aria-label={isSearching ? 'Buscando PQR' : 'Buscar PQR'}
             >
               {isSearching ? (

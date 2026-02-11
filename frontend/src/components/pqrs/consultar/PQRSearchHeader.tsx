@@ -26,10 +26,10 @@ export function PQRSearchHeader() {
           <div className="w-8 h-8 bg-primary-red/20 rounded" style={{ display: 'inline-block' }}></div>
         )}
       </div>
-      <h1 className="text-4xl font-bold text-neutral-dark mb-4">
+      <h1 className="text-3xl md:text-4xl font-bold text-neutral-dark mb-4">
         Consultar Estado de PQR
       </h1>
-      <p className="text-lg text-neutral-gray max-w-2xl mx-auto">
+      <p className="text-base md:text-lg text-neutral-gray max-w-2xl mx-auto">
         Ingresa el número de tu PQR o tu número de documento para consultar el estado de tu solicitud
       </p>
     </div>

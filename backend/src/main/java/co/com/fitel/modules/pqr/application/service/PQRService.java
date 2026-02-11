@@ -12,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -28,17 +31,39 @@ public class PQRService {
     private final PQRRepository pqrRepository;
     private final EmailService emailService;
     private final EntityManager entityManager;
+    private final co.com.fitel.common.service.StorageService storageService;
     
     // SLA: 15 días hábiles para respuesta
     private static final int SLA_DAYS = 15;
     
     /**
-     * Crea una nueva PQR desde el frontend
+     * Crea una nueva PQR desde el frontend (con archivos opcionales)
      */
-    public PQRResponseDTO createPQR(CreatePQRRequest request) {
+    public PQRResponseDTO createPQR(CreatePQRRequest request, java.util.List<org.springframework.web.multipart.MultipartFile> files) {
         log.info("Creating new PQR for customer: {}", request.getCustomerEmail());
         
+        // Cargar archivos si existen
+        java.util.List<String> uploadedUrls = new java.util.ArrayList<>();
+        if (files != null && !files.isEmpty()) {
+            uploadedUrls = storageService.uploadFiles(files);
+            log.info("Uploaded {} files for PQR", uploadedUrls.size());
+        }
+
         // El CUN se genera automáticamente por el trigger
+        // NOTA: Para guardar las URLs de archivos, deberíamos tener un campo en la entidad PQR
+        // o una tabla relacionada. Por ahora, las concatenaremos en la descripción si no existe campo.
+        // TODO: Actualizar entidad PQR para soportar attachments
+        
+        String descriptionWithLinks = request.getDescription();
+        if (!uploadedUrls.isEmpty()) {
+            StringBuilder sb = new StringBuilder(descriptionWithLinks);
+            sb.append("\n\n--- Archivos Adjuntos ---\n");
+            for (String url : uploadedUrls) {
+                sb.append(url).append("\n");
+            }
+            descriptionWithLinks = sb.toString();
+        }
+
         PQR pqr = PQR.builder()
             .type(request.getType().toUpperCase())
             .customerName(request.getCustomerName())
@@ -48,7 +73,7 @@ public class PQRService {
             .customerDocumentNumber(request.getCustomerDocumentNumber())
             .customerAddress(request.getCustomerAddress())
             .subject(request.getSubject())
-            .description(request.getDescription())
+            .description(descriptionWithLinks)
             .resourceType(request.getResourceType())
             .status("RECIBIDA")
             .priority("NORMAL")
@@ -149,24 +174,25 @@ public class PQRService {
      * Busca una PQR por CUN o número de documento
      */
     @Transactional(readOnly = true)
-    public PQRResponseDTO searchPQR(String query) {
+    public List<PQRResponseDTO> searchPQR(String query) {
         log.debug("Searching PQR with query: {}", query);
         
-        // Intentar buscar por CUN primero
-        PQR pqr = pqrRepository.findByCun(query)
-            .orElse(null);
-        
-        // Si no se encuentra por CUN, buscar por documento
-        if (pqr == null) {
-            pqr = pqrRepository.findByCustomerDocumentNumber(query)
-                .orElse(null);
+        // Intentar buscar por CUN primero (es único)
+        Optional<PQR> pqrByCun = pqrRepository.findByCun(query);
+        if (pqrByCun.isPresent()) {
+            return List.of(mapToDTO(pqrByCun.get()));
         }
         
-        if (pqr == null) {
-            throw new RuntimeException("PQR no encontrada");
+        // Si no se encuentra por CUN, buscar por documento (puede haber varios)
+        List<PQR> pqrsByDoc = pqrRepository.findByCustomerDocumentNumber(query);
+        
+        if (pqrsByDoc != null && !pqrsByDoc.isEmpty()) {
+            return pqrsByDoc.stream()
+                    .map(this::mapToDTO)
+                    .collect(Collectors.toList());
         }
         
-        return mapToDTO(pqr);
+        throw new RuntimeException("PQR no encontrada");
     }
     
     /**
@@ -207,6 +233,13 @@ public class PQRService {
     /**
      * Calcula la fecha límite según SLA (15 días hábiles)
      */
+    /**
+     * Mantiene compatibilidad con llamadas sin archivos
+     */
+    public PQRResponseDTO createPQR(CreatePQRRequest request) {
+        return createPQR(request, null);
+    }
+    
     private LocalDateTime calculateSLADeadline() {
         LocalDateTime now = LocalDateTime.now();
         int daysAdded = 0;

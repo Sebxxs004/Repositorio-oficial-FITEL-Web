@@ -27,7 +27,7 @@ export function PQRsConsultarModule() {
   const {
     searchValue,
     isSearching,
-    pqrResult,
+    pqrResults,
     error,
     setSearchValue,
     handleSearch,
@@ -56,9 +56,9 @@ export function PQRsConsultarModule() {
         )}
 
         {/* Resultados de la búsqueda */}
-        {pqrResult && (
+        {pqrResults && pqrResults.length > 0 && (
           <div className="mb-8">
-            <PQRSearchResults pqr={pqrResult} />
+            <PQRSearchResults pqrs={pqrResults} />
           </div>
         )}
 

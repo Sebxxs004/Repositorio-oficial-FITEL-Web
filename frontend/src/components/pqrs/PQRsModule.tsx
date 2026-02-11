@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { FileText, Send, Loader2, AlertCircle, CheckCircle, Info, Download } from 'lucide-react'
+import { FileText, Send, Loader2, AlertCircle, CheckCircle, Info, Download, Upload, X, File as FileIcon } from 'lucide-react'
 import { PQRService } from '@/services/pqr/PQRService'
-import type { PQRConstancy } from '@/types/pqr.types'
+import type { PQRConstancy, PQRType } from '@/types/pqr.types'
 import { FITEL_PHONE_DISPLAY } from '@/config/constants'
 
 // Opciones de tipo de PQR
@@ -68,6 +68,43 @@ export function PQRsModule() {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [constancy, setConstancy] = useState<PQRConstancy | null>(null)
   const [createdCUN, setCreatedCUN] = useState<string | null>(null)
+  const [files, setFiles] = useState<File[]>([])
+  const [dragActive, setDragActive] = useState(false)
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true)
+    } else if (e.type === "dragleave") {
+      setDragActive(false)
+    }
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFiles(e.dataTransfer.files)
+    }
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    if (e.target.files && e.target.files[0]) {
+      handleFiles(e.target.files)
+    }
+  }
+
+  const handleFiles = (fileList: FileList) => {
+    const newFiles = Array.from(fileList)
+    setFiles((prevFiles) => [...prevFiles, ...newFiles])
+  }
+
+  const removeFile = (indexToRemove: number) => {
+    setFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove))
+  }
 
   const {
     register,
@@ -110,7 +147,7 @@ export function PQRsModule() {
 
     try {
       const response = await PQRService.createPQR({
-        type: data.type,
+        type: data.type as PQRType,
         customerName: data.customerName,
         customerEmail: data.customerEmail,
         customerPhone: data.customerPhone,
@@ -121,6 +158,7 @@ export function PQRsModule() {
         description: data.description,
         resourceType: data.resourceType,
         expectedResolution: data.expectedResolution,
+        files: files,
       })
 
       if (response.success && response.data) {
@@ -129,6 +167,7 @@ export function PQRsModule() {
         if (response.constancy) {
           setConstancy(response.constancy)
         }
+        setFiles([])
         reset()
       } else {
         setSubmitError(response.error || 'Ocurrió un error al enviar tu PQR. Por favor intenta de nuevo.')
@@ -420,6 +459,67 @@ export function PQRsModule() {
                   className="w-full px-4 py-3 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red focus:border-transparent resize-none"
                   placeholder="¿Cómo te gustaría que resolvamos tu solicitud? (Opcional)"
                 />
+              </div>
+
+              {/* Archivos Adjuntos */}
+              <div>
+                <label className="block text-sm font-semibold text-neutral-dark mb-2">
+                  Archivos Adjuntos <span className="text-neutral-gray font-normal">(Opcional)</span>
+                </label>
+                <div
+                  className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                    dragActive
+                      ? 'border-primary-red bg-red-50'
+                      : 'border-neutral-gray-light hover:border-primary-red/50 hover:bg-neutral-50'
+                  }`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                >
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <div className="flex flex-col items-center justify-center space-y-2 pointer-events-none">
+                    <Upload className="w-8 h-8 text-neutral-gray" />
+                    <p className="text-sm text-neutral-gray">
+                      <span className="font-semibold text-primary-red">Haz clic para subir</span> o arrastra y suelta tus archivos aquí
+                    </p>
+                    <p className="text-xs text-neutral-gray-light">
+                      Soporta documentos PDF, imágenes y archivos comprimidos
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Lista de archivos seleccionados */}
+                {files.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {files.map((file, index) => (
+                      <div
+                        key={`${file.name}-${index}`}
+                        className="flex items-center justify-between p-3 bg-white border border-neutral-gray-light rounded-lg"
+                      >
+                        <div className="flex items-center space-x-3 overflow-hidden">
+                           <FileIcon className="w-5 h-5 text-primary-red flex-shrink-0" />
+                          <div className="truncate">
+                            <p className="text-sm font-medium text-neutral-dark truncate">{file.name}</p>
+                            <p className="text-xs text-neutral-gray">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeFile(index)}
+                          className="p-1 hover:bg-red-50 rounded-full text-neutral-gray hover:text-red-600 transition-colors"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Mensajes de éxito/error */}

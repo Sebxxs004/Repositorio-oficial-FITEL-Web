@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth/admin")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "http://localhost:*"}, allowCredentials = "true", maxAge = 3600)
+@CrossOrigin(originPatterns = "*", allowCredentials = "true", maxAge = 3600)
 public class AuthController {
     
     private final AuthService authService;

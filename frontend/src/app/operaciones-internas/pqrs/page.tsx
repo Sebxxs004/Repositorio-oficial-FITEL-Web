@@ -12,8 +12,8 @@ interface PQR {
   customerName: string
   customerEmail: string
   customerPhone: string
-  customerDocumentType?: string
-  customerDocumentNumber?: string
+  customerDocumentType: string
+  customerDocumentNumber: string
   customerAddress?: string
   subject: string
   description: string

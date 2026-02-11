@@ -1,6 +1,6 @@
 -- Tabla para almacenar la configuración de contacto
 CREATE TABLE IF NOT EXISTS contact_config (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     phone VARCHAR(20) NOT NULL COMMENT 'Número de teléfono sin formato',
     phone_display VARCHAR(30) NOT NULL COMMENT 'Número de teléfono con formato para mostrar',
     email VARCHAR(255) NOT NULL COMMENT 'Correo electrónico de contacto',
@@ -21,7 +21,7 @@ ON DUPLICATE KEY UPDATE
 
 -- Tabla para almacenar las imágenes del carrusel
 CREATE TABLE IF NOT EXISTS carousel_images (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     filename VARCHAR(255) NOT NULL COMMENT 'Nombre del archivo',
     file_path VARCHAR(500) NOT NULL COMMENT 'Ruta del archivo en el servidor',
     order_index INT NOT NULL DEFAULT 0 COMMENT 'Orden de visualización',

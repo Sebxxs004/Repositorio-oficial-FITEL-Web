@@ -13,7 +13,7 @@ import type { PQRResponse, PQRSearchResponse } from '@/types/pqr.types'
 interface UsePQRSearchReturn {
   searchValue: string
   isSearching: boolean
-  pqrResult: PQRResponse | null
+  pqrResults: PQRResponse[]
   error: string | null
   setSearchValue: (value: string) => void
   handleSearch: (query: string) => Promise<void>
@@ -24,7 +24,7 @@ interface UsePQRSearchReturn {
 export function usePQRSearch(): UsePQRSearchReturn {
   const [searchValue, setSearchValue] = useState('')
   const [isSearching, setIsSearching] = useState(false)
-  const [pqrResult, setPqrResult] = useState<PQRResponse | null>(null)
+  const [pqrResults, setPqrResults] = useState<PQRResponse[]>([])
   const [error, setError] = useState<string | null>(null)
 
   const handleSearch = useCallback(async (query: string) => {
@@ -35,13 +35,13 @@ export function usePQRSearch(): UsePQRSearchReturn {
 
     setIsSearching(true)
     setError(null)
-    setPqrResult(null)
+    setPqrResults([])
 
     try {
       const response: PQRSearchResponse = await PQRService.searchPQR({ query: query.trim() })
 
-      if (response.success && response.data) {
-        setPqrResult(response.data)
+      if (response.success && response.data && response.data.length > 0) {
+        setPqrResults(response.data)
       } else {
         setError(response.error || response.message || 'No se encontró ninguna PQR con los datos proporcionados')
       }
@@ -54,7 +54,7 @@ export function usePQRSearch(): UsePQRSearchReturn {
   }, [])
 
   const clearResults = useCallback(() => {
-    setPqrResult(null)
+    setPqrResults([])
     setError(null)
   }, [])
 
@@ -65,7 +65,7 @@ export function usePQRSearch(): UsePQRSearchReturn {
   return {
     searchValue,
     isSearching,
-    pqrResult,
+    pqrResults,
     error,
     setSearchValue,
     handleSearch,

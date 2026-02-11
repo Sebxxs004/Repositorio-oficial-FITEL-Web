@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { BarChart3, Users, FileText, Settings, LogOut, Shield, User, LayoutDashboard } from 'lucide-react'
+import { BarChart3, Users, FileText, Settings, LogOut, Shield, User, LayoutDashboard, ChevronDown, ChevronRight, Package, Tv } from 'lucide-react'
 
 interface UserInfo {
   username: string
@@ -22,6 +22,15 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
+  const [isGestionOpen, setIsGestionOpen] = useState(false)
+
+  // Mantener el menú de gestión abierto si estamos en alguna de sus páginas
+  useEffect(() => {
+    if (pathname?.startsWith('/operaciones-internas/planes') || 
+        pathname?.startsWith('/operaciones-internas/canales')) {
+      setIsGestionOpen(true)
+    }
+  }, [pathname])
 
   useEffect(() => {
     // Verificar autenticación y obtener información del usuario
@@ -106,12 +115,6 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
       active: pathname?.startsWith('/operaciones-internas/pqrs'),
     },
     {
-      icon: BarChart3,
-      label: 'Gestión de Planes',
-      path: '/operaciones-internas/planes',
-      active: pathname?.startsWith('/operaciones-internas/planes'),
-    },
-    {
       icon: Settings,
       label: 'Configuración',
       path: '/operaciones-internas/configuracion',
@@ -122,6 +125,21 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
       label: 'Usuarios e IPs',
       path: '/operaciones-internas/usuarios-ips',
       active: pathname?.startsWith('/operaciones-internas/usuarios-ips'),
+    },
+  ]
+
+  const gestionSubmenuItems = [
+    {
+      icon: Package,
+      label: 'Gestión de Planes',
+      path: '/operaciones-internas/planes',
+      active: pathname?.startsWith('/operaciones-internas/planes'),
+    },
+    {
+      icon: Tv,
+      label: 'Gestión de Canales',
+      path: '/operaciones-internas/canales',
+      active: pathname?.startsWith('/operaciones-internas/canales'),
     },
   ]
 
@@ -171,6 +189,52 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
               </Link>
             )
           })}
+
+          {/* Menú Desplegable de Gestión */}
+          <div>
+            <button
+              onClick={() => setIsGestionOpen(!isGestionOpen)}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
+                pathname?.startsWith('/operaciones-internas/planes') || 
+                pathname?.startsWith('/operaciones-internas/canales')
+                  ? 'bg-primary-red text-neutral-white'
+                  : 'text-neutral-gray-light hover:bg-neutral-gray/20 hover:text-neutral-white'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <BarChart3 className="w-5 h-5" />
+                <span className="font-medium">Gestión</span>
+              </div>
+              {isGestionOpen ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+
+            {/* Submenú */}
+            {isGestionOpen && (
+              <div className="mt-2 ml-4 space-y-1">
+                {gestionSubmenuItems.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors text-sm ${
+                        item.active
+                          ? 'bg-primary-red/80 text-neutral-white'
+                          : 'text-neutral-gray-light hover:bg-neutral-gray/20 hover:text-neutral-white'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Botón de Cerrar Sesión */}

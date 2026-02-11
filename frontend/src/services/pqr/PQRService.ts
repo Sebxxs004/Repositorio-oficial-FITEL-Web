@@ -22,13 +22,30 @@ export class PQRService {
    */
   static async createPQR(request: CreatePQRRequest): Promise<CreatePQRResponse> {
     try {
+      // Separar archivos para procesarlos (extraer nombres por ahora)
+      const { files, ...requestData } = request;
+      
+      const payload = {
+        ...requestData,
+        // attachments: files?.map(f => f.name) || [] // Ya no enviamos solo nombres, sino Form Data
+      };
+
+      const formData = new FormData()
+      formData.append('data', new Blob([JSON.stringify(payload)], { type: 'application/json' }))
+      
+      if (files && files.length > 0) {
+        files.forEach(file => {
+          formData.append('files', file)
+        })
+      }
+
       const response = await fetch(`${API_BASE_URL}/pqrs`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          // 'Content-Type': 'multipart/form-data', // No establecer explícitamente, fetch lo hace con el boundary correcto
         },
         credentials: 'include',
-        body: JSON.stringify(request),
+        body: formData,
       })
 
       if (!response.ok) {

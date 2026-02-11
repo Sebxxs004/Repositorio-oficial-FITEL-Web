@@ -34,14 +34,16 @@ export default function AdminLoginPage() {
         throw new Error(errorData.message || 'Credenciales inválidas')
       }
 
-      const data = await response.json()
-      
-      // Guardar token en cookie (el backend debería hacerlo, pero por si acaso)
+      const jsonResponse = await response.json()
+      // Estructura ApiResponse: { success: true, data: { token: ... }, ... }
+      const data = jsonResponse.data || jsonResponse
+
+      // Guardar token en cookie
       if (data.token) {
-        document.cookie = `admin_token=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`
+        document.cookie = `admin_token=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
       }
       if (data.sessionToken) {
-        document.cookie = `admin_session=${data.sessionToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`
+        document.cookie = `admin_session=${data.sessionToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
       }
 
       // Redirigir al dashboard

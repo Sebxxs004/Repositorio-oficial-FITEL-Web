@@ -33,6 +33,7 @@ services:
       DATABASE_USERNAME: fitel
       DATABASE_PASSWORD: fiteladmin123
       JWT_SECRET: your-secret-key-change-in-production-min-256-bits
+      STORAGE_PROVIDER: local
       MAIL_USERNAME: ${MAIL_USERNAME:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-zspgebdrjeoducpz}
       MAIL_FROM: ${MAIL_FROM:-}
@@ -43,6 +44,7 @@ services:
         condition: service_healthy
     volumes:
       - ./backend/logs:/app/logs
+      - ./backend/uploads:/app/uploads
       - ./frontend/public:/app/frontend/public
     networks:
       - fitel-network

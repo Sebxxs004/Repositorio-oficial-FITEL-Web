@@ -95,7 +95,7 @@ export function PQRTimeline({ pqr }: PQRTimelineProps) {
   const currentStatusIndex = getStatusIndex(pqr.status)
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+    <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 mb-6">
       <h3 className="text-xl font-bold text-neutral-dark mb-6 flex items-center gap-2">
         <Clock className="w-5 h-5 text-primary-red" />
         Seguimiento de tu PQR
@@ -103,7 +103,7 @@ export function PQRTimeline({ pqr }: PQRTimelineProps) {
       
       <div className="relative">
         {/* Línea de progreso */}
-        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200">
+        <div className="absolute left-5 sm:left-6 top-0 bottom-0 w-0.5 bg-gray-200">
           <div 
             className="absolute top-0 left-0 w-full bg-gradient-to-b from-primary-red to-primary-red/80 transition-all duration-500"
             style={{ 

@@ -28,11 +28,11 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin/plans")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "http://localhost:*"}, allowCredentials = "true", maxAge = 3600)
+@CrossOrigin(originPatterns = "*", allowCredentials = "true", maxAge = 3600)
 public class PlanManagementController {
     
     private final PlanManagementService planManagementService;
-    private static final String UPLOAD_DIR = "frontend/public/assets/plans/";
+    private static final String UPLOAD_DIR = "uploads/assets/plans/";
     
     /**
      * Lista todos los planes (activos e inactivos)

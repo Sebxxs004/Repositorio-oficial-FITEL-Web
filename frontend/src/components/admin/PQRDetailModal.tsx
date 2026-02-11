@@ -436,7 +436,44 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
               </div>
               <div>
                 <label className="block text-sm font-semibold text-neutral-dark mb-2">Descripción</label>
-                <p className="text-neutral-dark whitespace-pre-wrap">{pqr.description}</p>
+                {(() => {
+                  const parts = pqr.description.split('--- Archivos Adjuntos ---')
+                  const descriptionText = parts[0].trim()
+                  const attachments = parts.length > 1 ? parts[1].trim().split('\n').filter(url => url.trim().length > 0) : []
+                  
+                  return (
+                    <div className="space-y-4">
+                      <p className="text-neutral-dark whitespace-pre-wrap">{descriptionText}</p>
+                      
+                      {attachments.length > 0 && (
+                        <div className="mt-3 bg-neutral-50 border border-neutral-gray-light rounded-lg p-3">
+                          <h4 className="text-sm font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                            <Paperclip className="w-4 h-4 text-primary-red" />
+                            Archivos Adjuntos del Usuario
+                          </h4>
+                          <ul className="space-y-2">
+                            {attachments.map((url, index) => {
+                               const fileName = url.split('/').pop() || `Archivo ${index + 1}`;
+                               return (
+                                <li key={index}>
+                                  <a 
+                                    href={url.trim()} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 text-primary-red hover:underline text-sm break-all"
+                                  >
+                                    <div className="w-1.5 h-1.5 rounded-full bg-primary-red flex-shrink-0" />
+                                    {fileName}
+                                  </a>
+                                </li>
+                               )
+                            })}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })()}
               </div>
             </div>
           </div>
@@ -756,7 +793,7 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                 </button>
                 <button
                   type="button"
-                  onClick={handleSave}
+                  onClick={() => handleSave()}
                   disabled={isSaving}
                   className="px-6 py-2 border border-primary-red text-primary-red rounded-lg hover:bg-primary-red/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                 >
@@ -789,7 +826,7 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                 </button>
                 <button
                   type="button"
-                  onClick={handleSave}
+                  onClick={() => handleSave()}
                   disabled={isSaving}
                   className="px-6 py-2 border border-primary-red text-primary-red rounded-lg hover:bg-primary-red/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                 >
@@ -822,7 +859,7 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                 </button>
                 <button
                   type="button"
-                  onClick={handleSave}
+                  onClick={() => handleSave()}
                   disabled={isSaving}
                   className="px-6 py-2 bg-primary-red text-white rounded-lg hover:bg-primary-red/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                 >

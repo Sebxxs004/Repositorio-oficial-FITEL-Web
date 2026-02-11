@@ -6,7 +6,7 @@ USE fitel_db;
 
 -- Tabla para almacenar la configuración de email
 CREATE TABLE IF NOT EXISTS email_config (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(255) NOT NULL COMMENT 'Email de Gmail para envío de correos',
     app_password VARCHAR(100) NOT NULL COMMENT 'Contraseña de aplicación de Gmail (encriptada)',
     smtp_host VARCHAR(100) DEFAULT 'smtp.gmail.com' COMMENT 'Servidor SMTP',

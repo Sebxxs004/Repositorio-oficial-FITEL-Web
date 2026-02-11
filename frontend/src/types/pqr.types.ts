@@ -48,6 +48,10 @@ export interface PQRConstancy {
 
 export interface CreatePQRRequest {
   type: PQRType
+  // ... existing fields ...
+  // Added below
+  files?: File[]
+
   customerName: string
   customerEmail: string
   customerPhone: string
@@ -66,7 +70,7 @@ export interface PQRSearchRequest {
 
 export interface PQRSearchResponse {
   success: boolean
-  data?: PQRResponse
+  data?: PQRResponse[]
   message?: string
   error?: string
 }

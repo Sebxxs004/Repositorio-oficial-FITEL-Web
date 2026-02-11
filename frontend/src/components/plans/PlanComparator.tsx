@@ -235,11 +235,11 @@ export function PlanComparator() {
   return (
     <div ref={containerRef} className="container-custom section-padding">
       {/* Header */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+      <div className="text-center mb-8 md:mb-12">
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4">
           <span className="text-gradient">Nuestros Planes</span>
         </h1>
-        <p className="text-lg md:text-xl text-neutral-gray max-w-3xl mx-auto">
+        <p className="text-base md:text-xl text-neutral-gray max-w-3xl mx-auto">
           Explora nuestros planes de Internet y TV. Navega entre ellos para encontrar el perfecto para ti.
         </p>
       </div>
@@ -254,16 +254,16 @@ export function PlanComparator() {
         </div>
       )}
 
-      {/* Carrusel de Planes */}
+      {/* Carrusel de Planes (Visualización Uno por Uno) */}
       {plans.length > 0 && (
         <div className="relative">
-          {/* Contenedor del carrusel */}
-          <div className="overflow-hidden rounded-2xl">
-            <div
-              className="flex transition-transform duration-700 ease-in-out"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-            >
-              {plans.map((plan) => {
+          {/* Contenedor del plan activo */}
+          <div className="overflow-hidden rounded-2xl shadow-2xl bg-neutral-dark">
+            {/* Renderizamos solo el plan actual con una animación key para remontar al cambiar */}
+            <div key={plans[currentIndex].id} className="animate-fade-in">
+              {(() => {
+                const plan = plans[currentIndex]
+                
                 const formatPricePlan = (price: number): string => {
                   return new Intl.NumberFormat('es-CO', {
                     style: 'currency',
@@ -279,7 +279,6 @@ export function PlanComparator() {
                     `${plan.tvChannels} canales HD - Malla completa`,
                   ]
 
-                  // Características según el tipo de plan (si existe)
                   if (plan.planType === 'BASIC') {
                     features.push('Soporte técnico 24/7', 'Instalación gratuita')
                   } else if (plan.planType === 'FAMILY') {
@@ -299,7 +298,6 @@ export function PlanComparator() {
                       'IP estática incluida'
                     )
                   } else {
-                    // Si no hay tipo de plan, características genéricas
                     features.push('Soporte técnico 24/7', 'Instalación gratuita')
                   }
 
@@ -307,131 +305,162 @@ export function PlanComparator() {
                 }
 
                 return (
-                  <div key={plan.id} className="min-w-full flex-shrink-0">
-                    <section
-                      className={`relative min-h-[600px] md:min-h-[700px] overflow-hidden ${
-                        plan.popular ? 'border-4 border-primary-red' : ''
-                      } rounded-2xl`}
-                    >
-                      {/* Imagen de fondo */}
-                      {plan.backgroundImage && (
-                        <div
-                          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                          style={{
-                            backgroundImage: `url(${plan.backgroundImage})`,
-                          }}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-r from-neutral-dark/90 via-neutral-dark/80 to-neutral-dark/70" />
-                        </div>
-                      )}
-                      {!plan.backgroundImage && (
-                        <div className="absolute inset-0 bg-gradient-to-r from-primary-red/20 via-secondary-blue/20 to-primary-red/20" />
-                      )}
+                  <section
+                    className={`relative min-h-[600px] md:min-h-[650px] overflow-hidden ${
+                      plan.popular ? 'border-4 border-primary-red' : ''
+                    } rounded-2xl`}
+                  >
+                    {/* Imagen de fondo */}
+                    {plan.backgroundImage && (
+                      <div
+                        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 hover:scale-105"
+                        style={{
+                          backgroundImage: `url(${plan.backgroundImage})`,
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-neutral-dark/95 via-neutral-dark/80 to-neutral-dark/60" />
+                      </div>
+                    )}
+                    {!plan.backgroundImage && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary-red/20 via-secondary-blue/20 to-primary-red/20 bg-neutral-dark" />
+                    )}
 
-                      {/* Contenido */}
-                      <div className="relative z-10 p-8 md:p-12 lg:p-16 h-full flex items-center">
-                        <div className="max-w-6xl mx-auto w-full">
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-                            {/* Información del plan */}
-                            <div className="text-white">
-                              {plan.popular && (
-                                <div className="mb-4">
-                                  <span className="bg-primary-red text-neutral-white px-4 py-1.5 rounded-full text-sm font-bold">
-                                    Más Popular
-                                  </span>
-                                </div>
-                              )}
-                              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">{plan.name}</h2>
-                              {plan.description && (
-                                <p className="text-lg md:text-xl text-neutral-200 mb-6">{plan.description}</p>
-                              )}
-                              <div className="flex items-baseline space-x-2 mb-6">
-                                <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-white">
-                                  {formatPricePlan(plan.monthlyPrice)}
+                    {/* Contenido */}
+                    <div className="relative z-10 p-6 sm:p-8 md:p-12 lg:p-16 h-full flex items-center">
+                      <div className="max-w-6xl mx-auto w-full">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                          {/* Información del plan */}
+                          <div className="text-white pb-16 lg:pb-0"> {/* Padding bottom extra para móvil (chatbot) */}
+                            {plan.popular && (
+                              <div className="mb-4 animate-slide-in-left">
+                                <span className="bg-primary-red text-neutral-white px-4 py-1.5 rounded-full text-xs md:text-sm font-bold uppercase tracking-wider shadow-lg">
+                                  Más Popular
                                 </span>
-                                <span className="text-xl md:text-2xl text-neutral-300">/mes</span>
                               </div>
-
-                              <div className="space-y-4 mb-6">
-                                <div className="flex items-center space-x-3">
-                                  <Wifi className="w-6 h-6 md:w-7 md:h-7 text-primary-red" />
-                                  <span className="text-lg md:text-xl font-semibold text-white">
-                                    {plan.internetSpeedMbps} Mbps
-                                  </span>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                  <Tv className="w-6 h-6 md:w-7 md:h-7 text-secondary-blue" />
-                                  <span className="text-lg md:text-xl font-semibold text-white">
-                                    {plan.tvChannels} canales HD
-                                  </span>
-                                </div>
-                              </div>
-
-                              <ul className="space-y-3 mb-8">
-                                {getFeatures(plan).map((feature, featureIndex) => (
-                                  <li key={featureIndex} className="flex items-start space-x-3">
-                                    <Check className="w-5 h-5 md:w-6 md:h-6 text-primary-red flex-shrink-0 mt-0.5" />
-                                    <span className="text-base md:text-lg text-neutral-200">{feature}</span>
-                                  </li>
-                                ))}
-                              </ul>
-
-                              <Link
-                                href="/contacto"
-                                className="inline-flex items-center space-x-2 bg-primary-red hover:bg-primary-red/90 text-neutral-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105"
-                              >
-                                <span>Contactar Asesor</span>
-                                <ArrowRight className="w-5 h-5" />
-                              </Link>
+                            )}
+                            
+                            <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-3 md:mb-4 leading-tight">
+                              {plan.name}
+                            </h2>
+                            
+                            {plan.description && (
+                              <p className="text-base md:text-xl text-neutral-200 mb-6 font-light max-w-lg">
+                                {plan.description}
+                              </p>
+                            )}
+                            
+                            <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-2 mb-6 md:mb-8">
+                              <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight">
+                                {formatPricePlan(plan.monthlyPrice)}
+                              </span>
+                              <span className="text-lg md:text-2xl text-neutral-300 font-medium">/mes</span>
                             </div>
 
-                            {/* Card de resumen */}
-                            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 md:p-8 border border-white/20">
-                              <h3 className="text-xl md:text-2xl font-bold text-white mb-6">Resumen del Plan</h3>
-                              <div className="space-y-4">
-                                <div className="flex justify-between items-center pb-4 border-b border-white/20">
-                                  <span className="text-neutral-200 text-lg">Velocidad Internet</span>
-                                  <span className="text-white font-bold text-xl">{plan.internetSpeedMbps} Mbps</span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                              <div className="flex items-center space-x-3 bg-white/5 p-3 rounded-lg backdrop-blur-sm">
+                                <Wifi className="w-6 h-6 md:w-8 md:h-8 text-primary-red" />
+                                <span className="text-lg md:text-xl font-semibold text-white">
+                                  {plan.internetSpeedMbps} Mbps
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-3 bg-white/5 p-3 rounded-lg backdrop-blur-sm">
+                                <Tv className="w-6 h-6 md:w-8 md:h-8 text-secondary-blue" />
+                                <span className="text-lg md:text-xl font-semibold text-white">
+                                  {plan.tvChannels} canales HD
+                                </span>
+                              </div>
+                            </div>
+
+                            <ul className="space-y-3 mb-8 md:mb-10">
+                              {getFeatures(plan).map((feature, featureIndex) => (
+                                <li key={featureIndex} className="flex items-start space-x-3">
+                                  <div className="bg-primary-red/20 p-1 rounded-full mt-0.5">
+                                    <Check className="w-4 h-4 md:w-5 md:h-5 text-primary-red flex-shrink-0" />
+                                  </div>
+                                  <span className="text-base md:text-lg text-neutral-100 font-light">{feature}</span>
+                                </li>
+                              ))}
+                            </ul>
+
+                            <Link
+                              href="/contacto"
+                              className="w-full sm:w-auto inline-flex justify-center items-center space-x-2 bg-primary-red hover:bg-primary-red-dark text-neutral-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-primary-red/30 transition-all duration-300 transform hover:-translate-y-1"
+                            >
+                              <span>Lo quiero ahora</span>
+                              <ArrowRight className="w-5 h-5" />
+                            </Link>
+                          </div>
+
+                          {/* Card de resumen (Solo escritorio) */}
+                          <div className="hidden lg:block bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/10 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-500">
+                            <h3 className="text-2xl font-bold text-white mb-8 border-b border-white/10 pb-4">
+                              Detalles del Servicio
+                            </h3>
+                            <div className="space-y-6">
+                              <div className="flex justify-between items-center group">
+                                <div className="flex items-center space-x-3">
+                                  <div className="p-2 bg-white/5 rounded-lg group-hover:bg-primary-red/20 transition-colors">
+                                    <Wifi className="w-5 h-5 text-neutral-200" />
+                                  </div>
+                                  <span className="text-neutral-200 text-lg">Internet Fibra</span>
                                 </div>
-                                <div className="flex justify-between items-center pb-4 border-b border-white/20">
-                                  <span className="text-neutral-200 text-lg">Canales TV</span>
-                                  <span className="text-white font-bold text-xl">{plan.tvChannels}</span>
+                                <span className="text-white font-bold text-xl">{plan.internetSpeedMbps} Mbps</span>
+                              </div>
+                              
+                              <div className="flex justify-between items-center group">
+                                <div className="flex items-center space-x-3">
+                                  <div className="p-2 bg-white/5 rounded-lg group-hover:bg-secondary-blue/20 transition-colors">
+                                    <Tv className="w-5 h-5 text-neutral-200" />
+                                  </div>
+                                  <span className="text-neutral-200 text-lg">Televisión</span>
                                 </div>
-                                <div className="flex justify-between items-center">
-                                  <span className="text-neutral-200 text-lg">Precio Mensual</span>
-                                  <span className="text-white font-bold text-xl">{formatPricePlan(plan.monthlyPrice)}</span>
+                                <span className="text-white font-bold text-xl">{plan.tvChannels} Canales</span>
+                              </div>
+                              
+                              <div className="pt-6 border-t border-white/10 mt-2">
+                                <div className="flex justify-between items-end">
+                                  <span className="text-neutral-200 text-lg mb-1">Total a pagar</span>
+                                  <span className="text-white font-bold text-3xl text-primary-red-light">{formatPricePlan(plan.monthlyPrice)}</span>
                                 </div>
+                                <p className="text-right text-xs text-neutral-400 mt-1">*Impuestos incluidos</p>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </section>
-                  </div>
+                    </div>
+                  </section>
                 )
-              })}
+              })()}
             </div>
           </div>
 
-          {/* Botones de navegación */}
+          {/* Botones de navegación (Flotantes y mejor posicionados) */}
           {plans.length > 1 && (
             <>
               <button
-                onClick={prevPlan}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-200 z-20"
+                onClick={(e) => {
+                  e.currentTarget.blur(); // Quitar foco para evitar estilos raros
+                  prevPlan();
+                }}
+                className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/10 rounded-full p-3 md:p-4 shadow-lg transition-all duration-200 z-20 group"
                 aria-label="Plan anterior"
               >
-                <ChevronLeft className="w-6 h-6 text-primary-red" />
+                <ChevronLeft className="w-6 h-6 md:w-8 md:h-8 group-hover:-translate-x-1 transition-transform" />
               </button>
               <button
-                onClick={nextPlan}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-200 z-20"
+                onClick={(e) => {
+                  e.currentTarget.blur();
+                  nextPlan();
+                }}
+                className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/10 rounded-full p-3 md:p-4 shadow-lg transition-all duration-200 z-20 group"
                 aria-label="Siguiente plan"
               >
-                <ChevronRight className="w-6 h-6 text-primary-red" />
+                <ChevronRight className="w-6 h-6 md:w-8 md:h-8 group-hover:translate-x-1 transition-transform" />
               </button>
             </>
           )}
+
 
           {/* Indicadores de posición */}
           {plans.length > 1 && (
@@ -456,21 +485,21 @@ export function PlanComparator() {
       {/* Tabla Comparativa */}
       {plans.length > 0 && (
         <div className="mt-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-8">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8">
             <span className="text-gradient">Comparación de Planes</span>
           </h2>
           <div className="overflow-x-auto bg-neutral-white rounded-xl shadow-lg border border-neutral-gray-light">
-            <table className="w-full min-w-[600px]">
+            <table className="w-full min-w-[600px] border-collapse">
               <thead>
-                <tr className="bg-gradient-to-r from-primary-red/10 to-secondary-blue/10">
-                  <th className="px-6 py-4 text-left text-sm font-bold text-neutral-dark sticky left-0 bg-gradient-to-r from-primary-red/10 to-secondary-blue/10 z-10">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-neutral-dark sticky left-0 z-30 bg-neutral-white border-b border-r border-neutral-gray-light shadow-[4px_0_10px_-4px_rgba(0,0,0,0.1)]">
                     Característica
                   </th>
                   {plans.map((plan) => (
                     <th
                       key={plan.id}
-                      className={`px-6 py-4 text-center text-sm font-bold text-neutral-dark ${
-                        plan.popular ? 'bg-primary-red/20' : ''
+                      className={`px-6 py-4 text-center text-sm font-bold text-neutral-dark border-b border-neutral-gray-light bg-neutral-white ${
+                        plan.popular ? 'bg-primary-red/5' : ''
                       }`}
                     >
                       <div className="flex flex-col items-center">
@@ -486,33 +515,33 @@ export function PlanComparator() {
               <tbody className="divide-y divide-neutral-gray-light">
                 {/* Precio Mensual */}
                 <tr>
-                  <td className="px-6 py-4 font-semibold text-neutral-dark sticky left-0 bg-neutral-white z-10">
+                  <td className="px-6 py-4 font-semibold text-neutral-dark sticky left-0 z-20 bg-neutral-white border-r border-neutral-gray-light shadow-[4px_0_10px_-4px_rgba(0,0,0,0.1)]">
                     Precio Mensual
                   </td>
                   {plans.map((plan) => (
-                    <td key={plan.id} className="px-6 py-4 text-center">
+                    <td key={plan.id} className="px-6 py-4 text-center bg-neutral-white">
                       <span className="text-lg font-bold text-primary-red">{formatPrice(plan.monthlyPrice)}</span>
                     </td>
                   ))}
                 </tr>
                 {/* Velocidad de Internet */}
                 <tr className="bg-neutral-gray-light/30">
-                  <td className="px-6 py-4 font-semibold text-neutral-dark sticky left-0 bg-neutral-gray-light/30 z-10">
+                  <td className="px-6 py-4 font-semibold text-neutral-dark sticky left-0 z-20 bg-[#f5f5f5] border-r border-neutral-gray-light shadow-[4px_0_10px_-4px_rgba(0,0,0,0.1)]">
                     Velocidad de Internet
                   </td>
                   {plans.map((plan) => (
-                    <td key={plan.id} className="px-6 py-4 text-center">
+                    <td key={plan.id} className="px-6 py-4 text-center bg-neutral-gray-light/30">
                       <span className="text-neutral-dark font-semibold">{plan.internetSpeedMbps} Mbps</span>
                     </td>
                   ))}
                 </tr>
                 {/* Canales de TV */}
                 <tr>
-                  <td className="px-6 py-4 font-semibold text-neutral-dark sticky left-0 bg-neutral-white z-10">
+                  <td className="px-6 py-4 font-semibold text-neutral-dark sticky left-0 z-20 bg-neutral-white border-r border-neutral-gray-light shadow-[4px_0_10px_-4px_rgba(0,0,0,0.1)]">
                     Canales de TV
                   </td>
                   {plans.map((plan) => (
-                    <td key={plan.id} className="px-6 py-4 text-center">
+                    <td key={plan.id} className="px-6 py-4 text-center bg-neutral-white">
                       <span className="text-neutral-dark font-semibold">{plan.tvChannels} canales</span>
                     </td>
                   ))}
@@ -521,15 +550,17 @@ export function PlanComparator() {
                 {getAllFeatures().map((feature, index) => (
                   <tr
                     key={feature}
-                    className={index % 2 === 0 ? 'bg-neutral-gray-light/30' : ''}
+                    className={index % 2 === 0 ? 'bg-neutral-gray-light/30' : 'bg-neutral-white'}
                   >
-                    <td className={`px-6 py-4 font-semibold text-neutral-dark sticky left-0 z-10 ${
-                      index % 2 === 0 ? 'bg-neutral-gray-light/30' : 'bg-neutral-white'
+                    <td className={`px-6 py-4 font-semibold text-neutral-dark sticky left-0 z-20 border-r border-neutral-gray-light shadow-[4px_0_10px_-4px_rgba(0,0,0,0.1)] ${
+                      index % 2 === 0 ? 'bg-[#f5f5f5]' : 'bg-neutral-white'
                     }`}>
                       {feature}
                     </td>
                     {plans.map((plan) => (
-                      <td key={plan.id} className="px-6 py-4 text-center">
+                      <td key={plan.id} className={`px-6 py-4 text-center ${
+                        index % 2 === 0 ? 'bg-neutral-gray-light/30' : 'bg-neutral-white'
+                      }`}>
                         {hasFeature(plan, feature) ? (
                           <Check className="w-5 h-5 text-primary-red mx-auto" />
                         ) : (
@@ -541,6 +572,7 @@ export function PlanComparator() {
                 ))}
               </tbody>
             </table>
+
           </div>
         </div>
       )}

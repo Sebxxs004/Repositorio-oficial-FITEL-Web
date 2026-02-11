@@ -5,6 +5,8 @@ import co.com.fitel.modules.pqr.application.dto.UpdatePQRRequest;
 import co.com.fitel.modules.pqr.domain.model.PQR;
 import co.com.fitel.modules.pqr.domain.repository.PQRRepository;
 import co.com.fitel.common.service.EmailService;
+import co.com.fitel.common.exception.BusinessException;
+import org.springframework.http.HttpStatus;
 import co.com.fitel.modules.audit.application.service.OperationLogService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -99,6 +101,14 @@ public class PQRManagementService {
         
         // Actualizar campos
         if (request.getStatus() != null) {
+            // Validar restricción de transición para estado RESUELTA
+            if ("RESUELTA".equals(previousStatus) && !request.getStatus().equals(previousStatus)) {
+                List<String> allowedTransitions = List.of("CERRADA", "RECIBIDA", "EN_ANALISIS", "EN_RESPUESTA");
+                if (!allowedTransitions.contains(request.getStatus())) {
+                    throw new BusinessException("Una PQR resuelta solo puede pasar a CERRADA o devolverse a una etapa anterior.", HttpStatus.BAD_REQUEST);
+                }
+            }
+
             pqr.setStatus(request.getStatus());
             
             // Actualizar fechas según el estado

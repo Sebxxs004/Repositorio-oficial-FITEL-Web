@@ -15,15 +15,17 @@ public class WebConfig implements WebMvcConfigurer, Ordered {
 
     /**
      * Configuración de recursos estáticos
-     * Excluye explícitamente /api/** del manejo de recursos estáticos
-     * para asegurar que los endpoints REST tengan prioridad
+     * Mapea URLs /assets/** a archivos en el sistema de archivos
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // NO configurar recursos estáticos para /api/**
-        // Los controladores REST manejarán estas rutas
-        // Solo configurar recursos estáticos para otras rutas si es necesario
-        // Por defecto, Spring Boot ya maneja recursos estáticos correctamente
+        // Mapear solicitudes a /assets/** a la carpeta de cargas
+        registry.addResourceHandler("/assets/**")
+                .addResourceLocations("file:uploads/assets/");
+                
+        // Mapear solicitudes a /uploads/** a la carpeta raíz de cargas
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:uploads/");
     }
 
     /**

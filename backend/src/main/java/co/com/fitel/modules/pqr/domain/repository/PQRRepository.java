@@ -16,7 +16,7 @@ public interface PQRRepository extends JpaRepository<PQR, Long> {
     
     Optional<PQR> findByCun(String cun);
     
-    Optional<PQR> findByCustomerDocumentNumber(String documentNumber);
+    List<PQR> findByCustomerDocumentNumber(String documentNumber);
     
     List<PQR> findByStatus(String status);
     

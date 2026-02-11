@@ -12,6 +12,16 @@ const nextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api',
     ALLOWED_ADMIN_IPS: process.env.ALLOWED_ADMIN_IPS || '', // IPs permitidas para panel admin
   },
+  async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+    const backendUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
+    return [
+      {
+        source: '/assets/:path*',
+        destination: `${backendUrl}/assets/:path*`,
+      },
+    ];
+  },
   // Optimizaciones para desarrollo más rápido
   webpack: (config, { dev, isServer }) => {
     // Configurar webpack para resolver correctamente leaflet
