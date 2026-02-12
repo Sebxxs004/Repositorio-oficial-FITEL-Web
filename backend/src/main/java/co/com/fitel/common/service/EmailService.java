@@ -58,7 +58,8 @@ public class EmailService {
             String typeSpanish = switch (type.toUpperCase()) {
                 case "PETICION" -> "Petición";
                 case "QUEJA" -> "Queja";
-                case "RECURSO" -> "Recurso";
+                case "RECLAMO" -> "Reclamo";
+                case "SUGERENCIA" -> "Sugerencia";
                 default -> type;
             };
 

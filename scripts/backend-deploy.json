@@ -1,0 +1,79 @@
+﻿{
+    "resourceGroup":  "rg-fitel-demo",
+    "properties":  {
+                       "configuration":  {
+                                             "ingress":  {
+                                                             "external":  true,
+                                                             "transport":  "tcp",
+                                                             "corsPolicy":  {
+                                                                                "allowedMethods":  [
+                                                                                                       "*"
+                                                                                                   ],
+                                                                                "allowedOrigins":  [
+                                                                                                       "*"
+                                                                                                   ],
+                                                                                "allowedHeaders":  [
+                                                                                                       "*"
+                                                                                                   ]
+                                                                            },
+                                                             "targetPort":  8080
+                                                         },
+                                             "activeRevisionsMode":  "Single"
+                                         },
+                       "template":  {
+                                        "scale":  {
+                                                      "maxReplicas":  1,
+                                                      "minReplicas":  1
+                                                  },
+                                        "containers":  [
+                                                           {
+                                                               "volumeMounts":  [
+                                                                                    {
+                                                                                        "mountPath":  "/app/uploads",
+                                                                                        "volumeName":  "fitel-storage"
+                                                                                    }
+                                                                                ],
+                                                               "env":  [
+                                                                           {
+                                                                               "value":  "prod",
+                                                                               "name":  "SPRING_PROFILES_ACTIVE"
+                                                                           },
+                                                                           {
+                                                                               "value":  "jdbc:mariadb://fitel-db:3306/fitel_db",
+                                                                               "name":  "DATABASE_URL"
+                                                                           },
+                                                                           {
+                                                                               "value":  "fitel",
+                                                                               "name":  "DATABASE_USERNAME"
+                                                                           },
+                                                                           {
+                                                                               "value":  "fiteladmin123",
+                                                                               "name":  "DATABASE_PASSWORD"
+                                                                           },
+                                                                           {
+                                                                               "value":  "ThisIsASecretKeyForJWTTokenGenerationAndItShouldBeLongEnough",
+                                                                               "name":  "JWT_SECRET"
+                                                                           }
+                                                                       ],
+                                                               "name":  "fitel-backend",
+                                                               "resources":  {
+                                                                                 "cpu":  0.5,
+                                                                                 "memory":  "1Gi"
+                                                                             },
+                                                               "image":  "acrfiteldemo.azurecr.io/fitel-backend:latest"
+                                                           }
+                                                       ],
+                                        "volumes":  [
+                                                        {
+                                                            "storageType":  "AzureFile",
+                                                            "name":  "fitel-storage",
+                                                            "storageName":  "fitel-storage"
+                                                        }
+                                                    ]
+                                    },
+                       "managedEnvironmentId":  "/subscriptions/045f4076-01a5-4fbb-a87f-33e8e895615c/resourceGroups/rg-fitel-demo/providers/Microsoft.App/managedEnvironments/env-fitel-demo"
+                   },
+    "name":  "fitel-backend",
+    "location":  "eastus",
+    "type":  "Microsoft.App/containerApps"
+}

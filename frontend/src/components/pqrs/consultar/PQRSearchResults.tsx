@@ -7,7 +7,7 @@
 
 'use client'
 
-import { CheckCircle, Clock, XCircle, AlertCircle } from 'lucide-react'
+import { CheckCircle, Clock, XCircle, AlertCircle, FileText, Eye } from 'lucide-react'
 import type { PQRResponse, PQRStatus } from '@/types/pqr.types'
 import { PQRTimeline } from './PQRTimeline'
 
@@ -66,12 +66,27 @@ function getStatusColor(status: PQRStatus): string {
 }
 
 export function PQRSearchResults({ pqrs }: PQRSearchResultsProps) {
+
   if (!pqrs || pqrs.length === 0) return null
+
+  const parseDescription = (fullDescription: string) => {
+    if (!fullDescription) return { description: '', attachments: [] }
+    // Usar regex para ser más flexible con los saltos de línea y espacios
+    const parts = fullDescription.split(/[\n\r]*--- Archivos Adjuntos ---[\n\r]*/)
+    return {
+      description: parts[0].trim(),
+      attachments: parts.slice(1).flatMap(part => 
+        part.split(/[\n\r]+/).map(url => url.trim()).filter(url => url.length > 0 && url.startsWith('http'))
+      )
+    }
+  }
 
   return (
     <div className="space-y-12">
       {pqrs.map((pqr) => {
         const isReceived = pqr.status === 'RECIBIDA'
+        const { description, attachments } = parseDescription(pqr.description)
+        
         return (
           <div key={pqr.id} className="space-y-6">
             {!isReceived && <PQRTimeline pqr={pqr} />}
@@ -128,12 +143,43 @@ export function PQRSearchResults({ pqrs }: PQRSearchResultsProps) {
 
                 <div>
                   <h3 className="text-sm font-semibold text-neutral-gray mb-2">Descripción</h3>
-                  <p className="text-neutral-dark">{pqr.description}</p>
+                  <p className="text-neutral-dark whitespace-pre-line">{description}</p>
+                  
+                  {attachments.length > 0 && (
+                    <div className="mt-6">
+                      <h3 className="text-sm font-semibold text-neutral-gray mb-3 flex items-center gap-2">
+                        <FileText className="w-4 h-4" />
+                        Archivos Adjuntos
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        {attachments.map((url, index) => {
+                          const fileName = url.split('/').pop()?.split('?')[0] || `Adjunto ${index + 1}`
+                          return (
+                            <a
+                              key={index}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="group flex items-center p-3 bg-neutral-50 hover:bg-white border border-neutral-gray-light hover:border-primary-red rounded-lg transition-all duration-200 shadow-sm hover:shadow-md text-left w-full"
+                            >
+                              <div className="bg-white p-2 rounded-md border border-neutral-gray-light group-hover:border-primary-red/30 mr-3">
+                                <FileText className="w-5 h-5 text-neutral-gray group-hover:text-primary-red" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-neutral-dark truncate">{fileName}</p>
+                                <p className="text-xs text-neutral-gray group-hover:text-primary-red">Clic para abrir en nueva pestaña</p>
+                              </div>
+                              <Eye className="w-4 h-4 text-neutral-gray group-hover:text-primary-red opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </a>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-neutral-gray-light">
                   <div>
-                    <h3 className="text-sm font-semibold text-neutral-gray mb-1">Fecha de Creación</h3>
                     <p className="text-neutral-dark">
                       {new Date(pqr.createdAt).toLocaleDateString('es-CO', {
                         year: 'numeric',

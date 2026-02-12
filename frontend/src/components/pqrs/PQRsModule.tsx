@@ -13,7 +13,8 @@ import { FITEL_PHONE_DISPLAY } from '@/config/constants'
 export const PQR_TYPE_OPTIONS = [
   { value: 'PETICION', label: 'Petición' },
   { value: 'QUEJA', label: 'Queja' },
-  { value: 'RECURSO', label: 'Recurso' },
+  { value: 'RECLAMO', label: 'Reclamo' },
+  { value: 'SUGERENCIA', label: 'Sugerencia' },
 ] as const
 
 // Opciones de tipo de documento
@@ -46,17 +47,7 @@ const pqrFormSchema = z.object({
   customerAddress: z.string().min(10, 'Ingresa tu dirección completa').optional(),
   subject: z.string().min(5, 'El asunto debe tener al menos 5 caracteres'),
   description: z.string().min(20, 'La descripción debe tener al menos 20 caracteres'),
-  resourceType: z.string().optional(),
   expectedResolution: z.string().optional(),
-}).refine((data) => {
-  // Si es RECURSO, el tipo de recurso es requerido
-  if (data.type === 'RECURSO' && !data.resourceType) {
-    return false
-  }
-  return true
-}, {
-  message: 'El tipo de recurso es requerido cuando el tipo de PQR es Recurso',
-  path: ['resourceType'],
 })
 
 type PQRFormData = z.infer<typeof pqrFormSchema>
@@ -156,7 +147,6 @@ export function PQRsModule() {
         customerAddress: data.customerAddress,
         subject: data.subject,
         description: data.description,
-        resourceType: data.resourceType,
         expectedResolution: data.expectedResolution,
         files: files,
       })
@@ -412,40 +402,12 @@ export function PQRsModule() {
                       ? 'border-red-500 focus:ring-red-500'
                       : 'border-neutral-gray-light focus:ring-primary-red focus:border-transparent'
                   }`}
-                  placeholder="Describe detalladamente tu petición, queja o recurso..."
+                  placeholder="Describe detalladamente tu petición, queja, reclamo o sugerencia..."
                 />
                 {errors.description && (
                   <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
                 )}
               </div>
-
-              {/* Tipo de Recurso (solo si es RECURSO) */}
-              {selectedType === 'RECURSO' && (
-                <div>
-                  <label htmlFor="resourceType" className="block text-sm font-semibold text-neutral-dark mb-2">
-                    Tipo de Recurso *
-                  </label>
-                  <select
-                    id="resourceType"
-                    {...register('resourceType')}
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors bg-white ${
-                      errors.resourceType
-                        ? 'border-red-500 focus:ring-red-500'
-                        : 'border-neutral-gray-light focus:ring-primary-red focus:border-transparent'
-                    }`}
-                  >
-                    <option value="">Selecciona el tipo de recurso...</option>
-                    {RESOURCE_TYPE_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.resourceType && (
-                    <p className="mt-1 text-sm text-red-600">{errors.resourceType.message}</p>
-                  )}
-                </div>
-              )}
 
               {/* Resolución Esperada (opcional) */}
               <div>

@@ -55,6 +55,7 @@ public class PQRService {
         // TODO: Actualizar entidad PQR para soportar attachments
         
         String descriptionWithLinks = request.getDescription();
+        /* BLOQUE ELIMINADO: No adjuntar links antes de tener el CUN
         if (!uploadedUrls.isEmpty()) {
             StringBuilder sb = new StringBuilder(descriptionWithLinks);
             sb.append("\n\n--- Archivos Adjuntos ---\n");
@@ -63,6 +64,7 @@ public class PQRService {
             }
             descriptionWithLinks = sb.toString();
         }
+        */
 
         PQR pqr = PQR.builder()
             .type(request.getType().toUpperCase())
@@ -95,9 +97,22 @@ public class PQRService {
             .orElseThrow(() -> new RuntimeException("Error al guardar PQR"));
         
         // Verificar que el CUN fue generado por el trigger
-        if (savedPQR.getCun() == null || savedPQR.getCun().isEmpty()) {
-            log.error("El CUN no fue generado por el trigger para la PQR ID: {}", savedPQR.getId());
-            throw new RuntimeException("Error: El CUN no fue generado automáticamente. Por favor contacte al administrador.");
+        if (!uploadedUrls.isEmpty()) {
+            StringBuilder sb = new StringBuilder(descriptionWithLinks);
+            sb.append("\n\n--- Archivos Adjuntos ---\n");
+            for (String url : uploadedUrls) {
+                // Agregar el parámetro CUN a la URL guardada para facilitar el acceso posterior
+                if (url.contains("/uploads/") && !url.contains("?cun=")) {
+                   sb.append(url).append("?cun=").append(savedPQR.getCun()).append("\n");
+                } else {
+                   sb.append(url).append("\n");
+                }
+            }
+            descriptionWithLinks = sb.toString();
+            
+            // Actualizar la descripción con los links que incluyen el CUN
+            savedPQR.setDescription(descriptionWithLinks);
+            savedPQR = pqrRepository.save(savedPQR);
         }
         
         log.info("PQR created successfully with ID: {}, CUN: {}", savedPQR.getId(), savedPQR.getCun());

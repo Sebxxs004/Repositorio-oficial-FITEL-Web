@@ -7,7 +7,7 @@
 
 export type PQRStatus = 'RECIBIDA' | 'EN_ANALISIS' | 'EN_RESPUESTA' | 'RESUELTA' | 'CERRADA'
 
-export type PQRType = 'PETICION' | 'QUEJA' | 'RECURSO'
+export type PQRType = 'PETICION' | 'QUEJA' | 'RECLAMO' | 'SUGERENCIA'
 
 export type DocumentType = 'CC' | 'NIT' | 'CE' | 'PASAPORTE' | 'OTRO'
 

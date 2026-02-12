@@ -199,10 +199,11 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
         }, 300)
       }
       
-      // Ocultar modal de éxito después de 4 segundos (sin cerrar el modal de detalles)
+      // Ocultar modal de éxito después de 2 segundos y cerrar el modal de detalles
       setTimeout(() => {
         setShowSuccessModal(false)
-      }, 4000)
+        onClose()
+      }, 2000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar cambios')
     } finally {
@@ -333,10 +334,11 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
       onUpdate()
       setAttachmentFile(null)
       
-      // Ocultar modal de éxito después de 4 segundos (sin cerrar el modal de detalles)
+      // Ocultar modal de éxito después de 2 segundos y cerrar el modal de detalles
       setTimeout(() => {
         setShowSuccessModal(false)
-      }, 4000)
+        onClose()
+      }, 2000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar cambios')
     } finally {
@@ -453,11 +455,15 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                           </h4>
                           <ul className="space-y-2">
                             {attachments.map((url, index) => {
-                               const fileName = url.split('/').pop() || `Archivo ${index + 1}`;
+                               const cleanUrl = url.split('\n')[0].trim();
+                               const fileName = cleanUrl.split('/').pop()?.split('?')[0] || `Archivo ${index + 1}`;
+                               // Asegurarnos de que el link tenga el CUN si no lo tiene (caso legacy o fallo)
+                               const finalUrl = cleanUrl.includes('?cun=') ? cleanUrl : `${cleanUrl}?cun=${pqr.cun}`;
+                               
                                return (
                                 <li key={index}>
                                   <a 
-                                    href={url.trim()} 
+                                    href={finalUrl} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-2 text-primary-red hover:underline text-sm break-all"

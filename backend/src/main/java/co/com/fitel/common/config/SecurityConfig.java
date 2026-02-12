@@ -48,7 +48,8 @@ public class SecurityConfig {
                 // Permitir acceso a recursos estáticos
                 .requestMatchers("/**").permitAll()
                 .anyRequest().permitAll()
-            );
+            )
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
 
         return http.build();
     }

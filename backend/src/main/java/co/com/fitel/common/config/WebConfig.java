@@ -23,9 +23,8 @@ public class WebConfig implements WebMvcConfigurer, Ordered {
         registry.addResourceHandler("/assets/**")
                 .addResourceLocations("file:uploads/assets/");
                 
-        // Mapear solicitudes a /uploads/** a la carpeta raíz de cargas
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/");
+        // Eliminado el mapeo estático de /uploads/** para mejorar la seguridad
+        // Los archivos ahora se sirven a través de SecureFileController
     }
 
     /**
