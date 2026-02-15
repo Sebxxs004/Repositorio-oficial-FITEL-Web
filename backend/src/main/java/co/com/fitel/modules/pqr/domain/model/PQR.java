@@ -102,4 +102,7 @@ public class PQR extends AuditableEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_pqr_id")
     private PQR parentPqr;
+
+    @Column(name = "appeal_reason", columnDefinition = "TEXT")
+    private String appealReason;
 }

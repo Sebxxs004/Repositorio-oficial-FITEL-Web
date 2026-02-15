@@ -1,6 +1,7 @@
 package co.com.fitel.modules.auth.infrastructure.controller;
 
 import co.com.fitel.common.dto.ApiResponse;
+import co.com.fitel.modules.auth.application.dto.CreateUserRequest;
 import co.com.fitel.modules.auth.application.dto.LoginRequest;
 import co.com.fitel.modules.auth.application.dto.LoginResponse;
 import co.com.fitel.modules.auth.application.service.AuthService;
@@ -141,6 +142,27 @@ public class AuthController {
         }
     }
     
+    @PostMapping("/users")
+    public ResponseEntity<ApiResponse<Void>> createUser(@Valid @RequestBody CreateUserRequest request) {
+        try {
+            authService.createUser(request);
+            return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                    .success(true)
+                    .message("Usuario creado exitosamente")
+                    .build()
+            );
+        } catch (Exception e) {
+            log.error("Error creando usuario: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ApiResponse.<Void>builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build()
+            );
+        }
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response) {
         // Eliminar cookies
@@ -162,5 +184,75 @@ public class AuthController {
                 .message("Sesión cerrada")
                 .build()
         );
+    }
+
+    @PostMapping("/change-password/init")
+    public ResponseEntity<ApiResponse<Void>> initChangePassword(
+            @Valid @RequestBody co.com.fitel.modules.auth.application.dto.ChangePasswordInitRequest request) {
+        
+        try {
+            String username = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+            
+            if (username == null || "anonymousUser".equals(username)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ApiResponse.<Void>builder()
+                        .success(false)
+                        .message("No autenticado")
+                        .build()
+                );
+            }
+
+            authService.initiatePasswordChange(username, request.getCurrentPassword());
+            
+            return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                    .success(true)
+                    .message("Código de verificación enviado al correo")
+                    .build()
+            );
+        } catch (Exception e) {
+            log.error("Error iniciando cambio contraseña: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(
+                ApiResponse.<Void>builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build()
+            );
+        }
+    }
+
+    @PostMapping("/change-password/confirm")
+    public ResponseEntity<ApiResponse<Void>> confirmChangePassword(
+            @Valid @RequestBody co.com.fitel.modules.auth.application.dto.ChangePasswordConfirmRequest request) {
+        
+        try {
+            String username = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+            
+            if (username == null || "anonymousUser".equals(username)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ApiResponse.<Void>builder()
+                        .success(false)
+                        .message("No autenticado")
+                        .build()
+                );
+            }
+
+            authService.confirmPasswordChange(username, request.getNewPassword(), request.getVerificationCode());
+            
+            return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                    .success(true)
+                    .message("Contraseña actualizada exitosamente")
+                    .build()
+            );
+        } catch (Exception e) {
+             log.error("Error confirmando cambio contraseña: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(
+                ApiResponse.<Void>builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build()
+            );
+        }
     }
 }

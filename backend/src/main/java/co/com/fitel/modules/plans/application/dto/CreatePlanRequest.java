@@ -1,20 +1,11 @@
 package co.com.fitel.modules.plans.application.dto;
 
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 
 /**
  * DTO para crear un nuevo plan
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class CreatePlanRequest {
     
     @NotBlank(message = "El nombre del plan es obligatorio")
@@ -36,10 +27,8 @@ public class CreatePlanRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a 0")
     private BigDecimal monthlyPrice;
     
-    @Builder.Default
     private Boolean active = true;
     
-    @Builder.Default
     private Boolean popular = false;
     
     @Size(max = 50, message = "El tipo de plan no puede exceder 50 caracteres")
@@ -47,4 +36,33 @@ public class CreatePlanRequest {
     
     @Size(max = 500, message = "La URL de la imagen de fondo no puede exceder 500 caracteres")
     private String backgroundImage;
+
+    public CreatePlanRequest() {}
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    
+    public Integer getInternetSpeedMbps() { return internetSpeedMbps; }
+    public void setInternetSpeedMbps(Integer internetSpeedMbps) { this.internetSpeedMbps = internetSpeedMbps; }
+    
+    public Integer getTvChannels() { return tvChannels; }
+    public void setTvChannels(Integer tvChannels) { this.tvChannels = tvChannels; }
+    
+    public BigDecimal getMonthlyPrice() { return monthlyPrice; }
+    public void setMonthlyPrice(BigDecimal monthlyPrice) { this.monthlyPrice = monthlyPrice; }
+    
+    public Boolean getActive() { return active; }
+    public void setActive(Boolean active) { this.active = active; }
+    
+    public Boolean getPopular() { return popular; }
+    public void setPopular(Boolean popular) { this.popular = popular; }
+    
+    public String getPlanType() { return planType; }
+    public void setPlanType(String planType) { this.planType = planType; }
+    
+    public String getBackgroundImage() { return backgroundImage; }
+    public void setBackgroundImage(String backgroundImage) { this.backgroundImage = backgroundImage; }
 }

@@ -3,7 +3,8 @@ package co.com.fitel.modules.auth.application.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +18,9 @@ import java.util.Map;
  * Servicio para manejo de JWT
  */
 @Service
-@Slf4j
 public class JwtService {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtService.class);
     
     @Value("${spring.security.jwt.secret:your-secret-key-change-in-production-min-256-bits}")
     private String secret;

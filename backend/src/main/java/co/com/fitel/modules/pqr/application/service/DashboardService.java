@@ -5,8 +5,8 @@ import co.com.fitel.modules.pqr.application.dto.DashboardStatsDTO;
 import co.com.fitel.modules.pqr.application.dto.PQRTimeSeriesDTO;
 import co.com.fitel.modules.pqr.domain.repository.PQRRepository;
 import co.com.fitel.modules.plans.domain.repository.PlanRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,14 +16,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
 @Transactional(readOnly = true)
 public class DashboardService {
+    
+    private static final Logger log = LoggerFactory.getLogger(DashboardService.class);
     
     private final PQRRepository pqrRepository;
     private final PlanRepository planRepository;
     private final AdminUserRepository adminUserRepository;
+
+    public DashboardService(PQRRepository pqrRepository, PlanRepository planRepository, AdminUserRepository adminUserRepository) {
+        this.pqrRepository = pqrRepository;
+        this.planRepository = planRepository;
+        this.adminUserRepository = adminUserRepository;
+    }
     
     public DashboardStatsDTO getDashboardStats() {
         log.debug("Fetching dashboard statistics");
@@ -88,10 +94,10 @@ public class DashboardService {
                                 date = LocalDate.parse(dateObj.toString());
                             }
                             Long count = ((Number) row[1]).longValue();
-                            return PQRTimeSeriesDTO.builder()
-                                .date(date)
-                                .count(count)
-                                .build();
+                            PQRTimeSeriesDTO dto = new PQRTimeSeriesDTO();
+                            dto.setDate(date);
+                            dto.setCount(count);
+                            return dto;
                         } catch (Exception e) {
                             log.warn("Error procesando fila de time series: {}", e.getMessage());
                             return null;
@@ -104,12 +110,13 @@ public class DashboardService {
                 // Si hay error, usar lista vacía en lugar de fallar
             }
             
-            return DashboardStatsDTO.builder()
-                .pendingPQRs(pendingPQRs != null ? pendingPQRs : 0L)
-                .activePlans(activePlans != null ? activePlans : 0L)
-                .activeUsers(activeUsers != null ? activeUsers : 0L)
-                .pqrTimeSeries(pqrTimeSeries)
-                .build();
+            DashboardStatsDTO stats = new DashboardStatsDTO();
+            stats.setPendingPQRs(pendingPQRs != null ? pendingPQRs : 0L);
+            stats.setActivePlans(activePlans != null ? activePlans : 0L);
+            stats.setActiveUsers(activeUsers != null ? activeUsers : 0L);
+            stats.setPqrTimeSeries(pqrTimeSeries != null ? pqrTimeSeries : java.util.Collections.emptyList());
+            
+            return stats;
         } catch (Exception e) {
             log.error("Error en getDashboardStats: {}", e.getMessage(), e);
             throw new RuntimeException("Error al obtener estadísticas del dashboard: " + e.getMessage(), e);

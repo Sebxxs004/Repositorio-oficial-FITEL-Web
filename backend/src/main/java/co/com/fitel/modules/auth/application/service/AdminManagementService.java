@@ -1,6 +1,8 @@
 package co.com.fitel.modules.auth.application.service;
 
+import co.com.fitel.common.service.EmailService;
 import co.com.fitel.modules.auth.application.dto.AddIPRequest;
+import co.com.fitel.modules.auth.application.dto.CreateUserRequest;
 import co.com.fitel.modules.auth.application.dto.AdminUserDTO;
 import co.com.fitel.modules.auth.application.dto.AllowedIPDTO;
 import co.com.fitel.modules.auth.application.dto.UpdateUserRequest;
@@ -26,12 +28,44 @@ public class AdminManagementService {
     private final AllowedAdminIPRepository allowedAdminIPRepository;
     private final PasswordEncoder passwordEncoder;
     private final IPEncryptionService ipEncryptionService;
+    private final EmailService emailService;
     
     @Transactional(readOnly = true)
     public List<AdminUserDTO> getAllUsers() {
         return adminUserRepository.findAll().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public AdminUserDTO createUser(CreateUserRequest request) {
+        if (adminUserRepository.existsByUsername(request.getEmail())) {
+            throw new RuntimeException("El usuario ya existe con ese correo electrónico");
+        }
+        
+        // Hashear la contraseña
+        String hashedPassword = passwordEncoder.encode(request.getPassword());
+        
+        AdminUser newUser = AdminUser.builder()
+            .username(request.getEmail())
+            .passwordHash(hashedPassword)
+            .fullName(request.getFullName())
+            .role(request.getRole() != null ? request.getRole() : "ADMIN")
+            .active(true)
+            .build();
+        
+        AdminUser savedUser = adminUserRepository.save(newUser);
+        log.info("Usuario administrador creado: {}", savedUser.getUsername());
+        
+        // Enviar email con credenciales
+        emailService.sendAccountCreationEmail(
+            savedUser.getUsername(),
+            savedUser.getFullName(),
+            savedUser.getUsername(),
+            request.getPassword()
+        );
+        
+        return toDTO(savedUser);
     }
     
     @Transactional

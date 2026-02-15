@@ -2,10 +2,6 @@ package co.com.fitel.modules.plans.domain.model;
 
 import co.com.fitel.common.audit.AuditableEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
@@ -17,10 +13,6 @@ import java.math.BigDecimal;
  */
 @Entity
 @Table(name = "plans")
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class Plan extends AuditableEntity {
 
     @Id
@@ -43,11 +35,9 @@ public class Plan extends AuditableEntity {
     private BigDecimal monthlyPrice;
 
     @Column(nullable = false)
-    @Builder.Default
     private Boolean active = true;
 
     @Column(nullable = false)
-    @Builder.Default
     private Boolean popular = false;
 
     @Column(length = 50)
@@ -55,4 +45,41 @@ public class Plan extends AuditableEntity {
 
     @Column(length = 500)
     private String backgroundImage; // URL o ruta de la imagen de fondo
+
+    public Plan() {
+    }
+
+    public Plan(Long id, String name, String description, Integer internetSpeedMbps, Integer tvChannels, BigDecimal monthlyPrice, Boolean active, Boolean popular, String planType, String backgroundImage) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.internetSpeedMbps = internetSpeedMbps;
+        this.tvChannels = tvChannels;
+        this.monthlyPrice = monthlyPrice;
+        this.active = active;
+        this.popular = popular;
+        this.planType = planType;
+        this.backgroundImage = backgroundImage;
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public Integer getInternetSpeedMbps() { return internetSpeedMbps; }
+    public void setInternetSpeedMbps(Integer internetSpeedMbps) { this.internetSpeedMbps = internetSpeedMbps; }
+    public Integer getTvChannels() { return tvChannels; }
+    public void setTvChannels(Integer tvChannels) { this.tvChannels = tvChannels; }
+    public BigDecimal getMonthlyPrice() { return monthlyPrice; }
+    public void setMonthlyPrice(BigDecimal monthlyPrice) { this.monthlyPrice = monthlyPrice; }
+    public Boolean getActive() { return active; }
+    public void setActive(Boolean active) { this.active = active; }
+    public Boolean getPopular() { return popular; }
+    public void setPopular(Boolean popular) { this.popular = popular; }
+    public String getPlanType() { return planType; }
+    public void setPlanType(String planType) { this.planType = planType; }
+    public String getBackgroundImage() { return backgroundImage; }
+    public void setBackgroundImage(String backgroundImage) { this.backgroundImage = backgroundImage; }
 }

@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { FileText, Send, Loader2, AlertCircle, CheckCircle, Info, Download, Upload, X, File as FileIcon } from 'lucide-react'
+import Link from 'next/link'
+import { FileText, Send, Loader2, AlertCircle, CheckCircle, Info, Download, Upload, X, File as FileIcon, ShieldCheck } from 'lucide-react'
 import { PQRService } from '@/services/pqr/PQRService'
 import type { PQRConstancy, PQRType } from '@/types/pqr.types'
 import { FITEL_PHONE_DISPLAY } from '@/config/constants'
@@ -37,17 +38,75 @@ const pqrFormSchema = z.object({
   type: z.enum(PQR_TYPE_OPTIONS.map(opt => opt.value) as [string, ...string[]], {
     errorMap: () => ({ message: 'Por favor selecciona un tipo de PQR' }),
   }),
-  customerName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  customerEmail: z.string().email('Ingresa un email válido'),
-  customerPhone: z.string().min(10, 'Ingresa un teléfono válido'),
-  customerDocumentType: z.enum(DOCUMENT_TYPE_OPTIONS.map(opt => opt.value) as [string, ...string[]], {
-    errorMap: () => ({ message: 'Por favor selecciona un tipo de documento' }),
-  }),
-  customerDocumentNumber: z.string().min(5, 'Ingresa tu número de documento'),
-  customerAddress: z.string().min(10, 'Ingresa tu dirección completa').optional(),
+  customerName: z.string().optional(),
+  customerEmail: z.string().optional(),
+  customerPhone: z.string().optional(),
+  customerDocumentType: z.string().optional(),
+  customerDocumentNumber: z.string().optional(),
+  customerAddress: z.string().optional(),
   subject: z.string().min(5, 'El asunto debe tener al menos 5 caracteres'),
   description: z.string().min(20, 'La descripción debe tener al menos 20 caracteres'),
   expectedResolution: z.string().optional(),
+  isAnonymous: z.boolean().optional(),
+  privacyPolicyAccepted: z.boolean().refine(val => val === true, {
+    message: 'Debes aceptar la política de privacidad y tratamiento de datos',
+  }),
+}).superRefine((data, ctx) => {
+  // Privacy-by-Design: Minimización de datos
+  // Validaciones condicionales basadas en si es anónimo o no
+  const isAnonymous = data.isAnonymous === true;
+  const isDocumentRequired = !isAnonymous && data.type !== 'SUGERENCIA' && data.type !== 'QUEJA';
+  
+  if (isDocumentRequired) {
+    if (!data.customerDocumentType || data.customerDocumentType === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Por favor selecciona un tipo de documento',
+        path: ['customerDocumentType'],
+      })
+    }
+    if (!data.customerDocumentNumber || data.customerDocumentNumber.length < 5) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Ingresa tu número de documento',
+        path: ['customerDocumentNumber'],
+      })
+    }
+  }
+
+  // Validaciones de contacto si NO es anónimo
+  if (!isAnonymous) {
+    if (!data.customerName || data.customerName.length < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'El nombre debe tener al menos 2 caracteres',
+        path: ['customerName'],
+      })
+    }
+    if (!data.customerEmail || !z.string().email().safeParse(data.customerEmail).success) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Ingresa un email válido',
+        path: ['customerEmail'],
+      })
+    }
+     if (!data.customerPhone || data.customerPhone.length < 10) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Ingresa un teléfono válido',
+        path: ['customerPhone'],
+      })
+    }
+  } else {
+    // Si ES anónimo, el email es opcional, pero si se ingresa debe ser válido
+    if (data.customerEmail && data.customerEmail.length > 0 && !z.string().email().safeParse(data.customerEmail).success) {
+       ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'El email ingresado no es válido',
+        path: ['customerEmail'],
+      })
+    }
+  }
 })
 
 type PQRFormData = z.infer<typeof pqrFormSchema>
@@ -76,25 +135,54 @@ export function PQRsModule() {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFiles(e.dataTransfer.files)
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+      // Create a FileList-like array or just use the files directly with our handler
+      const fileList = e.dataTransfer.files;
+      // We need a helper to process files
+      const newFiles = Array.from(fileList);
+      processFiles(newFiles);
     }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault()
     if (e.target.files && e.target.files[0]) {
-      handleFiles(e.target.files)
+      const newFiles = Array.from(e.target.files);
+      processFiles(newFiles);
     }
   }
+  
+  const processFiles = (newFiles: File[]) => {
+      // Validar tipo y tamaño
+      // Aceptamos PDF, imagenes, ZIP
+      const validTypes = [
+          'application/pdf', 
+          'image/jpeg', 
+          'image/png', 
+          'image/jpg', 
+          'application/zip', 
+          'application/x-zip-compressed',
+          'application/x-zip'
+      ];
+      
+      const validFiles = newFiles.filter(file => {
+      const isValidType = validTypes.includes(file.type) || file.name.endsWith('.pdf') || file.name.endsWith('.zip') || file.name.endsWith('.png') || file.name.endsWith('.jpg') || file.name.endsWith('.jpeg');
+      const isValidSize = file.size <= 5 * 1024 * 1024 // 5MB limit
+      
+      // Simple alerts for now, could be better UI
+      if (!isValidSize) {
+        // En producción usaríamos un toast
+        console.warn(`El archivo ${file.name} excede el tamaño máximo de 5MB`)
+      }
+      
+      return isValidSize // Allow types loosely if extension matches
+    })
 
-  const handleFiles = (fileList: FileList) => {
-    const newFiles = Array.from(fileList)
-    setFiles((prevFiles) => [...prevFiles, ...newFiles])
+    setFiles(prev => [...prev, ...validFiles])
   }
 
   const removeFile = (indexToRemove: number) => {
-    setFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove))
+    setFiles(prev => prev.filter((_, index) => index !== indexToRemove))
   }
 
   const {
@@ -103,12 +191,19 @@ export function PQRsModule() {
     formState: { errors },
     reset,
     watch,
+    setValue,
   } = useForm<PQRFormData>({
     resolver: zodResolver(pqrFormSchema),
+    defaultValues: {
+      isAnonymous: false
+    }
   })
 
   const selectedType = watch('type')
-
+  const isAnonymous = watch('isAnonymous')
+  const isDocumentOptional = selectedType === 'SUGERENCIA' || selectedType === 'QUEJA'
+  
+  // Efecto para animaciones al hacer scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -129,6 +224,24 @@ export function PQRsModule() {
     return () => observer.disconnect()
   }, [])
 
+  // Efecto para limpiar campos si se marca como anónimo
+  useEffect(() => {
+    if (isAnonymous) {
+      setValue('customerName', 'Anónimo')
+      setValue('customerPhone', '0000000000')
+      setValue('customerDocumentType', '')
+      setValue('customerDocumentNumber', '')
+      setValue('customerAddress', '')
+      // No limpiamos el email aquí porque puede ser opcionalmente provisto
+    } else {
+       // Si se desmarca, limpiamos los valores por defecto "Anónimo" para que el usuario ingrese los reales
+       if (watch('customerName') === 'Anónimo') setValue('customerName', '')
+       if (watch('customerPhone') === '0000000000') setValue('customerPhone', '')
+    }
+  }, [isAnonymous, setValue, watch])
+
+  // ... (sigue igual)
+
   const onSubmit = async (data: PQRFormData) => {
     setIsSubmitting(true)
     setSubmitError(null)
@@ -136,15 +249,21 @@ export function PQRsModule() {
     setConstancy(null)
     setCreatedCUN(null)
 
+    // Si es anónimo y no se proveyó email, usamos uno dummy para pasar validación de backend si es necesario,
+    // o el backend debería soportar nulls. Asumiremos que el backend requiere email, así que manejamos logicamente.
+    
+    // Fallback seguro para email: si es anónimo y no hay email, usar dummy. Si no es anónimo, el schema garantiza email válido.
+    const finalEmail = (isAnonymous && !data.customerEmail) ? 'anonimo@fitel.com.co' : (data.customerEmail || '')
+
     try {
       const response = await PQRService.createPQR({
         type: data.type as PQRType,
-        customerName: data.customerName,
-        customerEmail: data.customerEmail,
-        customerPhone: data.customerPhone,
-        customerDocumentType: data.customerDocumentType,
-        customerDocumentNumber: data.customerDocumentNumber,
-        customerAddress: data.customerAddress,
+        customerName: isAnonymous ? 'Anónimo' : (data.customerName || ''),
+        customerEmail: finalEmail,
+        customerPhone: isAnonymous ? '0000000000' : (data.customerPhone || ''),
+        customerDocumentType: isAnonymous ? '' : (data.customerDocumentType || ''),
+        customerDocumentNumber: isAnonymous ? '' : (data.customerDocumentNumber || ''),
+        customerAddress: isAnonymous ? '' : (data.customerAddress || ''),
         subject: data.subject,
         description: data.description,
         expectedResolution: data.expectedResolution,
@@ -159,6 +278,10 @@ export function PQRsModule() {
         }
         setFiles([])
         reset()
+        // Scroll to top/success message
+        if (sectionRef.current) {
+            sectionRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
       } else {
         setSubmitError(response.error || 'Ocurrió un error al enviar tu PQR. Por favor intenta de nuevo.')
       }
@@ -235,6 +358,7 @@ export function PQRsModule() {
               </div>
 
               {/* Nombre Completo */}
+              {!isAnonymous && (
               <div>
                 <label htmlFor="customerName" className="block text-sm font-semibold text-neutral-dark mb-2">
                   Nombre Completo *
@@ -254,13 +378,25 @@ export function PQRsModule() {
                   <p className="mt-1 text-sm text-red-600">{errors.customerName.message}</p>
                 )}
               </div>
+              )}
 
               {/* Email y Teléfono */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="customerEmail" className="block text-sm font-semibold text-neutral-dark mb-2">
-                    Email *
-                  </label>
+                    <label htmlFor="customerEmail" className="block text-sm font-semibold text-neutral-dark mb-2 flex items-center">
+                    Email {isAnonymous ? <span className="text-neutral-gray font-normal ml-1">(Opcional)</span> : '*'}
+                    {isAnonymous && (
+                      <div className="group relative ml-2">
+                      <div className="cursor-help text-neutral-gray hover:text-primary-blue transition-colors">
+                        <Info className="w-4 h-4" />
+                      </div>
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-neutral-dark text-white text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                        Solo si deseas recibir actualizaciones automáticas. Si prefieres anonimato total, guarda tu código CUN para consultar manualmente.
+                        <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-neutral-dark"></div>
+                      </div>
+                      </div>
+                    )}
+                    </label>
                   <input
                     type="email"
                     id="customerEmail"
@@ -277,6 +413,7 @@ export function PQRsModule() {
                   )}
                 </div>
 
+                {!isAnonymous && (
                 <div>
                   <label htmlFor="customerPhone" className="block text-sm font-semibold text-neutral-dark mb-2">
                     Teléfono *
@@ -296,13 +433,39 @@ export function PQRsModule() {
                     <p className="mt-1 text-sm text-red-600">{errors.customerPhone.message}</p>
                   )}
                 </div>
+                )}
               </div>
 
+              {/* Checkbox de Anonimato (Solo para Quejas y Sugerencias) */}
+              {isDocumentOptional && (
+                <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 animate-fade-in">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex items-center h-5 mt-0.5">
+                      <input
+                        id="isAnonymous"
+                        type="checkbox"
+                        {...register('isAnonymous')}
+                        className="w-4 h-4 rounded border-gray-300 text-secondary-blue focus:ring-secondary-blue transition-all cursor-pointer"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="isAnonymous" className="font-semibold text-neutral-dark cursor-pointer select-none">
+                        {selectedType === 'QUEJA' ? 'Presentar Queja Anónima' : 'Presentar Sugerencia Anónima'}
+                      </label>
+                      <p className="text-sm text-neutral-gray mt-1">
+                        Tus datos personales no serán registrados. La respuesta se deberá consultar manualmente con el número de radicado (CUN).
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Tipo y Número de Documento */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {!isAnonymous && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
                 <div>
                   <label htmlFor="customerDocumentType" className="block text-sm font-semibold text-neutral-dark mb-2">
-                    Tipo de Documento *
+                    Tipo de Documento {isDocumentOptional ? <span className="text-neutral-gray font-normal">(Opcional)</span> : '*'}
                   </label>
                   <select
                     id="customerDocumentType"
@@ -327,7 +490,7 @@ export function PQRsModule() {
 
                 <div>
                   <label htmlFor="customerDocumentNumber" className="block text-sm font-semibold text-neutral-dark mb-2">
-                    Número de Documento *
+                    Número de Documento {isDocumentOptional ? <span className="text-neutral-gray font-normal">(Opcional)</span> : '*'}
                   </label>
                   <input
                     type="text"
@@ -345,9 +508,11 @@ export function PQRsModule() {
                   )}
                 </div>
               </div>
+              )}
 
               {/* Dirección (Opcional) */}
-              <div>
+              {!isAnonymous && (
+              <div className="animate-fade-in">
                 <label htmlFor="customerAddress" className="block text-sm font-semibold text-neutral-dark mb-2">
                   Dirección <span className="text-neutral-gray font-normal">(Opcional)</span>
                 </label>
@@ -366,6 +531,7 @@ export function PQRsModule() {
                   <p className="mt-1 text-sm text-red-600">{errors.customerAddress.message}</p>
                 )}
               </div>
+              )}
 
               {/* Asunto */}
               <div>
@@ -482,6 +648,38 @@ export function PQRsModule() {
                     ))}
                   </div>
                 )}
+              </div>
+
+              {/* Política de Privacidad */}
+              <div className="flex items-start space-x-3 pt-6 border-t border-neutral-gray-light">
+                <div className="flex items-center h-5">
+                  <input
+                    id="privacyPolicyAccepted"
+                    type="checkbox"
+                    {...register('privacyPolicyAccepted')}
+                    className={`w-4 h-4 rounded border-gray-300 text-primary-red focus:ring-primary-red transition-all cursor-pointer ${
+                      errors.privacyPolicyAccepted ? 'border-red-500 ring-1 ring-red-500' : ''
+                    }`}
+                  />
+                </div>
+                <div className="ml-2 text-sm">
+                  <label htmlFor="privacyPolicyAccepted" className="font-medium text-neutral-dark cursor-pointer select-none">
+                    Autorizo el tratamiento de mis datos personales
+                  </label>
+                  <p className="text-neutral-gray text-xs mt-1 leading-relaxed">
+                    De conformidad con el principio de transparencia y la Ley 1581 de 2012. He leído y acepto la{' '}
+                    <Link href="/politica-privacidad" className="text-primary-red hover:underline font-semibold" target="_blank">
+                      Política de Privacidad
+                    </Link>
+                    {' '}y el tratamiento de mis datos para la gestión, respuesta y seguimiento de esta PQR.
+                  </p>
+                  {errors.privacyPolicyAccepted && (
+                    <div className="flex items-center mt-1 text-red-600 text-xs animate-shake">
+                       <AlertCircle className="w-3 h-3 mr-1" />
+                       {errors.privacyPolicyAccepted.message}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Mensajes de éxito/error */}

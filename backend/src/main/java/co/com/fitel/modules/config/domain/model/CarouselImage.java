@@ -9,9 +9,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "carousel_images")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class CarouselImage {
     
     @Id
@@ -46,4 +43,31 @@ public class CarouselImage {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public CarouselImage() {}
+    
+    public CarouselImage(Long id, String filename, String filePath, Integer orderIndex, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.filename = filename;
+        this.filePath = filePath;
+        this.orderIndex = orderIndex;
+        this.isActive = isActive;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getFilename() { return filename; }
+    public void setFilename(String filename) { this.filename = filename; }
+    public String getFilePath() { return filePath; }
+    public void setFilePath(String filePath) { this.filePath = filePath; }
+    public Integer getOrderIndex() { return orderIndex; }
+    public void setOrderIndex(Integer orderIndex) { this.orderIndex = orderIndex; }
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

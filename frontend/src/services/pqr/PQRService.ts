@@ -131,6 +131,38 @@ export class PQRService {
   }
 
   /**
+   * Solicita un reanálisis para una PQR
+   */
+  static async requestReanalysis(cun: string, reason: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/pqrs/${cun}/reanalisis`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason }),
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Error al solicitar reanálisis' }))
+        return {
+          success: false,
+          error: errorData.message || 'Error al solicitar reanálisis',
+        }
+      }
+
+      return { success: true }
+    } catch (error) {
+      console.error('Error en PQRService.requestReanalysis:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Error de conexión al servidor',
+      }
+    }
+  }
+
+  /**
    * Obtiene la constancia de radicación
    */
   static async getConstancy(cun: string): Promise<PQRConstancy | null> {

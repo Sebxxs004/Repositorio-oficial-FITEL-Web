@@ -16,12 +16,16 @@ import java.util.List;
  * Servicio para gestión de logs de operaciones
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 @Transactional
 public class OperationLogService {
     
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OperationLogService.class);
+    
     private final OperationLogRepository operationLogRepository;
+
+    public OperationLogService(OperationLogRepository operationLogRepository) {
+        this.operationLogRepository = operationLogRepository;
+    }
     
     /**
      * Registra una operación en el log
@@ -36,17 +40,16 @@ public class OperationLogService {
             String newValues,
             String ipAddress
     ) {
-        OperationLog logEntry = OperationLog.builder()
-                .entityType(entityType)
-                .entityId(entityId)
-                .operationType(operationType)
-                .operationDescription(operationDescription)
-                .performedBy(performedBy)
-                .performedAt(LocalDateTime.now())
-                .oldValues(oldValues)
-                .newValues(newValues)
-                .ipAddress(ipAddress)
-                .build();
+        OperationLog logEntry = new OperationLog();
+        logEntry.setEntityType(entityType);
+        logEntry.setEntityId(entityId);
+        logEntry.setOperationType(operationType);
+        logEntry.setOperationDescription(operationDescription);
+        logEntry.setPerformedBy(performedBy);
+        logEntry.setPerformedAt(LocalDateTime.now());
+        logEntry.setOldValues(oldValues);
+        logEntry.setNewValues(newValues);
+        logEntry.setIpAddress(ipAddress);
         
         OperationLog saved = operationLogRepository.save(logEntry);
         log.debug("Operation logged: {} - {} by {}", operationType, entityType, performedBy);

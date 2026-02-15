@@ -5,8 +5,8 @@ import co.com.fitel.modules.plans.application.dto.PlanDTO;
 import co.com.fitel.modules.plans.application.dto.UpdatePlanRequest;
 import co.com.fitel.modules.plans.domain.model.Plan;
 import co.com.fitel.modules.plans.domain.repository.PlanRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,14 +18,19 @@ import java.util.stream.Collectors;
  * 
  * Implementa el principio de Responsabilidad Única (SRP) - solo lógica de negocio de gestión de planes
  */
-@Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class PlanManagementService {
 
+    private static final Logger log = LoggerFactory.getLogger(PlanManagementService.class);
+
     private final PlanRepository planRepository;
     private final PlanMapper planMapper;
+
+    public PlanManagementService(PlanRepository planRepository, PlanMapper planMapper) {
+        this.planRepository = planRepository;
+        this.planMapper = planMapper;
+    }
 
     /**
      * Obtiene todos los planes (activos e inactivos)
@@ -72,17 +77,16 @@ public class PlanManagementService {
             log.info("Unmarked {} other popular plan(s) to set new plan as popular", popularPlans.size());
         }
 
-        Plan plan = Plan.builder()
-                .name(request.getName())
-                .description(request.getDescription())
-                .internetSpeedMbps(request.getInternetSpeedMbps())
-                .tvChannels(request.getTvChannels())
-                .monthlyPrice(request.getMonthlyPrice())
-                .active(request.getActive() != null ? request.getActive() : true)
-                .popular(isPopular)
-                .planType(request.getPlanType())
-                .backgroundImage(request.getBackgroundImage())
-                .build();
+        Plan plan = new Plan();
+        plan.setName(request.getName());
+        plan.setDescription(request.getDescription());
+        plan.setInternetSpeedMbps(request.getInternetSpeedMbps());
+        plan.setTvChannels(request.getTvChannels());
+        plan.setMonthlyPrice(request.getMonthlyPrice());
+        plan.setActive(request.getActive() != null ? request.getActive() : true);
+        plan.setPopular(isPopular);
+        plan.setPlanType(request.getPlanType());
+        plan.setBackgroundImage(request.getBackgroundImage());
 
         Plan savedPlan = planRepository.save(plan);
         log.info("Plan created successfully with id: {}", savedPlan.getId());

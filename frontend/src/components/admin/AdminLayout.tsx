@@ -106,25 +106,25 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
       icon: LayoutDashboard,
       label: 'Dashboard',
       path: '/operaciones-internas/dashboard',
-      active: pathname === '/operaciones-internas/dashboard',
+      roles: ['ADMIN', 'OPERARIO']
     },
     {
       icon: FileText,
       label: 'Gestión de PQRs',
       path: '/operaciones-internas/pqrs',
-      active: pathname?.startsWith('/operaciones-internas/pqrs'),
+      roles: ['ADMIN', 'OPERARIO']
     },
     {
       icon: Settings,
       label: 'Configuración',
       path: '/operaciones-internas/configuracion',
-      active: pathname?.startsWith('/operaciones-internas/configuracion'),
+      roles: ['ADMIN', 'OPERARIO']
     },
     {
       icon: Users,
       label: 'Usuarios e IPs',
       path: '/operaciones-internas/usuarios-ips',
-      active: pathname?.startsWith('/operaciones-internas/usuarios-ips'),
+      roles: ['ADMIN']
     },
   ]
 
@@ -133,15 +133,24 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
       icon: Package,
       label: 'Gestión de Planes',
       path: '/operaciones-internas/planes',
-      active: pathname?.startsWith('/operaciones-internas/planes'),
+      roles: ['ADMIN']
     },
     {
       icon: Tv,
       label: 'Gestión de Canales',
       path: '/operaciones-internas/canales',
-      active: pathname?.startsWith('/operaciones-internas/canales'),
+      roles: ['ADMIN']
     },
   ]
+
+  // Filtrar items según rol
+  const visibleMenuItems = menuItems.filter(item => 
+    !item.roles || (userInfo?.role && item.roles.includes(userInfo.role))
+  )
+  
+  const visibleGestionItems = gestionSubmenuItems.filter(item =>
+    !item.roles || (userInfo?.role && item.roles.includes(userInfo.role))
+  )
 
   return (
     <div className="min-h-screen bg-neutral-gray-light flex">
@@ -150,7 +159,6 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
         {/* Header del Sidebar */}
         <div className="p-6 border-b border-neutral-gray/20">
           <div className="flex items-center space-x-3 mb-4">
-            <Shield className="w-8 h-8 text-primary-red" />
             <h1 className="text-xl font-bold">FITEL Admin</h1>
           </div>
           
@@ -172,14 +180,16 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
         {/* Menú de Navegación */}
         <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
-          {menuItems.map((item) => {
+          {visibleMenuItems.map((item) => {
             const Icon = item.icon
+            const isActive = pathname === item.path || pathname?.startsWith(item.path + '/')
+            
             return (
               <Link
                 key={item.path}
                 href={item.path}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  item.active
+                  isActive
                     ? 'bg-primary-red text-neutral-white'
                     : 'text-neutral-gray-light hover:bg-neutral-gray/20 hover:text-neutral-white'
                 }`}
@@ -190,51 +200,55 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
             )
           })}
 
-          {/* Menú Desplegable de Gestión */}
-          <div>
-            <button
-              onClick={() => setIsGestionOpen(!isGestionOpen)}
-              className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
-                pathname?.startsWith('/operaciones-internas/planes') || 
-                pathname?.startsWith('/operaciones-internas/canales')
-                  ? 'bg-primary-red text-neutral-white'
-                  : 'text-neutral-gray-light hover:bg-neutral-gray/20 hover:text-neutral-white'
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <BarChart3 className="w-5 h-5" />
-                <span className="font-medium">Gestión</span>
-              </div>
-              {isGestionOpen ? (
-                <ChevronDown className="w-4 h-4" />
-              ) : (
-                <ChevronRight className="w-4 h-4" />
-              )}
-            </button>
+          {/* Menú Desplegable de Gestión (Solo si hay items visibles) */}
+          {visibleGestionItems.length > 0 && (
+            <div>
+              <button
+                onClick={() => setIsGestionOpen(!isGestionOpen)}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
+                  pathname?.startsWith('/operaciones-internas/planes') || 
+                  pathname?.startsWith('/operaciones-internas/canales')
+                    ? 'bg-primary-red text-neutral-white'
+                    : 'text-neutral-gray-light hover:bg-neutral-gray/20 hover:text-neutral-white'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <BarChart3 className="w-5 h-5" />
+                  <span className="font-medium">Gestión</span>
+                </div>
+                {isGestionOpen ? (
+                  <ChevronDown className="w-4 h-4" />
+                ) : (
+                  <ChevronRight className="w-4 h-4" />
+                )}
+              </button>
 
-            {/* Submenú */}
-            {isGestionOpen && (
-              <div className="mt-2 ml-4 space-y-1">
-                {gestionSubmenuItems.map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <Link
-                      key={item.path}
-                      href={item.path}
-                      className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors text-sm ${
-                        item.active
-                          ? 'bg-primary-red/80 text-neutral-white'
-                          : 'text-neutral-gray-light hover:bg-neutral-gray/20 hover:text-neutral-white'
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span>{item.label}</span>
-                    </Link>
-                  )
-                })}
-              </div>
-            )}
-          </div>
+              {/* Submenú */}
+              {isGestionOpen && (
+                <div className="mt-2 ml-4 space-y-1">
+                  {visibleGestionItems.map((item) => {
+                    const Icon = item.icon
+                    const isActive = pathname === item.path || pathname?.startsWith(item.path + '/')
+                    
+                    return (
+                      <Link
+                        key={item.path}
+                        href={item.path}
+                        className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors text-sm ${
+                          isActive
+                            ? 'bg-primary-red/80 text-neutral-white'
+                            : 'text-neutral-gray-light hover:bg-neutral-gray/20 hover:text-neutral-white'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </nav>
 
         {/* Botón de Cerrar Sesión */}

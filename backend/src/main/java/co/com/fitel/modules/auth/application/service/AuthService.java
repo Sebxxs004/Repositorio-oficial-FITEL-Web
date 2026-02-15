@@ -1,5 +1,7 @@
 package co.com.fitel.modules.auth.application.service;
 
+import co.com.fitel.common.service.EmailService;
+import co.com.fitel.modules.auth.application.dto.CreateUserRequest;
 import co.com.fitel.modules.auth.application.dto.LoginRequest;
 import co.com.fitel.modules.auth.application.dto.LoginResponse;
 import co.com.fitel.modules.auth.domain.model.AdminUser;
@@ -23,6 +25,7 @@ public class AuthService {
     private final AdminUserRepository adminUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final EmailService emailService;
     
     @Transactional
     public LoginResponse login(LoginRequest request) {
@@ -108,6 +111,71 @@ public class AuthService {
         }
     }
     
+    @Transactional
+    public void initiatePasswordChange(String username, String currentPassword) {
+        log.info("Iniciando cambio de contraseña para usuario: {}", username);
+        
+        Optional<AdminUser> userOpt = adminUserRepository.findByUsername(username);
+        
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+        
+        AdminUser user = userOpt.get();
+        
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new RuntimeException("Contraseña actual incorrecta");
+        }
+        
+        // Generar código de 6 dígitos
+        String code = String.format("%06d", new java.util.Random().nextInt(999999));
+        
+        user.setVerificationCode(code);
+        user.setVerificationCodeExpiresAt(java.time.LocalDateTime.now().plusMinutes(10)); // Valido por 10 min
+        adminUserRepository.save(user);
+        
+        // Enviar correo
+        try {
+            emailService.sendEmail(
+                user.getUsername(), // Asumimos que username es el email
+                "Código de Verificación - Cambio de Contraseña",
+                "Su código de verificación para cambiar la contraseña es: <b>" + code + "</b><br>Este código expira en 10 minutos."
+            );
+        } catch (Exception e) {
+            log.error("Error enviando correo de verificación: {}", e.getMessage());
+            throw new RuntimeException("Error enviando el correo de verificación");
+        }
+    }
+
+    @Transactional
+    public void confirmPasswordChange(String username, String newPassword, String code) {
+        log.info("Confirmando cambio de contraseña para usuario: {}", username);
+        
+        Optional<AdminUser> userOpt = adminUserRepository.findByUsername(username);
+        
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+        
+        AdminUser user = userOpt.get();
+        
+        if (user.getVerificationCode() == null || !user.getVerificationCode().equals(code)) {
+            throw new RuntimeException("Código de verificación inválido");
+        }
+        
+        if (user.getVerificationCodeExpiresAt().isBefore(java.time.LocalDateTime.now())) {
+            throw new RuntimeException("El código de verificación ha expirado");
+        }
+        
+        // Cambiar la contraseña
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setVerificationCode(null); // Limpiar código
+        user.setVerificationCodeExpiresAt(null);
+        
+        adminUserRepository.save(user);
+        log.info("Contraseña actualizada exitosamente para usuario: {}", username);
+    }
+
     /**
      * Crear un nuevo usuario administrador
      * La contraseña se hashea automáticamente con BCrypt antes de guardarse
@@ -135,6 +203,32 @@ public class AuthService {
         return savedUser;
     }
     
+    /**
+     * Crear un usuario desde una petición y enviar correo
+     */
+    @Transactional
+    public void createUser(CreateUserRequest request) {
+        // Crear usuario (ya hashea la contraseña)
+        createAdminUser(
+            request.getEmail(),
+            request.getPassword(), 
+            request.getFullName(),
+            request.getRole()
+        );
+        
+        // Enviar correo con la contraseña original (no hasheada)
+        try {
+            emailService.sendAccountCreationEmail(
+                request.getEmail(), 
+                request.getFullName(), 
+                request.getPassword()
+            );
+        } catch (Exception e) {
+            log.error("Usuario creado exitosamente pero falló el envío del correo de bienvenida a {}: {}", 
+                     request.getEmail(), e.getMessage());
+        }
+    }
+
     /**
      * Actualizar la contraseña de un usuario
      * La nueva contraseña se hashea automáticamente

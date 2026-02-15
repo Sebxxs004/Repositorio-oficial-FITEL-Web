@@ -2,6 +2,7 @@ package co.com.fitel.modules.auth.infrastructure.controller;
 
 import co.com.fitel.common.dto.ApiResponse;
 import co.com.fitel.modules.auth.application.dto.AddIPRequest;
+import co.com.fitel.modules.auth.application.dto.CreateUserRequest;
 import co.com.fitel.modules.auth.application.dto.AdminUserDTO;
 import co.com.fitel.modules.auth.application.dto.AllowedIPDTO;
 import co.com.fitel.modules.auth.application.dto.UpdateUserRequest;
@@ -20,6 +21,11 @@ import java.util.List;
 @CrossOrigin(originPatterns = "*", allowCredentials = "true", maxAge = 3600)
 public class AdminManagementController {
     
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        log.info("AdminManagementController initialized successfully");
+    }
+
     private final AdminManagementService adminManagementService;
     
     // ========== Endpoints de Usuarios ==========
@@ -29,6 +35,29 @@ public class AdminManagementController {
         log.info("GET /api/admin/users - Fetching all admin users");
         List<AdminUserDTO> users = adminManagementService.getAllUsers();
         return ResponseEntity.ok(ApiResponse.success("Usuarios obtenidos exitosamente", users));
+    }
+    
+    @GetMapping("/users/test-endpoint")
+    public ResponseEntity<String> testEndpoint() {
+        log.info("GET /api/admin/users/test-endpoint called");
+        return ResponseEntity.ok("Controller is working for GET");
+    }
+
+    @PostMapping("/users")
+    public ResponseEntity<ApiResponse<AdminUserDTO>> createUser(@RequestBody CreateUserRequest request) {
+        log.info("POST /api/admin/users - Creating new user: {}", request.getEmail());
+        try {
+            AdminUserDTO newUser = adminManagementService.createUser(request);
+            return ResponseEntity.ok(ApiResponse.success("Usuario creado exitosamente. Se han enviado las credenciales al correo.", newUser));
+        } catch (RuntimeException e) {
+            log.error("Error creating user (Runtime): {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        } catch (Exception e) {
+            log.error("Unexpected error creating user", e);
+            return ResponseEntity.status(500)
+                    .body(ApiResponse.error("Error interno del servidor: " + e.getMessage()));
+        }
     }
     
     @PutMapping("/users/{id}")

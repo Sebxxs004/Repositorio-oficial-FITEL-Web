@@ -9,9 +9,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "email_config")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class EmailConfig {
     
     @Id
@@ -49,4 +46,34 @@ public class EmailConfig {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public EmailConfig() {}
+    
+    public EmailConfig(Long id, String email, String appPassword, String smtpHost, Integer smtpPort, Boolean enabled, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.email = email;
+        this.appPassword = appPassword;
+        this.smtpHost = smtpHost;
+        this.smtpPort = smtpPort;
+        this.enabled = enabled;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getAppPassword() { return appPassword; }
+    public void setAppPassword(String appPassword) { this.appPassword = appPassword; }
+    public String getSmtpHost() { return smtpHost; }
+    public void setSmtpHost(String smtpHost) { this.smtpHost = smtpHost; }
+    public Integer getSmtpPort() { return smtpPort; }
+    public void setSmtpPort(Integer smtpPort) { this.smtpPort = smtpPort; }
+    public Boolean getEnabled() { return enabled; }
+    public void setEnabled(Boolean enabled) { this.enabled = enabled; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

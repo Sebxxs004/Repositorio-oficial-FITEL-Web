@@ -7,9 +7,11 @@
 
 'use client'
 
-import { CheckCircle, Clock, XCircle, AlertCircle, FileText, Eye } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle, Clock, XCircle, AlertCircle, FileText, Eye, RefreshCw, AlertTriangle } from 'lucide-react'
 import type { PQRResponse, PQRStatus } from '@/types/pqr.types'
 import { PQRTimeline } from './PQRTimeline'
+import { PQRService } from '@/services/pqr/PQRService'
 
 interface PQRSearchResultsProps {
   pqrs: PQRResponse[]
@@ -66,6 +68,41 @@ function getStatusColor(status: PQRStatus): string {
 }
 
 export function PQRSearchResults({ pqrs }: PQRSearchResultsProps) {
+  const [reanalysisOpen, setReanalysisOpen] = useState(false)
+  const [selectedCun, setSelectedCun] = useState<string | null>(null)
+  const [reason, setReason] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const handleOpenReanalysis = (cun: string) => {
+    setSelectedCun(cun)
+    setReanalysisOpen(true)
+    setReason('')
+    setSubmitSuccess(false)
+    setErrorMessage(null)
+  }
+
+  const handleSubmitReanalysis = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedCun || !reason || reason.length < 20) return
+
+    setIsSubmitting(true)
+    setErrorMessage(null)
+
+    const response = await PQRService.requestReanalysis(selectedCun, reason)
+
+    setIsSubmitting(false)
+    if (response.success) {
+      setSubmitSuccess(true)
+      setTimeout(() => {
+        setReanalysisOpen(false)
+        window.location.reload()
+      }, 2000)
+    } else {
+      setErrorMessage(response.error || 'Error desconocido al solicitar reanálisis')
+    }
+  }
 
   if (!pqrs || pqrs.length === 0) return null
 
@@ -227,7 +264,22 @@ export function PQRSearchResults({ pqrs }: PQRSearchResultsProps) {
                 {!isReceived && pqr.response && (
                   <div className="pt-4 border-t border-neutral-gray-light">
                     <h3 className="text-sm font-semibold text-neutral-gray mb-2">Respuesta</h3>
-                    <p className="text-neutral-dark">{pqr.response}</p>
+                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="text-neutral-dark">{pqr.response}</p>
+                    </div>
+
+                     {/* Botón de reanálisis */}
+                    {(pqr.status === 'RESUELTA' || pqr.status === 'CERRADA') && (
+                        <div className="mt-4 flex justify-end">
+                            <button
+                                onClick={() => handleOpenReanalysis(pqr.cun)}
+                                className="flex items-center gap-2 px-4 py-2 bg-neutral-white border border-primary-red text-primary-red hover:bg-primary-red hover:text-white rounded-lg transition-colors duration-300 font-medium text-sm"
+                            >
+                                <RefreshCw className="w-4 h-4" />
+                                No estoy conforme (Solicitar Reanálisis)
+                            </button>
+                        </div>
+                    )}
                   </div>
                 )}
 
@@ -266,6 +318,110 @@ export function PQRSearchResults({ pqrs }: PQRSearchResultsProps) {
           </div>
         )
       })}
+      {/* Modal de Reanálisis */}
+      {reanalysisOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-300">
+                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 className="text-xl font-bold text-neutral-dark flex items-center gap-2">
+                        <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                        Solicitar Reanálisis
+                    </h3>
+                    <button 
+                        onClick={() => setReanalysisOpen(false)}
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <XCircle className="w-6 h-6" />
+                    </button>
+                </div>
+                
+                <div className="p-6 space-y-4">
+                    {!submitSuccess ? (
+                        <>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+                                <p className="flex gap-2">
+                                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                                    <span>
+                                        Si no estás conforme con la respuesta recibida, puedes solicitar un reanálisis. 
+                                        Tu caso será reabierto y asignado nuevamente para revisión.
+                                    </span>
+                                </p>
+                            </div>
+
+                            <form onSubmit={handleSubmitReanalysis}>
+                                <div className="space-y-2">
+                                    <label htmlFor="reason" className="block text-sm font-medium text-gray-700">
+                                        Motivo de inconformidad <span className="text-red-500">*</span>
+                                    </label>
+                                    <textarea
+                                        id="reason"
+                                        rows={4}
+                                        className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-red focus:ring focus:ring-primary-red/20 text-sm p-3 border"
+                                        placeholder="Por favor explica detalladamente por qué no estás conforme con la respuesta..."
+                                        value={reason}
+                                        onChange={(e) => setReason(e.target.value)}
+                                        minLength={20}
+                                        maxLength={2000}
+                                        required
+                                    />
+                                    <p className="text-xs text-gray-500 text-right">
+                                        {reason.length}/2000 caracteres (mínimo 20)
+                                    </p>
+                                </div>
+
+                                {errorMessage && (
+                                    <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-200 flex items-center gap-2">
+                                        <XCircle className="w-4 h-4" />
+                                        {errorMessage}
+                                    </div>
+                                )}
+
+                                <div className="mt-6 flex justify-end gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setReanalysisOpen(false)}
+                                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm font-medium transition-colors"
+                                        disabled={isSubmitting}
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting || reason.length < 20}
+                                        className="flex items-center gap-2 px-4 py-2 bg-primary-red text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow text-sm font-medium"
+                                    >
+                                        {isSubmitting ? (
+                                            <>
+                                                <RefreshCw className="w-4 h-4 animate-spin" />
+                                                Enviando...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCircle className="w-4 h-4" />
+                                                Enviar Solicitud
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
+                        </>
+                    ) : (
+                        <div className="text-center py-8">
+                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <CheckCircle className="w-8 h-8 text-green-600" />
+                            </div>
+                            <h4 className="text-xl font-bold text-gray-900 mb-2">¡Solicitud Recibida!</h4>
+                            <p className="text-gray-600 mb-6">
+                                Tu solicitud de reanálisis ha sido registrada correctamente. 
+                                La PQR ha cambiado a estado "En Análisis" y recibirás una nueva respuesta pronto.
+                            </p>
+                            <p className="text-sm text-gray-400">Actualizando...</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -48,6 +48,12 @@ public class AdminUser {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
     
+    @Column
+    private String verificationCode;
+    
+    @Column
+    private LocalDateTime verificationCodeExpiresAt;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

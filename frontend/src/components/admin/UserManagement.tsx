@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { User, Edit, Trash2, Lock, Save, X, Loader2, Eye, EyeOff } from 'lucide-react'
+import { User, Edit, Trash2, Lock, Save, X, Loader2, Eye, EyeOff, UserPlus } from 'lucide-react'
 
 interface AdminUser {
   id: number
@@ -20,6 +20,13 @@ interface EditUserForm {
   confirmPassword: string
 }
 
+interface CreateUserForm {
+  fullName: string
+  email: string
+  password: string
+  role: string
+}
+
 export function UserManagement() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -27,6 +34,15 @@ export function UserManagement() {
   const [editingUser, setEditingUser] = useState<EditUserForm | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  
+  // Estado para creación de usuario
+  const [isCreating, setIsCreating] = useState(false)
+  const [newUser, setNewUser] = useState<CreateUserForm>({
+    fullName: '',
+    email: '',
+    password: '',
+    role: 'ADMIN'
+  })
 
   useEffect(() => {
     loadUsers()
@@ -51,6 +67,65 @@ export function UserManagement() {
       setMessage({ type: 'error', text: 'Error al cargar los usuarios' })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleStartCreate = () => {
+    setIsCreating(true)
+    setNewUser({
+      fullName: '',
+      email: '',
+      password: '',
+      role: 'ADMIN'
+    })
+    setEditingUser(null) // Cerrar edición si está abierta
+    setMessage(null)
+  }
+
+  const handleCancelCreate = () => {
+    setIsCreating(false)
+    setShowPassword(false)
+  }
+
+  const handleCreate = async () => {
+    // Validaciones
+    if (!newUser.fullName || !newUser.email || !newUser.password) {
+      setMessage({ type: 'error', text: 'Todos los campos son obligatorios' })
+      return
+    }
+
+    if (newUser.password.length < 6) {
+      setMessage({ type: 'error', text: 'La contraseña debe tener al menos 6 caracteres' })
+      return
+    }
+
+    setIsSaving(true)
+    setMessage(null)
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'}/admin/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(newUser),
+      })
+
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Usuario creado exitosamente. Se han enviado las credenciales al correo.' })
+        setIsCreating(false)
+        setShowPassword(false)
+        loadUsers()
+      } else {
+        const error = await response.json()
+        setMessage({ type: 'error', text: error.message || 'Error al crear el usuario' })
+      }
+    } catch (error) {
+      console.error('Error al crear usuario:', error)
+      setMessage({ type: 'error', text: 'Error al crear el usuario. Verifique su conexión.' })
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -184,9 +259,19 @@ export function UserManagement() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-neutral-dark mb-2">Gestión de Usuarios Administradores</h2>
-        <p className="text-neutral-gray">Administra los usuarios del panel de administración.</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-neutral-dark mb-2">Gestión de Usuarios Administradores</h2>
+          <p className="text-neutral-gray">Administra los usuarios del panel de administración.</p>
+        </div>
+        <button
+          onClick={handleStartCreate}
+          className="btn-primary flex items-center space-x-2 px-4 py-2"
+          disabled={isCreating}
+        >
+          <UserPlus className="w-5 h-5" />
+          <span>Nuevo Usuario</span>
+        </button>
       </div>
 
       {message && (
@@ -201,6 +286,110 @@ export function UserManagement() {
 
       {/* Lista de usuarios */}
       <div className="space-y-4">
+        
+        {/* Formulario de creación */}
+        {isCreating && (
+          <div className="bg-neutral-white rounded-lg border border-primary-red/20 p-6 shadow-sm ring-1 ring-primary-red/10">
+            <h3 className="text-lg font-bold text-neutral-dark mb-4 flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-primary-red" />
+              Nuevo Usuario
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-neutral-dark mb-2">
+                    Nombre Completo
+                  </label>
+                  <input
+                    type="text"
+                    value={newUser.fullName}
+                    onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })}
+                    placeholder="Ej. Juan Pérez"
+                    className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-neutral-dark mb-2">
+                    Correo Electrónico (Usuario)
+                  </label>
+                  <input
+                    type="email"
+                    value={newUser.email}
+                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                    placeholder="ejemplo@fitel.com.co"
+                    className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-neutral-dark mb-2">
+                    Contraseña Inicial
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={newUser.password}
+                      onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                      placeholder="Mínimo 6 caracteres"
+                      className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-gray hover:text-neutral-dark"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-neutral-dark mb-2">
+                    Rol
+                  </label>
+                  <select
+                    value={newUser.role}
+                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                    className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red bg-white"
+                  >
+                    <option value="ADMIN">Administrador</option>
+                    <option value="OPERARIO">Operario</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t border-neutral-gray-light mt-4">
+                <button
+                  onClick={handleCancelCreate}
+                  className="px-4 py-2 border border-neutral-gray-light rounded-lg text-neutral-gray hover:bg-neutral-gray-light transition-colors flex items-center space-x-2"
+                >
+                  <X className="w-4 h-4" />
+                  <span>Cancelar</span>
+                </button>
+                <button
+                  onClick={handleCreate}
+                  disabled={isSaving}
+                  className="btn-primary flex items-center space-x-2 px-4 py-2"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Creando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      <span>Crear Usuario</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {users.map((user) => (
           <div
             key={user.id}

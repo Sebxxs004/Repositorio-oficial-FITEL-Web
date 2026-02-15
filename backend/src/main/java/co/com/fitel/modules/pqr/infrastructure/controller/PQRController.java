@@ -2,6 +2,7 @@ package co.com.fitel.modules.pqr.infrastructure.controller;
 
 import co.com.fitel.common.dto.ApiResponse;
 import co.com.fitel.modules.pqr.application.dto.CreatePQRRequest;
+import co.com.fitel.modules.pqr.application.dto.ReanalysisRequest;
 import co.com.fitel.modules.pqr.application.dto.PQRConstancyDTO;
 import co.com.fitel.modules.pqr.application.dto.PQRResponseDTO;
 import co.com.fitel.modules.pqr.application.service.PQRService;
@@ -101,6 +102,27 @@ public class PQRController {
             log.error("Error searching PQR: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error("PQR no encontrada: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Solicita reanálisis (recurso) para una PQR
+     */
+    @PostMapping("/{cun}/reanalisis")
+    public ResponseEntity<ApiResponse<PQRResponseDTO>> requestReanalysis(
+            @PathVariable String cun,
+            @Valid @RequestBody ReanalysisRequest request) {
+        log.info("POST /api/pqrs/{}/reanalisis", cun);
+        try {
+            PQRResponseDTO pqr = pqrService.requestReanalysis(cun, request);
+            return ResponseEntity.ok(ApiResponse.success("Solicitud de reanálisis enviada exitosamente", pqr));
+        } catch (co.com.fitel.common.exception.BusinessException e) {
+            return ResponseEntity.status(e.getStatus())
+                .body(ApiResponse.error(e.getMessage()));
+        } catch (Exception e) {
+            log.error("Error requesting reanalysis: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Error inesperado al solicitar reanálisis"));
         }
     }
     

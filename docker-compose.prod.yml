@@ -1,0 +1,75 @@
+services:
+  # Base de Datos (Producción)
+  mariadb:
+    image: mariadb:10.11
+    container_name: fitel-mariadb
+    environment:
+      MYSQL_DATABASE: fitel_db
+      MYSQL_USER: fitel
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fitel-network
+    restart: always
+
+  # Backend API (Producción)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fitel-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DATABASE_URL: jdbc:mariadb://mariadb:3306/fitel_db
+      DATABASE_USERNAME: fitel
+      DATABASE_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      STORAGE_PROVIDER: local
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      # Configuración de URLs para correos y redirecciones
+      APP_FRONTEND_URL: http://${SERVER_IP}:3000
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    volumes:
+      - ./backend/logs:/app/logs
+      - ./backend/uploads:/app/uploads
+    networks:
+      - fitel-network
+    restart: always
+
+  # Frontend (Producción)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Importante: Next.js 'quema' esta variable al momento de construir (build)
+        NEXT_PUBLIC_API_URL: http://${SERVER_IP}:8080/api
+    container_name: fitel-frontend
+    environment:
+      NODE_ENV: production
+      ALLOWED_ADMIN_IPS: ${ALLOWED_ADMIN_IPS}
+    ports:
+      - "80:3000" # Expone el puerto 3000 del contenedor en el puerto 80 del servidor (Web estándar)
+    depends_on:
+      - backend
+    networks:
+      - fitel-network
+    restart: always
+
+volumes:
+  mariadb_data:
+
+networks:
+  fitel-network:
+    driver: bridge

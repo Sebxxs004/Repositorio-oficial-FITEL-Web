@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Validation Error")
-                .message("Error de validación en los datos enviados")
+                .message("Error de validación: " + errors.toString())
                 .details(errors)
                 .build();
 

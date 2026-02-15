@@ -35,6 +35,30 @@ public class EmailService {
     }
 
     /**
+     * Envía un correo electrónico simple (usado por ejemplo para códigos de verificación)
+     */
+    public void sendEmail(String to, String subject, String body) {
+        try {
+            JavaMailSender configuredSender = getConfiguredMailSender();
+            EmailConfig config = getEmailConfig();
+
+            MimeMessage message = configuredSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(config.getFromEmail(), "FITEL Admin");
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(body, true);
+
+            configuredSender.send(message);
+            log.info("Correo enviado a: {}", to);
+        } catch (Exception e) {
+            log.error("Error enviando email a {}: {}", to, e.getMessage());
+            throw new RuntimeException("Error al enviar el correo: " + e.getMessage());
+        }
+    }
+
+    /**
      * Envía al cliente la respuesta de su PQR, opcionalmente con un archivo adjunto.
      */
     public void sendPQRResponseToCustomer(String to,
@@ -255,6 +279,163 @@ public class EmailService {
     }
     
     /**
+     * Envía un correo de creación de cuenta administrativa con las credenciales.
+     */
+    public void sendAccountCreationEmail(String to, String name, String password) {
+        try {
+            EmailConfig config = getEmailConfig();
+            JavaMailSender configuredSender = getConfiguredMailSender();
+
+            MimeMessage message = configuredSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(config.getEmail());
+            helper.setTo(to);
+            helper.setSubject("Bienvenido al Panel Administrativo de Fitel");
+
+            String htmlContent = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        body {
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            line-height: 1.6;
+                            color: #1f2937;
+                            background-color: #f3f4f6;
+                            padding: 20px;
+                        }
+                        .email-wrapper {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #ffffff;
+                            border-radius: 12px;
+                            overflow: hidden;
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        }
+                        .header {
+                            background: linear-gradient(135deg, #dc2626, #b91c1c);
+                            color: white;
+                            padding: 30px;
+                            text-align: center;
+                        }
+                        .header-title {
+                            font-size: 24px;
+                            font-weight: 600;
+                            margin: 0;
+                        }
+                        .content {
+                            padding: 40px;
+                        }
+                        .welcome-text {
+                            font-size: 18px;
+                            color: #374151;
+                            margin-bottom: 20px;
+                        }
+                        .credentials-box {
+                            background-color: #f8fafc;
+                            border-left: 4px solid #dc2626;
+                            padding: 20px;
+                            margin: 20px 0;
+                            border-radius: 4px;
+                        }
+                        .credential-item {
+                            margin-bottom: 10px;
+                        }
+                        .credential-label {
+                            font-weight: 600;
+                            color: #4b5563;
+                            display: block;
+                            font-size: 0.875rem;
+                            text-transform: uppercase;
+                            letter-spacing: 0.05em;
+                        }
+                        .credential-value {
+                            font-family: 'Consolas', 'Monaco', monospace;
+                            background-color: #e5e7eb;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            color: #111827;
+                            font-size: 1rem;
+                        }
+                        .button-container {
+                            text-align: center;
+                            margin-top: 30px;
+                        }
+                        .login-button {
+                            display: inline-block;
+                            background-color: #dc2626;
+                            color: white;
+                            text-decoration: none;
+                            padding: 12px 24px;
+                            border-radius: 6px;
+                            font-weight: 600;
+                            transition: background-color 0.2s;
+                        }
+                        .login-button:hover {
+                            background-color: #b91c1c;
+                        }
+                        .footer {
+                            background-color: #f9fafb;
+                            padding: 20px;
+                            text-align: center;
+                            font-size: 0.875rem;
+                            color: #6b7280;
+                            border-top: 1px solid #e5e7eb;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-wrapper">
+                        <div class="header">
+                            <h1 class="header-title">Bienvenido a Fitel</h1>
+                        </div>
+                        <div class="content">
+                            <p class="welcome-text">Hola <strong>%s</strong>,</p>
+                            <p>Tu cuenta administrativa ha sido creada exitosamente. A continuación encontrarás tus credenciales de acceso:</p>
+                            
+                            <div class="credentials-box">
+                                <div class="credential-item">
+                                    <span class="credential-label">Usuario / Email</span>
+                                    <span class="credential-value">%s</span>
+                                </div>
+                                <div class="credential-item">
+                                    <span class="credential-label">Contraseña Temporal</span>
+                                    <span class="credential-value">%s</span>
+                                </div>
+                            </div>
+                            
+                            <p>Por razones de seguridad, te recomendamos cambiar tu contraseña después de iniciar sesión por primera vez.</p>
+                            
+                            <div class="button-container">
+                                <a href="https://fitel.com.co/admin/login" class="login-button">Iniciar Sesión</a>
+                            </div>
+                        </div>
+                        <div class="footer">
+                            <p>&copy; 2024 Fitel. Todos los derechos reservados.</p>
+                            <p>Este es un mensaje automático, por favor no responder.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            """.formatted(name, to, password);
+
+            helper.setText(htmlContent, true);
+            configuredSender.send(message);
+            log.info("Email de creación de cuenta enviado a: {}", to);
+
+        } catch (MessagingException e) {
+            log.error("Error al crear mensaje de correo: {}", e.getMessage());
+            throw new RuntimeException("Error al enviar el correo", e);
+        } catch (Exception e) {
+            log.error("Error al enviar email de creación de cuenta: {}", e.getMessage());
+            throw new RuntimeException("Error enviando email: " + e.getMessage());
+        }
+    }
+
+    /**
      * Crea un JavaMailSender dinámico basado en la configuración de la BD
      */
     private JavaMailSender getConfiguredMailSender() {
@@ -280,6 +461,81 @@ public class EmailService {
         props.put("mail.smtp.writetimeout", "5000");
         
         return mailSender;
+    }
+
+    /**
+     * Notifica solicitud de reanálisis (Apelación) a cliente y admins
+     */
+    public void sendReanalysisNotification(String to, String customerName, String cun, String appealReason) {
+        try {
+            EmailConfig config = getEmailConfig();
+            JavaMailSender configuredSender = getConfiguredMailSender();
+            
+            // 1. Correo al Usuario
+            MimeMessage userMessage = configuredSender.createMimeMessage();
+            MimeMessageHelper userHelper = new MimeMessageHelper(userMessage, true, "UTF-8");
+            userHelper.setFrom(config.getEmail());
+            userHelper.setTo(to);
+            userHelper.setSubject("Solicitud de Reanálisis Recibida - CUN: " + cun);
+            
+            String userHtml = """
+                <!DOCTYPE html>
+                <html>
+                <body>
+                    <div style="font-family: Arial, sans-serif; padding: 20px;">
+                        <h2 style="color: #d32f2f;">Solicitud de Reanálisis Recibida</h2>
+                        <p>Hola <strong>%s</strong>,</p>
+                        <p>Hemos recibido su solicitud de revisión para la PQR con CUN <strong>%s</strong>.</p>
+                        <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <strong>Motivo de inconformidad:</strong><br/>
+                            %s
+                        </div>
+                        <p>Su caso ha pasado a estado <strong>EN ANÁLISIS</strong>. Nuestro equipo revisará nuevamente su solicitud y le daremos respuesta en los próximos días hábiles.</p>
+                        <p style="font-size: 12px; color: #666;">FITEL - Sistema de PQR</p>
+                    </div>
+                </body>
+                </html>
+                """.formatted(customerName, cun, appealReason.replace("\n", "<br/>"));
+            
+            userHelper.setText(userHtml, true);
+            configuredSender.send(userMessage);
+
+            // 2. Correo a la Empresa (Admin)
+            MimeMessage adminMessage = configuredSender.createMimeMessage();
+            MimeMessageHelper adminHelper = new MimeMessageHelper(adminMessage, true, "UTF-8");
+            adminHelper.setFrom(config.getEmail());
+            adminHelper.setTo(config.getEmail()); 
+            adminHelper.setSubject("[ALERTA] Nueva Solicitud de Reanálisis - CUN: " + cun);
+            
+            String adminHtml = """
+                <!DOCTYPE html>
+                <html>
+                <body>
+                    <div style="font-family: Arial, sans-serif; padding: 20px;">
+                        <h2 style="color: #d32f2f;">⚠️ Nueva Solicitud de Reanálisis/Apelación</h2>
+                        <p>El usuario ha marcado inconformidad con la respuesta de una PQR.</p>
+                        <ul>
+                            <li><strong>CUN:</strong> %s</li>
+                            <li><strong>Cliente:</strong> %s</li>
+                            <li><strong>Email:</strong> %s</li>
+                        </ul>
+                        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; border: 1px solid #ffeeba; margin: 20px 0;">
+                            <strong>Motivo de apelación:</strong><br/>
+                            %s
+                        </div>
+                        <p>Por favor, revisar el caso en el panel administrativo lo antes posible.</p>
+                    </div>
+                </body>
+                </html>
+                """.formatted(cun, customerName, to, appealReason.replace("\n", "<br/>"));
+            
+            adminHelper.setText(adminHtml, true);
+            configuredSender.send(adminMessage);
+            
+            log.info("Notificaciones de reanálisis enviadas para CUN {}", cun);
+        } catch (Exception e) {
+            log.error("Error enviando notificaciones de reanálisis para CUN {}: {}", cun, e.getMessage()); 
+        }
     }
     
     /**
@@ -1170,4 +1426,158 @@ public class EmailService {
                 .replace("{{SUBJECT}}", subject != null ? subject : "")
                 .replace("{{MESSAGE}}", message != null ? message.replace("\n", "<br>") : "");
     }
+
+    /**
+     * Envía las credenciales de acceso al nuevo usuario administrativo.
+     */
+    public void sendAccountCreationEmail(String to, String name, String username, String initialPassword) {
+        try {
+            EmailConfig config = getEmailConfig();
+            JavaMailSender configuredSender = getConfiguredMailSender();
+
+            MimeMessage message = configuredSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(config.getEmail());
+            helper.setTo(to);
+            helper.setSubject("Bienvenido al Panel Administrativo de FITEL");
+
+            String htmlContent = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        body {
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            line-height: 1.6;
+                            color: #1f2937;
+                            background-color: #f3f4f6;
+                            padding: 20px;
+                        }
+                        .email-wrapper {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #ffffff;
+                            border-radius: 8px;
+                            overflow: hidden;
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        }
+                        .header {
+                            background-color: #dc2626;
+                            color: white;
+                            padding: 24px;
+                            text-align: center;
+                        }
+                        .content {
+                            padding: 32px;
+                        }
+                        .credentials-box {
+                            background-color: #f8fafc;
+                            border: 1px solid #e2e8f0;
+                            border-radius: 6px;
+                            padding: 16px;
+                            margin: 20px 0;
+                        }
+                        .credential-row {
+                            margin-bottom: 8px;
+                        }
+                        .label {
+                            font-weight: 600;
+                            color: #64748b;
+                        }
+                        .value {
+                            font-family: monospace;
+                            font-size: 1.1em;
+                            color: #0f172a;
+                        }
+                        .footer {
+                            background-color: #f1f5f9;
+                            padding: 16px;
+                            text-align: center;
+                            font-size: 12px;
+                            color: #64748b;
+                        }
+                        .button {
+                            display: inline-block;
+                            background-color: #dc2626;
+                            color: white;
+                            padding: 12px 24px;
+                            border-radius: 6px;
+                            text-decoration: none;
+                            font-weight: 600;
+                            margin-top: 16px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-wrapper">
+                        <div class="header">
+                            <h1 style="margin:0; font-size: 24px;">Bienvenido a FITEL</h1>
+                        </div>
+                        <div class="content">
+                            <p>Hola <strong>{{NAME}}</strong>,</p>
+                            <p>Se ha creado una cuenta de administrador para ti en el portal web de FITEL.</p>
+                            <p>A continuación encontrarás tus credenciales de acceso:</p>
+                            
+                            <div class="credentials-box">
+                                <div class="credential-row">
+                                    <span class="label">Usuario:</span><br>
+                                    <span class="value">{{USERNAME}}</span>
+                                </div>
+                                <div class="credential-row">
+                                    <span class="label">Contraseña:</span><br>
+                                    <span class="value">{{PASSWORD}}</span>
+                                </div>
+                            </div>
+                            
+                            <p>Por seguridad, te recomendamos cambiar tu contraseña al iniciar sesión por primera vez.</p>
+                            
+                            <div style="text-align: center;">
+                                <a href="https://fitel.com.co/admin" class="button">Ir al Panel de Administración</a>
+                            </div>
+                        </div>
+                        <div class="footer">
+                            <p>Este es un mensaje automático, por favor no responder.</p>
+                            <p>&copy; 2024 FITEL. Todos los derechos reservados.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """
+                .replace("{{NAME}}", name)
+                .replace("{{USERNAME}}", username)
+                .replace("{{PASSWORD}}", initialPassword);
+
+            helper.setText(htmlContent, true);
+
+            configuredSender.send(message);
+            log.info("Correo de creación de cuenta enviado a: {}", to);
+
+        } catch (MessagingException e) {
+            log.error("Error enviando correo de creación de cuenta a {}: {}", to, e.getMessage());
+        } catch (Exception e) {
+            log.error("Error inesperado enviando correo a {}: {}", to, e.getMessage());
+        }
+    }
+
+    private JavaMailSender getConfiguredMailSender() {
+        EmailConfig config = getEmailConfig();
+
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost(config.getHost() != null ? config.getHost() : "smtp.gmail.com");
+        mailSender.setPort(config.getPort() != null ? config.getPort() : 587);
+        mailSender.setUsername(config.getUsername());
+        mailSender.setPassword(config.getPassword());
+        
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        // props.put("mail.debug", "true"); // Descomentar para debug
+        
+        return mailSender;
+    }
 }
+

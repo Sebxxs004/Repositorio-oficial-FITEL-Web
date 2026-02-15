@@ -32,6 +32,10 @@ SOURCE 09_migrate_ips_to_encrypted.sql;
 SOURCE 10_create_config_tables.sql;
 SOURCE 11_update_pqr_table.sql;
 SOURCE 12_create_email_config.sql;
+SOURCE 13_create_operation_logs.sql;
+SOURCE 14_remove_assigned_to_column.sql;
+SOURCE 15_add_background_image_to_plans.sql;
+SOURCE 16_add_response_attachment_path.sql;
 
 -- =====================================================
 -- Verificación Final

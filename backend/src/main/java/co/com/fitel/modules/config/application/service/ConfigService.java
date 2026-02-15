@@ -9,8 +9,8 @@ import co.com.fitel.modules.config.domain.model.EmailConfig;
 import co.com.fitel.modules.config.domain.repository.CarouselImageRepository;
 import co.com.fitel.modules.config.domain.repository.ContactConfigRepository;
 import co.com.fitel.modules.config.domain.repository.EmailConfigRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +18,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class ConfigService {
+    
+    private static final Logger log = LoggerFactory.getLogger(ConfigService.class);
     
     private final ContactConfigRepository contactConfigRepository;
     private final CarouselImageRepository carouselImageRepository;
     private final EmailConfigRepository emailConfigRepository;
+
+    public ConfigService(ContactConfigRepository contactConfigRepository, CarouselImageRepository carouselImageRepository, EmailConfigRepository emailConfigRepository) {
+        this.contactConfigRepository = contactConfigRepository;
+        this.carouselImageRepository = carouselImageRepository;
+        this.emailConfigRepository = emailConfigRepository;
+    }
     
     @Transactional(readOnly = true)
     public ContactConfigDTO getContactConfig() {

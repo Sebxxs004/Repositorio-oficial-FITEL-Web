@@ -35,13 +35,11 @@ public class CreatePQRRequest {
     @Size(max = 20)
     private String customerPhone;
     
-    @NotBlank(message = "El tipo de documento es requerido")
     @Size(max = 20)
-    private String customerDocumentType; // CC, NIT, CE, etc.
+    private String customerDocumentType; // CC, NIT, CE, etc. (Opcional para algunas PQRs)
     
-    @NotBlank(message = "El número de documento es requerido")
     @Size(max = 50)
-    private String customerDocumentNumber;
+    private String customerDocumentNumber; // (Opcional para algunas PQRs)
     
     @Size(max = 500)
     private String customerAddress;

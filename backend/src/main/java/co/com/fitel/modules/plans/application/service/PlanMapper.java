@@ -17,20 +17,21 @@ public class PlanMapper {
             return null;
         }
 
-        return PlanDTO.builder()
-                .id(plan.getId())
-                .name(plan.getName())
-                .description(plan.getDescription())
-                .internetSpeedMbps(plan.getInternetSpeedMbps())
-                .tvChannels(plan.getTvChannels())
-                .monthlyPrice(plan.getMonthlyPrice())
-                .active(plan.getActive())
-                .popular(plan.getPopular())
-                .planType(plan.getPlanType())
-                .backgroundImage(plan.getBackgroundImage())
-                .createdAt(plan.getCreatedAt())
-                .updatedAt(plan.getUpdatedAt())
-                .build();
+        PlanDTO dto = new PlanDTO();
+        dto.setId(plan.getId());
+        dto.setName(plan.getName());
+        dto.setDescription(plan.getDescription());
+        dto.setInternetSpeedMbps(plan.getInternetSpeedMbps());
+        dto.setTvChannels(plan.getTvChannels());
+        dto.setMonthlyPrice(plan.getMonthlyPrice());
+        dto.setActive(plan.getActive());
+        dto.setPopular(plan.getPopular());
+        dto.setPlanType(plan.getPlanType());
+        dto.setBackgroundImage(plan.getBackgroundImage());
+        dto.setCreatedAt(plan.getCreatedAt());
+        dto.setUpdatedAt(plan.getUpdatedAt());
+
+        return dto;
     }
 
     public Plan toEntity(PlanDTO dto) {
@@ -38,17 +39,18 @@ public class PlanMapper {
             return null;
         }
 
-        return Plan.builder()
-                .id(dto.getId())
-                .name(dto.getName())
-                .description(dto.getDescription())
-                .internetSpeedMbps(dto.getInternetSpeedMbps())
-                .tvChannels(dto.getTvChannels())
-                .monthlyPrice(dto.getMonthlyPrice())
-                .active(dto.getActive())
-                .popular(dto.getPopular())
-                .planType(dto.getPlanType())
-                .backgroundImage(dto.getBackgroundImage())
-                .build();
+        Plan plan = new Plan();
+        plan.setId(dto.getId());
+        plan.setName(dto.getName());
+        plan.setDescription(dto.getDescription());
+        plan.setInternetSpeedMbps(dto.getInternetSpeedMbps());
+        plan.setTvChannels(dto.getTvChannels());
+        plan.setMonthlyPrice(dto.getMonthlyPrice());
+        plan.setActive(dto.getActive());
+        plan.setPopular(dto.getPopular());
+        plan.setPlanType(dto.getPlanType());
+        plan.setBackgroundImage(dto.getBackgroundImage());
+
+        return plan;
     }
 }

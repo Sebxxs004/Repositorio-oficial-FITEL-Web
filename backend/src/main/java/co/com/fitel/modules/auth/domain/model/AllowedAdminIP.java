@@ -1,10 +1,6 @@
 package co.com.fitel.modules.auth.domain.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -13,10 +9,6 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "allowed_admin_ips")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class AllowedAdminIP {
     
     @Id
@@ -39,7 +31,6 @@ public class AllowedAdminIP {
     private String description;
     
     @Column(nullable = false)
-    @Builder.Default
     private Boolean active = true;
     
     @Column(nullable = false, updatable = false)
@@ -139,4 +130,41 @@ public class AllowedAdminIP {
             return false;
         }
     }
+
+    public AllowedAdminIP() {}
+    
+    public AllowedAdminIP(Long id, byte[] ipAddressEncrypted, byte[] ipRangeEncrypted, String ipHash, String rangeHash, String description, Boolean active, LocalDateTime createdAt, LocalDateTime updatedAt, String ipAddress, String ipRange) {
+        this.id = id;
+        this.ipAddressEncrypted = ipAddressEncrypted;
+        this.ipRangeEncrypted = ipRangeEncrypted;
+        this.ipHash = ipHash;
+        this.rangeHash = rangeHash;
+        this.description = description;
+        this.active = active;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.ipAddress = ipAddress;
+        this.ipRange = ipRange;
+    }
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public byte[] getIpAddressEncrypted() { return ipAddressEncrypted; }
+    public void setIpAddressEncrypted(byte[] ipAddressEncrypted) { this.ipAddressEncrypted = ipAddressEncrypted; }
+    public byte[] getIpRangeEncrypted() { return ipRangeEncrypted; }
+    public void setIpRangeEncrypted(byte[] ipRangeEncrypted) { this.ipRangeEncrypted = ipRangeEncrypted; }
+    public String getIpHash() { return ipHash; }
+    public void setIpHash(String ipHash) { this.ipHash = ipHash; }
+    public String getRangeHash() { return rangeHash; }
+    public void setRangeHash(String rangeHash) { this.rangeHash = rangeHash; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public Boolean getActive() { return active; }
+    public void setActive(Boolean active) { this.active = active; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    // ipAddress and ipRange getters/setters are already defined above
 }

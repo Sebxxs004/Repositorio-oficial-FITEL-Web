@@ -1,7 +1,9 @@
 package co.com.fitel.modules.pqr.application.service;
 
 import co.com.fitel.common.service.EmailService;
+import co.com.fitel.common.exception.BusinessException;
 import co.com.fitel.modules.pqr.application.dto.CreatePQRRequest;
+import co.com.fitel.modules.pqr.application.dto.ReanalysisRequest;
 import co.com.fitel.modules.pqr.application.dto.PQRConstancyDTO;
 import co.com.fitel.modules.pqr.application.dto.PQRResponseDTO;
 import co.com.fitel.modules.pqr.domain.model.PQR;
@@ -9,6 +11,7 @@ import co.com.fitel.modules.pqr.domain.repository.PQRRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -255,6 +258,48 @@ public class PQRService {
         return createPQR(request, null);
     }
     
+    /**
+     * Solicita reanálisis de una PQR resuelta
+     */
+    public PQRResponseDTO requestReanalysis(String cun, ReanalysisRequest request) {
+        log.info("Requesting reanalysis for PQR: {}", cun);
+        
+        PQR pqr = pqrRepository.findByCun(cun)
+            .orElseThrow(() -> new BusinessException("PQR no encontrada", HttpStatus.NOT_FOUND));
+            
+        if (!"RESUELTA".equals(pqr.getStatus()) && !"CERRADA".equals(pqr.getStatus())) {
+             throw new BusinessException("La PQR no está en estado Resuelta o Cerrada para solicitar reanálisis", HttpStatus.BAD_REQUEST);
+        }
+        
+        // Actualizar estado y agregar motivo
+        pqr.setStatus("EN_ANALISIS");
+        pqr.setAppealReason(request.getReason());
+        pqr.setUpdatedAt(LocalDateTime.now());
+        
+        // Opcional: Agregar como nota interna también o descripción
+        String note = "\n\n[SOLICITUD DE REANÁLISIS - " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "]\n" + request.getReason();
+        if (pqr.getDescription() != null) {
+            pqr.setDescription(pqr.getDescription() + note);
+        }
+        
+        PQR savedPqr = pqrRepository.save(pqr);
+        log.info("PQR {} re-opened for analysis", cun);
+        
+        // Enviar notificaciones de reanálisis
+        try {
+            emailService.sendReanalysisNotification(
+                savedPqr.getCustomerEmail(), 
+                savedPqr.getCustomerName(), 
+                savedPqr.getCun(), 
+                request.getReason()
+            );
+        } catch (Exception e) {
+            log.error("Failed to send reanalysis notification for PQR {}: {}", cun, e.getMessage());
+        }
+        
+        return mapToDTO(savedPqr);
+    }
+
     private LocalDateTime calculateSLADeadline() {
         LocalDateTime now = LocalDateTime.now();
         int daysAdded = 0;

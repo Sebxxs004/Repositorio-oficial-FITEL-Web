@@ -9,9 +9,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contact_config")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class ContactConfig {
     
     @Id
@@ -46,4 +43,31 @@ public class ContactConfig {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public ContactConfig() {}
+
+    public ContactConfig(Long id, String phone, String phoneDisplay, String email, String whatsapp, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.phone = phone;
+        this.phoneDisplay = phoneDisplay;
+        this.email = email;
+        this.whatsapp = whatsapp;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public String getPhoneDisplay() { return phoneDisplay; }
+    public void setPhoneDisplay(String phoneDisplay) { this.phoneDisplay = phoneDisplay; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getWhatsapp() { return whatsapp; }
+    public void setWhatsapp(String whatsapp) { this.whatsapp = whatsapp; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
