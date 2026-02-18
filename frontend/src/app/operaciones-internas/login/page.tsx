@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { LogIn, Loader2, AlertCircle, Lock } from 'lucide-react'
 import Image from 'next/image'
 
@@ -35,22 +36,16 @@ export default function AdminLoginPage() {
       }
 
       const jsonResponse = await response.json()
-      // Estructura ApiResponse: { success: true, data: { token: ... }, ... }
-      const data = jsonResponse.data || jsonResponse
+      
+      // Las cookies ya están siendo configuradas automáticamente por el backend
+      // con Set-Cookie header (SameSite=None; Secure; HttpOnly)
+      // No es necesario configurarlas manualmente aquí
 
-      // Guardar token en cookie
-      if (data.token) {
-        document.cookie = `admin_token=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-      }
-      if (data.sessionToken) {
-        document.cookie = `admin_session=${data.sessionToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-      }
-
-      // Redirigir al dashboard
-      router.push('/operaciones-internas/dashboard')
+      // Redirigir al dashboard usando window.location para forzar recarga
+      // Esto asegura que las cookies HttpOnly estén disponibles
+      window.location.href = '/operaciones-internas/dashboard'
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión')
-    } finally {
       setIsLoading(false)
     }
   }
@@ -111,6 +106,14 @@ export default function AdminLoginPage() {
                 placeholder="Ingresa tu contraseña"
                 autoComplete="current-password"
               />
+              <div className="mt-2 text-right">
+                <Link
+                  href="/operaciones-internas/forgot-password"
+                  className="text-sm text-primary-red hover:text-primary-red/80 transition-colors duration-200"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
             </div>
 
             <button

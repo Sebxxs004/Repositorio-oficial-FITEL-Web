@@ -10,7 +10,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,20 +46,25 @@ public class AuthController {
         try {
             LoginResponse loginResponse = authService.login(request);
             
-            // Configurar cookies httpOnly para mayor seguridad
-            Cookie tokenCookie = new Cookie("admin_token", loginResponse.getToken());
-            tokenCookie.setHttpOnly(true);
-            tokenCookie.setSecure(false); // Cambiar a true en producción con HTTPS
-            tokenCookie.setPath("/");
-            tokenCookie.setMaxAge(7 * 24 * 60 * 60); // 7 días
-            response.addCookie(tokenCookie);
+            // Configurar cookies httpOnly para mayor seguridad con SameSite=None para cross-domain
+            ResponseCookie tokenCookie = ResponseCookie.from("admin_token", loginResponse.getToken())
+                    .httpOnly(true)
+                    .secure(true) // true para HTTPS en producción
+                    .path("/")
+                    .maxAge(7 * 24 * 60 * 60) // 7 días
+                    .sameSite("None") // Permite cookies entre subdominios en HTTPS
+                    .build();
             
-            Cookie sessionCookie = new Cookie("admin_session", loginResponse.getSessionToken());
-            sessionCookie.setHttpOnly(true);
-            sessionCookie.setSecure(false);
-            sessionCookie.setPath("/");
-            sessionCookie.setMaxAge(60 * 60); // 1 hora
-            response.addCookie(sessionCookie);
+            ResponseCookie sessionCookie = ResponseCookie.from("admin_session", loginResponse.getSessionToken())
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .maxAge(60 * 60) // 1 hora
+                    .sameSite("None")
+                    .build();
+            
+            response.addHeader(HttpHeaders.SET_COOKIE, tokenCookie.toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, sessionCookie.toString());
             
             return ResponseEntity.ok(
                 ApiResponse.<LoginResponse>builder()
@@ -165,18 +172,25 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response) {
-        // Eliminar cookies
-        Cookie tokenCookie = new Cookie("admin_token", "");
-        tokenCookie.setHttpOnly(true);
-        tokenCookie.setPath("/");
-        tokenCookie.setMaxAge(0);
-        response.addCookie(tokenCookie);
+        // Eliminar cookies con SameSite=None para que funcione en cross-domain
+        ResponseCookie tokenCookie = ResponseCookie.from("admin_token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
         
-        Cookie sessionCookie = new Cookie("admin_session", "");
-        sessionCookie.setHttpOnly(true);
-        sessionCookie.setPath("/");
-        sessionCookie.setMaxAge(0);
-        response.addCookie(sessionCookie);
+        ResponseCookie sessionCookie = ResponseCookie.from("admin_session", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
+        
+        response.addHeader(HttpHeaders.SET_COOKIE, tokenCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, sessionCookie.toString());
         
         return ResponseEntity.ok(
             ApiResponse.<Void>builder()
@@ -248,6 +262,99 @@ public class AuthController {
         } catch (Exception e) {
              log.error("Error confirmando cambio contraseña: {}", e.getMessage());
             return ResponseEntity.badRequest().body(
+                ApiResponse.<Void>builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build()
+            );
+        }
+    }
+    
+    /**
+     * Endpoint para solicitar recuperación de contraseña
+     * Endpoint público - no requiere autenticación
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Valid @RequestBody co.com.fitel.modules.auth.application.dto.ForgotPasswordRequest request) {
+        try {
+            authService.initiateForgotPassword(request.getUsernameOrEmail());
+            
+            // Por seguridad, siempre devolver éxito aunque el usuario no exista
+            return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                    .success(true)
+                    .message("Si el usuario existe, recibirás un correo con las instrucciones para recuperar tu contraseña")
+                    .build()
+            );
+        } catch (Exception e) {
+            log.error("Error en forgot password: {}", e.getMessage());
+            // Si hay error enviando email, informar al usuario
+            if (e.getMessage().contains("email")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ApiResponse.<Void>builder()
+                        .success(false)
+                        .message(e.getMessage())
+                        .build()
+                );
+            }
+            // Para otros errores, devolver mensaje genérico por seguridad
+            return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                    .success(true)
+                    .message("Si el usuario existe, recibirás un correo con las instrucciones")
+                    .build()
+            );
+        }
+    }
+    
+    /**
+     * Endpoint para validar token de recuperación
+     * Endpoint público - no requiere autenticación
+     */
+    @GetMapping("/validate-reset-token")
+    public ResponseEntity<ApiResponse<Boolean>> validateResetToken(@RequestParam String token) {
+        try {
+            boolean isValid = authService.validatePasswordResetToken(token);
+            
+            return ResponseEntity.ok(
+                ApiResponse.<Boolean>builder()
+                    .success(true)
+                    .data(isValid)
+                    .message(isValid ? "Token válido" : "Token inválido o expirado")
+                    .build()
+            );
+        } catch (Exception e) {
+            log.error("Error validando token: {}", e.getMessage());
+            return ResponseEntity.ok(
+                ApiResponse.<Boolean>builder()
+                    .success(true)
+                    .data(false)
+                    .message("Token inválido")
+                    .build()
+            );
+        }
+    }
+    
+    /**
+     * Endpoint para resetear contraseña con token
+     * Endpoint público - no requiere autenticación
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody co.com.fitel.modules.auth.application.dto.ResetPasswordRequest request) {
+        try {
+            authService.resetPasswordWithToken(request.getToken(), request.getNewPassword());
+            
+            return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                    .success(true)
+                    .message("Contraseña restablecida exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.")
+                    .build()
+            );
+        } catch (Exception e) {
+            log.error("Error reseteando contraseña: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 ApiResponse.<Void>builder()
                     .success(false)
                     .message(e.getMessage())

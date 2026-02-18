@@ -12,7 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Servicio de autenticación para administradores
@@ -247,5 +249,105 @@ public class AuthService {
         adminUserRepository.save(user);
         
         log.info("Contraseña actualizada para usuario: {}", username);
+    }
+    
+    /**
+     * Iniciar proceso de recuperación de contraseña
+     * Genera un token único y envía email con el link de recuperación
+     */
+    @Transactional
+    public void initiateForgotPassword(String usernameOrEmail) {
+        log.info("Iniciando recuperación de contraseña para: {}", usernameOrEmail);
+        
+        // Buscar por username o email
+        Optional<AdminUser> userOpt = adminUserRepository.findByUsername(usernameOrEmail);
+        if (userOpt.isEmpty()) {
+            userOpt = adminUserRepository.findByEmail(usernameOrEmail);
+        }
+        
+        if (userOpt.isEmpty()) {
+            log.warn("Usuario/email no encontrado para recuperación: {}", usernameOrEmail);
+            // Por seguridad, no revelar si el usuario existe o no
+            return;
+        }
+        
+        AdminUser user = userOpt.get();
+        
+        // Verificar que el usuario tenga un email configurado
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            throw new RuntimeException("El usuario no tiene un email configurado. Contacte al administrador.");
+        }
+        
+        // Generar token único
+        String token = UUID.randomUUID().toString();
+        
+        // Configurar expiración: 1 hora
+        LocalDateTime expiresAt = LocalDateTime.now().plusHours(1);
+        
+        user.setPasswordResetToken(token);
+        user.setPasswordResetTokenExpiresAt(expiresAt);
+        adminUserRepository.save(user);
+        
+        // Enviar email con el link de recuperación
+        String resetLink = emailService.generatePasswordResetLink(token);
+        emailService.sendPasswordResetEmail(user.getEmail(), user.getFullName(), resetLink);
+        
+        log.info("Email de recuperación enviado a: {}", user.getEmail());
+    }
+    
+    /**
+     * Validar token de recuperación de contraseña
+     */
+    public boolean validatePasswordResetToken(String token) {
+        Optional<AdminUser> userOpt = adminUserRepository.findByPasswordResetToken(token);
+        
+        if (userOpt.isEmpty()) {
+            return false;
+        }
+        
+        AdminUser user = userOpt.get();
+        
+        // Verificar que el token no haya expirado
+        if (user.getPasswordResetTokenExpiresAt() == null || 
+            LocalDateTime.now().isAfter(user.getPasswordResetTokenExpiresAt())) {
+            log.warn("Token de recuperación expirado para usuario: {}", user.getUsername());
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Resetear contraseña usando token de recuperación
+     */
+    @Transactional
+    public void resetPasswordWithToken(String token, String newPassword) {
+        Optional<AdminUser> userOpt = adminUserRepository.findByPasswordResetToken(token);
+        
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("Token inválido");
+        }
+        
+        AdminUser user = userOpt.get();
+        
+        // Verificar que el token no haya expirado
+        if (user.getPasswordResetTokenExpiresAt() == null || 
+            LocalDateTime.now().isAfter(user.getPasswordResetTokenExpiresAt())) {
+            throw new RuntimeException("El token ha expirado. Solicite un nuevo enlace de recuperación.");
+        }
+        
+        // Actualizar contraseña
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        
+        // Limpiar token de recuperación
+        user.setPasswordResetToken(null);
+        user.setPasswordResetTokenExpiresAt(null);
+        
+        adminUserRepository.save(user);
+        
+        log.info("Contraseña restablecida exitosamente para usuario: {}", user.getUsername());
+        
+        // Enviar email de confirmación
+        emailService.sendPasswordChangedConfirmation(user.getEmail(), user.getFullName());
     }
 }

@@ -53,6 +53,15 @@ public class AdminUser {
     
     @Column
     private LocalDateTime verificationCodeExpiresAt;
+    
+    @Column
+    private String passwordResetToken;
+    
+    @Column
+    private LocalDateTime passwordResetTokenExpiresAt;
+    
+    @Column(length = 200)
+    private String email;
 
     @PrePersist
     protected void onCreate() {

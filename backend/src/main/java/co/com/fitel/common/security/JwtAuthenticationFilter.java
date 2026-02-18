@@ -4,6 +4,7 @@ import co.com.fitel.modules.auth.application.service.JwtService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -31,16 +32,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
-        final String jwt;
+        String jwt = null;
         final String username;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        // Primero intentar obtener el JWT del header Authorization
+        final String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            jwt = authHeader.substring(7);
+        }
+
+        // Si no está en el header, buscar en las cookies
+        if (jwt == null && request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("admin_token".equals(cookie.getName())) {
+                    jwt = cookie.getValue();
+                    log.debug("JWT encontrado en cookie: admin_token");
+                    break;
+                }
+            }
+        }
+
+        // Si no hay JWT en header ni en cookies, continuar sin autenticar
+        if (jwt == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        // Si no hay JWT en header ni en cookies, continuar sin autenticar
+        if (jwt == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
+        // Validar y procesar el JWT
         try {
             if (jwtService.validateToken(jwt)) {
                 Claims claims = jwtService.getClaims(jwt);
@@ -62,11 +85,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    log.debug("Authenticated user: {}, Role: {}", username, role);
+                    log.debug("Usuario autenticado: {}, Rol: {}", username, role);
                 }
             }
         } catch (Exception e) {
-            log.error("Cannot set user authentication: {}", e.getMessage());
+            log.error("Error al autenticar usuario: {}", e.getMessage());
         }
 
         filterChain.doFilter(request, response);

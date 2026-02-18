@@ -62,7 +62,12 @@ public class SecurityConfig {
                 // Endpoints Públicos (Login, Frontend público, Archivos)
                 .requestMatchers("/api/auth/admin/login").permitAll()
                 .requestMatchers("/api/auth/admin/verify").permitAll() // Verificación de email/cuenta si aplica
+                .requestMatchers("/api/auth/admin/forgot-password").permitAll() // Solicitar recuperación de contraseña
+                .requestMatchers("/api/auth/admin/validate-reset-token").permitAll() // Validar token de recuperación
+                .requestMatchers("/api/auth/admin/reset-password").permitAll() // Resetear contraseña con token
                 .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/api/channels").permitAll() // Canales públicos
+                .requestMatchers("/api/contact").permitAll() // Formulario de contacto público
                 .requestMatchers("/api/pqrs/**").permitAll() // Creación pública de PQR
                 .requestMatchers("/uploads/**").permitAll() // Acceso a imágenes/archivos
 
@@ -71,6 +76,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/pqrs/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_OPERARIO") // Gestión de PQRs
                 .requestMatchers("/api/auth/admin/me").authenticated() // Obtener usuario actual
                 .requestMatchers("/api/auth/admin/logout").authenticated()
+                .requestMatchers("/api/auth/admin/change-password/**").authenticated() // Cambiar contraseña (todos los usuarios autenticados)
 
                 // Endpoints Exclusivos de Administrador (ADMIN)
                 .requestMatchers("/api/admin/users/**").hasAuthority("ROLE_ADMIN") // Gestión de usuarios (Crear, listar, borrar)

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { FileText, Users, BarChart3, TrendingUp } from 'lucide-react'
 import { AdminLayout } from '@/components/admin/AdminLayout'
@@ -29,6 +30,7 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
+  const router = useRouter()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -41,12 +43,17 @@ export default function AdminDashboard() {
           `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'}/admin/dashboard/stats`,
           {
             method: 'GET',
-            credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
             },
+            credentials: 'include', // Usar cookies HttpOnly
           }
         )
+
+        if (response.status === 401 || response.status === 403) {
+           router.push('/operaciones-internas/login')
+           return
+        }
 
         if (!response.ok) {
           throw new Error('Error al obtener estadísticas')
@@ -76,7 +83,7 @@ export default function AdminDashboard() {
     }
 
     fetchStats()
-  }, [])
+  }, [router])
 
   if (isLoading) {
     return (

@@ -3,7 +3,11 @@ import type { NextRequest } from 'next/server'
 
 // Rutas protegidas del panel de administración
 const ADMIN_ROUTES = ['/operaciones-internas']
-const PUBLIC_ADMIN_ROUTES = ['/operaciones-internas/login']
+const PUBLIC_ADMIN_ROUTES = [
+  '/operaciones-internas/login',
+  '/operaciones-internas/forgot-password',
+  '/operaciones-internas/reset-password'
+]
 
 // Flag global para habilitar/deshabilitar temporalmente la restricción por IP
 // Mientras esté en false, NO se hará ningún filtro por IP para rutas admin.
@@ -86,19 +90,15 @@ export function middleware(request: NextRequest) {
       }
     }
 
-    // Si es la ruta de login, permitir acceso (solo verificar IP si está configurada)
+    // Si es una ruta pública de admin, permitir acceso
     if (isPublicAdminRoute) {
       return NextResponse.next()
     }
 
-    // Para otras rutas admin, verificar autenticación
-    const token = request.cookies.get('admin_token')?.value
-    const sessionToken = request.cookies.get('admin_session')?.value
-
-    // Si no hay token, devolver 404 para ocultar la ruta
-    if (!token && !sessionToken) {
-      return new NextResponse(null, { status: 404 })
-    }
+    // Para otras rutas admin, permitir el acceso
+    // El backend maneja la autenticación con cookies HttpOnly
+    // Si no están autenticados, el backend retornará 401/403
+    // y el frontend redirigirá al login desde cada página
   }
 
   return NextResponse.next()

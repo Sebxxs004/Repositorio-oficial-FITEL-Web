@@ -15,8 +15,4 @@ public class ChangePasswordInitRequest {
     
     @NotBlank(message = "La contraseña actual es requerida")
     private String currentPassword;
-    
-    @NotBlank(message = "La nueva contraseña es requerida")
-    @Size(min = 6, message = "La nueva contraseña debe tener al menos 6 caracteres")
-    private String newPassword;
 }

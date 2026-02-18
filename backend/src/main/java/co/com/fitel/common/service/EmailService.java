@@ -1561,23 +1561,250 @@ public class EmailService {
             log.error("Error inesperado enviando correo a {}: {}", to, e.getMessage());
         }
     }
-
-    private JavaMailSender getConfiguredMailSender() {
-        EmailConfig config = getEmailConfig();
-
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(config.getHost() != null ? config.getHost() : "smtp.gmail.com");
-        mailSender.setPort(config.getPort() != null ? config.getPort() : 587);
-        mailSender.setUsername(config.getUsername());
-        mailSender.setPassword(config.getPassword());
-        
-        Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        // props.put("mail.debug", "true"); // Descomentar para debug
-        
-        return mailSender;
+    
+    /**
+     * Generar link de recuperación de contraseña
+     */
+    public String generatePasswordResetLink(String token) {
+        // En producción, usar el dominio del frontend
+        String frontendUrl = System.getenv("FRONTEND_URL");
+        if (frontendUrl == null || frontendUrl.isEmpty()) {
+            frontendUrl = "https://fitel-frontend.blackocean-69d60157.eastus.azurecontainerapps.io";
+        }
+        return frontendUrl + "/operaciones-internas/reset-password?token=" + token;
     }
+    
+    /**
+     * Enviar email de recuperación de contraseña
+     */
+    public void sendPasswordResetEmail(String to, String name, String resetLink) {
+        JavaMailSender configuredSender = getConfiguredMailSender();
+        if (configuredSender == null) {
+            return;
+        }
+
+        EmailConfig emailConfig = getEmailConfig();
+
+        try {
+            MimeMessage message = configuredSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(emailConfig.getFromEmail());
+            helper.setTo(to);
+            helper.setSubject("Recuperación de Contraseña - FITEL");
+
+            String htmlContent = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                            max-width: 600px;
+                            margin: 0 auto;
+                            padding: 20px;
+                        }
+                        .container {
+                            background-color: #f9f9f9;
+                            border-radius: 10px;
+                            padding: 30px;
+                            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                        }
+                        .header {
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            padding: 20px;
+                            border-radius: 10px 10px 0 0;
+                            text-align: center;
+                        }
+                        .content {
+                            padding: 20px;
+                            background: white;
+                        }
+                        .button {
+                            display: inline-block;
+                            padding: 15px 30px;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            margin: 20px 0;
+                            font-weight: bold;
+                        }
+                        .footer {
+                            text-align: center;
+                            padding: 20px;
+                            color: #666;
+                            font-size: 0.9em;
+                        }
+                        .warning {
+                            background-color: #fff3cd;
+                            border-left: 4px solid #ffc107;
+                            padding: 15px;
+                            margin: 20px 0;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>Recuperación de Contraseña</h1>
+                        </div>
+                        <div class="content">
+                            <p>Hola <strong>{{NAME}}</strong>,</p>
+                            
+                            <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en FITEL.</p>
+                            
+                            <p>Si solicitaste este cambio, haz clic en el siguiente botón para crear una nueva contraseña:</p>
+                            
+                            <div style="text-align: center;">
+                                <a href="{{RESET_LINK}}" class="button">Restablecer Contraseña</a>
+                            </div>
+                            
+                            <div class="warning">
+                                <strong>⚠️ Importante:</strong>
+                                <ul>
+                                    <li>Este enlace expirará en <strong>1 hora</strong></li>
+                                    <li>Si no solicitaste este cambio, ignora este correo</li>
+                                    <li>Nunca compartas este enlace con nadie</li>
+                                </ul>
+                            </div>
+                            
+                            <p>Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:</p>
+                            <p style="word-break: break-all; color: #667eea;">{{RESET_LINK}}</p>
+                        </div>
+                        <div class="footer">
+                            <p>Este es un mensaje automático, por favor no responder.</p>
+                            <p>&copy; 2024 FITEL. Todos los derechos reservados.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """
+                .replace("{{NAME}}", name)
+                .replace("{{RESET_LINK}}", resetLink);
+
+            helper.setText(htmlContent, true);
+
+            configuredSender.send(message);
+            log.info("Correo de recuperación de contraseña enviado a: {}", to);
+
+        } catch (MessagingException e) {
+            log.error("Error enviando correo de recuperación a {}: {}", to, e.getMessage());
+            throw new RuntimeException("Error al enviar el correo de recuperación");
+        } catch (Exception e) {
+            log.error("Error inesperado enviando correo a {}: {}", to, e.getMessage());
+            throw new RuntimeException("Error al enviar el correo de recuperación");
+        }
+    }
+    
+    /**
+     * Enviar email de confirmación de cambio de contraseña
+     */
+    public void sendPasswordChangedConfirmation(String to, String name) {
+        JavaMailSender configuredSender = getConfiguredMailSender();
+        if (configuredSender == null) {
+            return;
+        }
+
+        EmailConfig emailConfig = getEmailConfig();
+
+        try {
+            MimeMessage message = configuredSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(emailConfig.getFromEmail());
+            helper.setTo(to);
+            helper.setSubject("Contraseña Actualizada - FITEL");
+
+            String htmlContent = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333;
+                            max-width: 600px;
+                            margin: 0 auto;
+                            padding: 20px;
+                        }
+                        .container {
+                            background-color: #f9f9f9;
+                            border-radius: 10px;
+                            padding: 30px;
+                            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                        }
+                        .header {
+                            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                            color: white;
+                            padding: 20px;
+                            border-radius: 10px 10px 0 0;
+                            text-align: center;
+                        }
+                        .content {
+                            padding: 20px;
+                            background: white;
+                        }
+                        .footer {
+                            text-align: center;
+                            padding: 20px;
+                            color: #666;
+                            font-size: 0.9em;
+                        }
+                        .success-box {
+                            background-color: #d4edda;
+                            border-left: 4px solid #28a745;
+                            padding: 15px;
+                            margin: 20px 0;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>✅ Contraseña Actualizada</h1>
+                        </div>
+                        <div class="content">
+                            <p>Hola <strong>{{NAME}}</strong>,</p>
+                            
+                            <div class="success-box">
+                                <p><strong>Tu contraseña ha sido actualizada exitosamente.</strong></p>
+                            </div>
+                            
+                            <p>Si no realizaste este cambio, contacta inmediatamente al administrador del sistema.</p>
+                            
+                            <p>Fecha y hora del cambio: <strong>{{TIMESTAMP}}</strong></p>
+                        </div>
+                        <div class="footer">
+                            <p>Este es un mensaje automático, por favor no responder.</p>
+                            <p>&copy; 2024 FITEL. Todos los derechos reservados.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """
+                .replace("{{NAME}}", name)
+                .replace("{{TIMESTAMP}}", java.time.LocalDateTime.now().format(
+                    java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                ));
+
+            helper.setText(htmlContent, true);
+
+            configuredSender.send(message);
+            log.info("Correo de confirmación de cambio de contraseña enviado a: {}", to);
+
+        } catch (MessagingException e) {
+            log.error("Error enviando correo de confirmación a {}: {}", to, e.getMessage());
+        } catch (Exception e) {
+            log.error("Error inesperado enviando correo a {}: {}", to, e.getMessage());
+        }
+    }
+
 }
 

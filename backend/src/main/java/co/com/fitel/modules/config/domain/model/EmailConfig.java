@@ -2,6 +2,7 @@ package co.com.fitel.modules.config.domain.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "email_config")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class EmailConfig {
     
     @Id
@@ -47,33 +52,24 @@ public class EmailConfig {
         updatedAt = LocalDateTime.now();
     }
 
-    public EmailConfig() {}
-    
-    public EmailConfig(Long id, String email, String appPassword, String smtpHost, Integer smtpPort, Boolean enabled, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
-        this.email = email;
-        this.appPassword = appPassword;
-        this.smtpHost = smtpHost;
-        this.smtpPort = smtpPort;
-        this.enabled = enabled;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+    // Compatibility methods for EmailService
+    public String getFromEmail() {
+        return this.email;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public String getAppPassword() { return appPassword; }
-    public void setAppPassword(String appPassword) { this.appPassword = appPassword; }
-    public String getSmtpHost() { return smtpHost; }
-    public void setSmtpHost(String smtpHost) { this.smtpHost = smtpHost; }
-    public Integer getSmtpPort() { return smtpPort; }
-    public void setSmtpPort(Integer smtpPort) { this.smtpPort = smtpPort; }
-    public Boolean getEnabled() { return enabled; }
-    public void setEnabled(Boolean enabled) { this.enabled = enabled; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public String getUsername() {
+        return this.email;
+    }
+
+    public String getPassword() {
+        return this.appPassword;
+    }
+
+    public String getHost() {
+        return this.smtpHost;
+    }
+
+    public int getPort() {
+        return this.smtpPort != null ? this.smtpPort : 587;
+    }
 }
