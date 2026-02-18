@@ -68,6 +68,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/channels").permitAll() // Canales públicos
                 .requestMatchers("/api/contact").permitAll() // Formulario de contacto público
+                .requestMatchers("/api/config/carousel").permitAll() // Carrousel público
                 .requestMatchers("/api/pqrs/**").permitAll() // Creación pública de PQR
                 .requestMatchers("/uploads/**").permitAll() // Acceso a imágenes/archivos
 

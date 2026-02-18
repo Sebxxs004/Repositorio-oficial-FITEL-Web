@@ -160,7 +160,7 @@ public class PlanManagementController {
                     ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
                     : ".png";
             String filename = "plan_" + UUID.randomUUID().toString() + extension;
-            String filePath = "/assets/plans/" + filename;
+            String filePath = "/uploads/assets/plans/" + filename;
             
             // Crear directorio si no existe
             Path uploadPath = Paths.get(UPLOAD_DIR);

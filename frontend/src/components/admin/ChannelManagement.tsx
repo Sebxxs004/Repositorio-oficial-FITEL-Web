@@ -63,6 +63,7 @@ export function ChannelManagement() {
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'}/admin/channels/upload-logo`,
         {
           method: 'POST',
+          credentials: 'include',
           body: uploadData,
         }
       )

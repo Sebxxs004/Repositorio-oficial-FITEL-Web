@@ -11,6 +11,7 @@ import co.com.fitel.modules.config.domain.repository.ContactConfigRepository;
 import co.com.fitel.modules.config.domain.repository.EmailConfigRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,9 @@ public class ConfigService {
     private final ContactConfigRepository contactConfigRepository;
     private final CarouselImageRepository carouselImageRepository;
     private final EmailConfigRepository emailConfigRepository;
+    
+    @Value("${storage.base-url}")
+    private String storageBaseUrl;
 
     public ConfigService(ContactConfigRepository contactConfigRepository, CarouselImageRepository carouselImageRepository, EmailConfigRepository emailConfigRepository) {
         this.contactConfigRepository = contactConfigRepository;
@@ -123,7 +127,9 @@ public class ConfigService {
         CarouselImageDTO dto = new CarouselImageDTO();
         dto.setId(image.getId());
         dto.setFilename(image.getFilename());
-        dto.setUrl(image.getFilePath());
+        // Construir URL completa con el dominio del backend
+        String fullUrl = storageBaseUrl + image.getFilePath();
+        dto.setUrl(fullUrl);
         dto.setOrder(image.getOrderIndex());
         dto.setIsActive(image.getIsActive());
         return dto;

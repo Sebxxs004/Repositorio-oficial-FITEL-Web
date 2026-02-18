@@ -69,7 +69,7 @@ public class ConfigController {
                     ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
                     : ".png";
             String filename = "carrousel_" + UUID.randomUUID().toString() + extension;
-            String filePath = "/assets/" + filename;
+            String filePath = "/uploads/assets/" + filename;
             
             // Guardar el archivo
             Path uploadPath = Paths.get(UPLOAD_DIR);

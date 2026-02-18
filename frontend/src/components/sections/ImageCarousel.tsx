@@ -4,7 +4,16 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-const carouselImages = [
+interface CarouselImage {
+  id: number
+  filename: string
+  url: string
+  order: number
+  isActive: boolean
+}
+
+// Imágenes por defecto en caso de que la API falle
+const defaultCarouselImages = [
   '/assets/carrousel1.png',
   '/assets/carrousel2.png',
   '/assets/carrousel3.png',
@@ -16,12 +25,61 @@ export function ImageCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [isMounted, setIsMounted] = useState(false)
+  const [carouselImages, setCarouselImages] = useState<string[]>(defaultCarouselImages)
+  const [isLoading, setIsLoading] = useState(true)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Asegurar que solo se renderice en el cliente
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // Cargar imágenes del carrousel desde la API
+  useEffect(() => {
+    const fetchCarouselImages = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
+        const response = await fetch(`${apiUrl}/config/carousel`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (response.ok) {
+          const result = await response.json()
+          // La API retorna { success: true, message: "...", data: [...] }
+          const images: CarouselImage[] = result.data || []
+          // Filtrar solo imágenes activas y mapear a URLs
+          const activeImages = images
+            .filter(img => img.isActive)
+            .sort((a, b) => a.order - b.order)
+            .map(img => img.url)
+
+          if (activeImages.length > 0) {
+            setCarouselImages(activeImages)
+            setCurrentIndex(0) // Resetear el índice cuando cambien las imágenes
+          }
+        } else {
+          console.warn('No se pudieron cargar las imágenes del carrousel, usando imágenes por defecto')
+        }
+      } catch (error) {
+        console.error('Error al cargar las imágenes del carrousel:', error)
+        // Mantiene las imágenes por defecto
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchCarouselImages()
+  }, [])
+
+  // Validar que currentIndex no exceda el número de imágenes
+  useEffect(() => {
+    if (currentIndex >= carouselImages.length && carouselImages.length > 0) {
+      setCurrentIndex(0)
+    }
+  }, [carouselImages.length, currentIndex])
 
   // Auto-play del carrusel
   useEffect(() => {
@@ -38,7 +96,7 @@ export function ImageCarousel() {
         clearInterval(intervalRef.current)
       }
     }
-  }, [isAutoPlaying, isMounted])
+  }, [isAutoPlaying, isMounted, carouselImages.length])
 
   const goToPrevious = () => {
     setIsAutoPlaying(false)

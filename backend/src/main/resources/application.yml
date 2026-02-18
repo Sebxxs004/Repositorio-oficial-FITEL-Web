@@ -34,6 +34,7 @@ storage:
   provider: ${STORAGE_PROVIDER:local}
   local:
     location: uploads
+  base-url: ${STORAGE_BASE_URL:http://localhost:8080}
 
 azure:
   storage:

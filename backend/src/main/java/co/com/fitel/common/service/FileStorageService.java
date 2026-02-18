@@ -18,8 +18,11 @@ import java.util.UUID;
 public class FileStorageService {
 
     private final Path fileStorageLocation;
+    
+    @Value("${storage.base-url}")
+    private String storageBaseUrl;
 
-    public FileStorageService(@Value("${fitel.storage.upload-dir:frontend/public/assets/canales}") String uploadDir) {
+    public FileStorageService(@Value("${fitel.storage.upload-dir:uploads/assets/canales}") String uploadDir) {
         this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
 
         try {
@@ -50,7 +53,9 @@ public class FileStorageService {
             Path targetLocation = this.fileStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-            return "/assets/canales/" + fileName;
+            // Retornar URL completa con dominio del backend
+            String relativeUrl = "/uploads/assets/canales/" + fileName;
+            return storageBaseUrl + relativeUrl;
         } catch (IOException ex) {
             throw new BusinessException("No se pudo guardar el archivo " + originalFileName + ". Intente nuevamente.", HttpStatus.INTERNAL_SERVER_ERROR, ex);
         }
