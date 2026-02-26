@@ -66,8 +66,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/admin/validate-reset-token").permitAll() // Validar token de recuperación
                 .requestMatchers("/api/auth/admin/reset-password").permitAll() // Resetear contraseña con token
                 .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/public/**").permitAll() // Fallback por si NEXT_PUBLIC_API_URL no incluye /api
                 .requestMatchers("/api/channels").permitAll() // Canales públicos
                 .requestMatchers("/api/contact").permitAll() // Formulario de contacto público
+                .requestMatchers(HttpMethod.GET, "/api/config/contact").permitAll() // Lectura pública de datos de contacto
                 .requestMatchers("/api/config/carousel").permitAll() // Carrousel público
                 .requestMatchers("/api/pqrs/**").permitAll() // Creación pública de PQR
                 .requestMatchers("/uploads/**").permitAll() // Acceso a imágenes/archivos

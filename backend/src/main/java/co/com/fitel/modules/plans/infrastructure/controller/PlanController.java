@@ -18,28 +18,28 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/public/plans")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class PlanController {
 
     private final PlanService planService;
 
-    @GetMapping
+    // Acepta tanto /api/public/plans como /public/plans (fallback cuando NEXT_PUBLIC_API_URL no incluye /api)
+    @GetMapping({"/api/public/plans", "/public/plans"})
     public ResponseEntity<ApiResponse<List<PlanDTO>>> getAllPlans() {
-        log.info("GET /api/public/plans - Fetching all active plans");
+        log.info("GET /api/public/plans (o /public/plans) - Fetching all active plans");
         List<PlanDTO> plans = planService.getAllActivePlans();
         return ResponseEntity.ok(ApiResponse.success("Planes obtenidos exitosamente", plans));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping({"/api/public/plans/{id}", "/public/plans/{id}"})
     public ResponseEntity<ApiResponse<PlanDTO>> getPlanById(@PathVariable Long id) {
         log.info("GET /api/public/plans/{} - Fetching plan", id);
         PlanDTO plan = planService.getPlanById(id);
         return ResponseEntity.ok(ApiResponse.success("Plan obtenido exitosamente", plan));
     }
 
-    @GetMapping("/popular")
+    @GetMapping({"/api/public/plans/popular", "/public/plans/popular"})
     public ResponseEntity<ApiResponse<List<PlanDTO>>> getPopularPlans() {
         log.info("GET /api/public/plans/popular - Fetching popular plans");
         List<PlanDTO> plans = planService.getPopularPlans();
