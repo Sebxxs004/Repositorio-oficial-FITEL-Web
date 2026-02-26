@@ -496,8 +496,7 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                 <textarea
                   value={formData.internalNotes}
                   onChange={(e) => {
-                    const value = String(e.target.value || '').trim()
-                    setFormData(prev => ({ ...prev, internalNotes: value }))
+                    setFormData(prev => ({ ...prev, internalNotes: e.target.value }))
                   }}
                   rows={6}
                   className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"
@@ -569,8 +568,7 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                   <textarea
                     value={formData.internalNotes}
                     onChange={(e) => {
-                      const value = String(e.target.value || '').trim()
-                      setFormData(prev => ({ ...prev, internalNotes: value }))
+                      setFormData(prev => ({ ...prev, internalNotes: e.target.value }))
                     }}
                     rows={4}
                     className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"
@@ -609,8 +607,7 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                   <textarea
                     value={formData.response}
                     onChange={(e) => {
-                      const value = String(e.target.value || '').trim()
-                      setFormData(prev => ({ ...prev, response: value }))
+                      setFormData(prev => ({ ...prev, response: e.target.value }))
                     }}
                     rows={6}
                     className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"
@@ -702,8 +699,7 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                   <textarea
                     value={formData.internalNotes}
                     onChange={(e) => {
-                      const value = String(e.target.value || '').trim()
-                      setFormData(prev => ({ ...prev, internalNotes: value }))
+                      setFormData(prev => ({ ...prev, internalNotes: e.target.value }))
                     }}
                     rows={4}
                     className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"
@@ -742,8 +738,7 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                   <textarea
                     value={formData.response}
                     onChange={(e) => {
-                      const value = String(e.target.value || '').trim()
-                      setFormData(prev => ({ ...prev, response: value }))
+                      setFormData(prev => ({ ...prev, response: e.target.value }))
                     }}
                     rows={6}
                     className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Wifi, Tv, Check, ArrowRight, Loader2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react'
 import { PlanService } from '@/services/api/PlanService'
 import { Plan } from '@/types'
+import { resolveAssetUrl } from '@/lib/utils'
 
 // Planes por defecto para mostrar mientras carga o en caso de error
 const DEFAULT_PLANS: Plan[] = [
@@ -315,7 +316,7 @@ export function PlanComparator() {
                       <div
                         className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 hover:scale-105"
                         style={{
-                          backgroundImage: `url(${plan.backgroundImage})`,
+                          backgroundImage: `url(${resolveAssetUrl(plan.backgroundImage)})`,
                         }}
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-neutral-dark/95 via-neutral-dark/80 to-neutral-dark/60" />

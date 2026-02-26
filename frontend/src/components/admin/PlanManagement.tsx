@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { Plus, Edit, Trash2, Power, PowerOff, Save, X, Loader2, Upload, Image as ImageIcon } from 'lucide-react'
+import { resolveAssetUrl } from '@/lib/utils'
 
 interface Plan {
   id: number
@@ -439,7 +440,7 @@ export function PlanManagement() {
                 ) : safeBackgroundImage ? (
                   <div className="relative">
                     <img
-                      src={safeBackgroundImage}
+                      src={resolveAssetUrl(safeBackgroundImage)}
                       alt="Vista previa"
                       className="w-full h-48 object-cover rounded-lg border border-neutral-gray-light"
                       onError={(e) => {
