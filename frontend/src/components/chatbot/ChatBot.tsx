@@ -8,6 +8,7 @@ import { ChatBotService, ChatMessage, RouteSuggestion } from '@/services/chatbot
 
 export function ChatBot() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isDismissed, setIsDismissed] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -85,7 +86,7 @@ export function ChatBot() {
   }
 
   // No renderizar hasta que esté montado en el cliente para evitar errores de hidratación
-  if (!isMounted) {
+  if (!isMounted || isDismissed) {
     return null
   }
 
@@ -93,9 +94,18 @@ export function ChatBot() {
     <>
       {/* Botón flotante */}
       {!isOpen && (
+        <div className="fixed bottom-0 right-0 z-50 flex flex-col items-end">
+          {/* Botón cerrar mascota */}
+          <button
+            onClick={(e) => { e.stopPropagation(); setIsDismissed(true) }}
+            className="self-end mr-2 mb-1 bg-white/80 hover:bg-white text-neutral-500 hover:text-neutral-800 rounded-full w-6 h-6 flex items-center justify-center shadow-md border border-neutral-200 transition-all duration-200"
+            aria-label="Cerrar asistente"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-0 right-0 z-50 transition-all duration-300 group cursor-pointer flex flex-col items-end"
+          className="transition-all duration-300 group cursor-pointer flex flex-col items-end"
           aria-label="Abrir chat de asistencia"
         >
           {/* Burbuja de chat */}
@@ -129,6 +139,7 @@ export function ChatBot() {
             />
           </div>
         </button>
+        </div>
       )}
 
       {/* Chat Window */}
@@ -190,6 +201,8 @@ export function ChatBot() {
                           key={index}
                           href={suggestion.href}
                           onClick={() => handleSuggestionClick(suggestion)}
+                          target={suggestion.href.startsWith('http') ? '_blank' : undefined}
+                          rel={suggestion.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                           className="block bg-primary-red/10 hover:bg-primary-red/20 text-primary-red rounded-md p-2 text-sm transition-colors border border-primary-red/20"
                         >
                           <div className="flex items-center justify-between">

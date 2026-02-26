@@ -350,12 +350,14 @@ export function PlanComparator() {
                               </p>
                             )}
                             
-                            <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-2 mb-6 md:mb-8">
-                              <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight">
-                                {formatPricePlan(plan.monthlyPrice)}
-                              </span>
-                              <span className="text-lg md:text-2xl text-neutral-300 font-medium">/mes</span>
-                            </div>
+                            {!!plan.monthlyPrice && plan.monthlyPrice > 0 && (
+                              <div className="flex flex-col sm:flex-row sm:items-baseline sm:space-x-2 mb-6 md:mb-8">
+                                <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight">
+                                  {formatPricePlan(plan.monthlyPrice)}
+                                </span>
+                                <span className="text-lg md:text-2xl text-neutral-300 font-medium">/mes</span>
+                              </div>
+                            )}
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                               <div className="flex items-center space-x-3 bg-white/5 p-3 rounded-lg backdrop-blur-sm">
@@ -418,13 +420,15 @@ export function PlanComparator() {
                                 <span className="text-white font-bold text-xl">{plan.tvChannels} Canales</span>
                               </div>
                               
-                              <div className="pt-6 border-t border-white/10 mt-2">
-                                <div className="flex justify-between items-end">
-                                  <span className="text-neutral-200 text-lg mb-1">Total a pagar</span>
-                                  <span className="text-white font-bold text-3xl text-primary-red-light">{formatPricePlan(plan.monthlyPrice)}</span>
+                              {!!plan.monthlyPrice && plan.monthlyPrice > 0 && (
+                                <div className="pt-6 border-t border-white/10 mt-2">
+                                  <div className="flex justify-between items-end">
+                                    <span className="text-neutral-200 text-lg mb-1">Total a pagar</span>
+                                    <span className="text-white font-bold text-3xl text-primary-red-light">{formatPricePlan(plan.monthlyPrice)}</span>
+                                  </div>
+                                  <p className="text-right text-xs text-neutral-400 mt-1">*Impuestos incluidos</p>
                                 </div>
-                                <p className="text-right text-xs text-neutral-400 mt-1">*Impuestos incluidos</p>
-                              </div>
+                              )}
                             </div>
                           </div>
                         </div>

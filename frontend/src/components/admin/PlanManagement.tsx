@@ -24,7 +24,7 @@ interface PlanForm {
   description: string
   internetSpeedMbps: number
   tvChannels: number
-  monthlyPrice: number
+  monthlyPrice: number | null
   active: boolean
   popular: boolean
   backgroundImage?: string
@@ -65,7 +65,7 @@ export function PlanManagement() {
     description: '',
     internetSpeedMbps: 50,
     tvChannels: 84,
-    monthlyPrice: 0,
+    monthlyPrice: null,
     active: true,
     popular: false,
     backgroundImage: '',
@@ -105,7 +105,7 @@ export function PlanManagement() {
       description: '',
       internetSpeedMbps: 50,
       tvChannels: 84,
-      monthlyPrice: 0,
+      monthlyPrice: null,
       active: true,
       popular: false,
       backgroundImage: '',
@@ -126,7 +126,7 @@ export function PlanManagement() {
       description: plan.description || '',
       internetSpeedMbps: plan.internetSpeedMbps || 0,
       tvChannels: plan.tvChannels || 0,
-      monthlyPrice: plan.monthlyPrice || 0,
+      monthlyPrice: plan.monthlyPrice > 0 ? plan.monthlyPrice : null,
       backgroundImage: plan.backgroundImage || '',
       active: plan.active ?? true,
       popular: plan.popular ?? false,
@@ -221,7 +221,7 @@ export function PlanManagement() {
   }
 
   const handleSave = async () => {
-    if (!formData.name || !formData.internetSpeedMbps || !formData.tvChannels || !formData.monthlyPrice) {
+    if (!formData.name || !formData.internetSpeedMbps || !formData.tvChannels) {
       setMessage({ type: 'error', text: 'Por favor completa todos los campos obligatorios' })
       return
     }
@@ -242,7 +242,7 @@ export function PlanManagement() {
         description: formData.description || '',
         internetSpeedMbps: formData.internetSpeedMbps || 0,
         tvChannels: formData.tvChannels || 0,
-        monthlyPrice: formData.monthlyPrice || 0,
+        monthlyPrice: formData.monthlyPrice ?? 0,
         active: formData.active ?? true,
         popular: formData.popular ?? false,
         backgroundImage: formData.backgroundImage || '',
@@ -319,7 +319,8 @@ export function PlanManagement() {
     }
   }
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: number | null | undefined) => {
+    if (!price || price <= 0) return '—'
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
@@ -543,13 +544,19 @@ export function PlanManagement() {
 
             <div>
               <label className="block text-sm font-semibold text-neutral-dark mb-2">
-                Precio Mensual (COP) *
+                Precio Mensual (COP) <span className="text-neutral-gray font-normal text-xs ml-1">(opcional)</span>
               </label>
               <input
                 type="number"
-                value={formData.monthlyPrice}
-                onChange={(e) => setFormData({ ...formData, monthlyPrice: parseFloat(e.target.value) || 0 })}
+                value={formData.monthlyPrice === null ? '' : formData.monthlyPrice}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    monthlyPrice: e.target.value === '' ? null : parseFloat(e.target.value) || 0,
+                  })
+                }
                 className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red"
+                placeholder="Dejar vacío si el precio es a convenir"
                 min="0"
                 step="0.01"
               />

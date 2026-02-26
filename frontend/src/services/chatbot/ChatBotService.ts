@@ -210,6 +210,35 @@ export class ChatBotService {
     ['documentales', [
       { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta canales de documentales' }
     ]],
+    ['speedtest', [
+      { label: 'SpeedTest FITEL', href: 'https://fitelcolombia.speedtestcustom.com/', description: 'Mide la velocidad de tu conexión' }
+    ]],
+    ['speed', [
+      { label: 'SpeedTest FITEL', href: 'https://fitelcolombia.speedtestcustom.com/', description: 'Mide la velocidad de tu conexión' }
+    ]],
+    ['velocidad', [
+      { label: 'SpeedTest FITEL', href: 'https://fitelcolombia.speedtestcustom.com/', description: 'Mide la velocidad de tu internet' }
+    ]],
+    ['velocidades', [
+      { label: 'SpeedTest FITEL', href: 'https://fitelcolombia.speedtestcustom.com/', description: 'Mide la velocidad de tu internet' }
+    ]],
+    ['medir', [
+      { label: 'SpeedTest FITEL', href: 'https://fitelcolombia.speedtestcustom.com/', description: 'Mide la velocidad de tu conexión' }
+    ]],
+    ['lento', [
+      { label: 'SpeedTest FITEL', href: 'https://fitelcolombia.speedtestcustom.com/', description: 'Prueba la velocidad de tu internet' },
+      { label: 'Realizar PQR', href: '/pqrs/realizar', description: 'Reporta un problema con tu servicio' }
+    ]],
+    ['lenta', [
+      { label: 'SpeedTest FITEL', href: 'https://fitelcolombia.speedtestcustom.com/', description: 'Prueba la velocidad de tu internet' },
+      { label: 'Realizar PQR', href: '/pqrs/realizar', description: 'Reporta un problema con tu servicio' }
+    ]],
+    ['prueba', [
+      { label: 'SpeedTest FITEL', href: 'https://fitelcolombia.speedtestcustom.com/', description: 'Prueba la velocidad de tu internet' }
+    ]],
+    ['test', [
+      { label: 'SpeedTest FITEL', href: 'https://fitelcolombia.speedtestcustom.com/', description: 'Mide la velocidad de tu internet' }
+    ]],
   ])
 
   // Saludos y respuestas del bot
@@ -283,6 +312,7 @@ export class ChatBotService {
       { label: 'Ver Planes', href: '/planes', description: 'Planes de Internet y TV' },
       { label: 'Malla de Canales', href: '/malla-canales', description: 'Consulta todos los canales disponibles' },
       { label: 'Verificar Cobertura', href: '/cobertura', description: 'Consulta si tenemos cobertura en tu zona' },
+      { label: 'SpeedTest', href: 'https://fitelcolombia.speedtestcustom.com/', description: 'Mide la velocidad de tu internet' },
       { label: 'Contacto', href: '/contacto', description: 'Contáctanos' },
       { label: 'Realizar PQR', href: '/pqrs/realizar', description: 'Crear una nueva PQR' },
     ]

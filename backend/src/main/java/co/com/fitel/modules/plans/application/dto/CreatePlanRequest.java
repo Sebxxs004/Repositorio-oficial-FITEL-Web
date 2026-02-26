@@ -23,8 +23,7 @@ public class CreatePlanRequest {
     @Min(value = 1, message = "El número de canales debe ser mayor a 0")
     private Integer tvChannels;
     
-    @NotNull(message = "El precio mensual es obligatorio")
-    @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a 0")
+    // Precio opcional: null o 0 indica que el plan no muestra precio públicamente
     private BigDecimal monthlyPrice;
     
     private Boolean active = true;

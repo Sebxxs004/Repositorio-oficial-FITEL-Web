@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Gauge } from 'lucide-react'
 import { NavigationService } from '@/services/navigation/NavigationService'
 import { PQRsDropdown } from './PQRsDropdown'
 import { ServicesDropdown } from './ServicesDropdown'
@@ -32,6 +32,10 @@ export function Header() {
 
   const handleWhatsApp = () => {
     window.open(FITEL_WHATSAPP_URL, '_blank')
+  }
+
+  const handleSpeedTest = () => {
+    window.open('https://fitelcolombia.speedtestcustom.com/', '_blank')
   }
 
   // Icono de WhatsApp
@@ -109,6 +113,14 @@ export function Header() {
               <WhatsAppIcon className="w-5 h-5" />
               <span>WhatsApp</span>
             </button>
+            <button
+              onClick={handleSpeedTest}
+              className="flex items-center space-x-2 bg-primary-red hover:bg-primary-red-dark text-white px-4 py-2 rounded-lg transition-colors font-medium"
+              aria-label="Probar velocidad de internet"
+            >
+              <Gauge className="w-5 h-5" />
+              <span>SpeedTest</span>
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -170,6 +182,16 @@ export function Header() {
                 >
                   <WhatsAppIcon className="w-5 h-5" />
                   <span>WhatsApp</span>
+                </button>
+                <button
+                  onClick={() => {
+                    handleSpeedTest()
+                    setIsMenuOpen(false)
+                  }}
+                  className="w-full flex items-center justify-center space-x-2 bg-primary-red hover:bg-primary-red-dark text-white px-4 py-2 rounded-lg transition-colors font-medium"
+                >
+                  <Gauge className="w-5 h-5" />
+                  <span>SpeedTest</span>
                 </button>
               </div>
             </div>

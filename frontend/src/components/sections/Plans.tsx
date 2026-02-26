@@ -66,7 +66,7 @@ const mapPlanToDisplay = (plan: Plan): PlanDisplay => {
       name: plan.name,
       internet: `${plan.internetSpeedMbps} Mbps`,
       tv: `${plan.tvChannels} canales`,
-      price: formatPrice(plan.monthlyPrice),
+      price: plan.monthlyPrice && plan.monthlyPrice > 0 ? formatPrice(plan.monthlyPrice) : '',
       period: 'mes',
       features: getFeatures(plan),
       popular: plan.popular,
@@ -205,10 +205,12 @@ export function Plans() {
 
                         <div className="text-center mb-4 sm:mb-6">
                           <h3 className="text-xl sm:text-2xl font-bold text-neutral-dark mb-2">{plan.name}</h3>
-                          <div className="flex items-baseline justify-center space-x-1 mb-4">
-                            <span className="text-3xl sm:text-4xl font-bold text-gradient">{plan.price}</span>
-                            <span className="text-neutral-gray text-sm sm:text-base">/{plan.period}</span>
-                          </div>
+                          {plan.price && (
+                            <div className="flex items-baseline justify-center space-x-1 mb-4">
+                              <span className="text-3xl sm:text-4xl font-bold text-gradient">{plan.price}</span>
+                              <span className="text-neutral-gray text-sm sm:text-base">/{plan.period}</span>
+                            </div>
+                          )}
                         </div>
 
                         <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
