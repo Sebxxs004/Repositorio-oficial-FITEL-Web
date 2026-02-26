@@ -20,7 +20,18 @@ import {
   MessageSquare,
   FileCheck,
   Users,
-  Settings
+  Settings,
+  Zap,
+  Monitor,
+  Globe,
+  Router,
+  Signal,
+  Cpu,
+  CloudOff,
+  Wrench,
+  BarChart2,
+  Info,
+  Network
 } from 'lucide-react'
 import Link from 'next/link'
 import { FITEL_PHONE_DISPLAY, FITEL_PHONE_TEL, FITEL_EMAIL, FITEL_WHATSAPP_URL } from '@/config/constants'
@@ -313,6 +324,582 @@ export function InformacionUsuarios() {
               Necesitarás tu documento de identidad, comprobante de residencia y datos de contacto. 
               Nuestro equipo te guiará en todo el proceso.
             </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'factores-limitacion',
+      title: 'Factores de limitación de la velocidad de Internet',
+      icon: <Zap className="w-6 h-6" />,
+      renderContent: () => (
+        <div className="space-y-6">
+          <p className="text-neutral-gray">
+            La velocidad de Internet que experimenta un usuario puede ser inferior a la velocidad 
+            contratada por múltiples razones técnicas. A continuación detallamos los principales 
+            factores, diferenciando los que dependen del operador FITEL de los que dependen del 
+            usuario o de terceros.
+          </p>
+
+          {/* Factores del operador */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 flex items-center justify-center bg-primary-red/10 rounded-lg text-primary-red flex-shrink-0">
+                <Signal className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-dark">
+                Factores propios de la red FITEL
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-red-50 border border-red-100 rounded-lg p-4">
+                <h4 className="font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                  <Wrench className="w-4 h-4 text-primary-red" />
+                  Tecnología de acceso
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  FITEL utiliza tecnología de fibra óptica (FTTH) y tecnología inalámbrica fija (FWA). 
+                  La velocidad máxima alcanzable depende del tipo de conexión disponible en tu zona.
+                </p>
+              </div>
+              <div className="bg-red-50 border border-red-100 rounded-lg p-4">
+                <h4 className="font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-primary-red" />
+                  Congestión en horas pico
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  En horas de mayor demanda (7–10 p.m.), la red puede experimentar congestiones 
+                  que reducen temporalmente la velocidad efectiva. Gestionamos el tráfico para 
+                  garantizar el mínimo garantizado de tu plan.
+                </p>
+              </div>
+              <div className="bg-red-50 border border-red-100 rounded-lg p-4">
+                <h4 className="font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                  <CloudOff className="w-4 h-4 text-primary-red" />
+                  Mantenimientos programados
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  Las labores de mantenimiento preventivo o correctivo pueden generar 
+                  interrupciones parciales o totales del servicio. Notificamos con anticipación 
+                  cuando es posible.
+                </p>
+              </div>
+              <div className="bg-red-50 border border-red-100 rounded-lg p-4">
+                <h4 className="font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                  <FileCheck className="w-4 h-4 text-primary-red" />
+                  Calidad del cableado de última milla
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  El estado del cableado desde el nodo de distribución hasta tu domicilio 
+                  puede afectar la velocidad. FITEL realiza revisiones periódicas de su infraestructura.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Factores del usuario */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-lg text-blue-600 flex-shrink-0">
+                <Router className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-dark">
+                Factores en la red interna del usuario
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <h4 className="font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                  <Wifi className="w-4 h-4 text-blue-600" />
+                  Conexión WiFi vs. cable
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  Una conexión por cable Ethernet siempre entrega velocidades superiores al WiFi. 
+                  El WiFi pierde eficiencia por distancia, paredes, interferencias y el estándar 
+                  del router (WiFi 4/5/6).
+                </p>
+              </div>
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <h4 className="font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                  <Users className="w-4 h-4 text-blue-600" />
+                  Número de dispositivos conectados
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  Con múltiples dispositivos conectados simultáneamente, el ancho de banda contratado 
+                  se distribuye entre todos ellos, reduciendo la velocidad disponible para cada uno.
+                </p>
+              </div>
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <h4 className="font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                  <Signal className="w-4 h-4 text-blue-600" />
+                  Interferencias de señal WiFi
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  Otros routers de vecinos, dispositivos como hornos microondas, teléfonos 
+                  inalámbricos y paredes gruesas generan interferencias que reducen la calidad 
+                  de la señal WiFi.
+                </p>
+              </div>
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <h4 className="font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                  <Settings className="w-4 h-4 text-blue-600" />
+                  Estado del router / módem
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  Un router con firmware desactualizado, sobrecalentado, con muchos años de uso 
+                  o con configuración incorrecta puede limitar significativamente el rendimiento 
+                  de la conexión.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Factores del dispositivo final */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 flex items-center justify-center bg-green-100 rounded-lg text-green-600 flex-shrink-0">
+                <Monitor className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-dark">
+                Factores del dispositivo del usuario
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-green-50 border border-green-100 rounded-lg p-4">
+                <h4 className="font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                  <Cpu className="w-4 h-4 text-green-600" />
+                  Capacidad del dispositivo
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  La velocidad de procesamiento de la tarjeta de red, el procesador y la RAM 
+                  del computador o celular determinan la velocidad máxima que el dispositivo 
+                  puede procesar, independientemente del plan contratado.
+                </p>
+              </div>
+              <div className="bg-green-50 border border-green-100 rounded-lg p-4">
+                <h4 className="font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-green-600" />
+                  Software y seguridad
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  El uso de VPNs, antivirus con inspección de tráfico, virus o malware activo 
+                  en el dispositivo puede reducir considerablemente la velocidad de navegación.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Factores externos */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 flex items-center justify-center bg-yellow-100 rounded-lg text-yellow-600 flex-shrink-0">
+                <Globe className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-dark">
+                Factores externos (ajenos al operador)
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4">
+                <h4 className="font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-yellow-600" />
+                  Capacidad del servidor destino
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  Si el sitio web, plataforma de streaming o juego en línea al que accedes tiene 
+                  limitaciones en sus propios servidores, la velocidad percibida será menor, 
+                  aunque tu conexión funcione correctamente.
+                </p>
+              </div>
+              <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4">
+                <h4 className="font-semibold text-neutral-dark mb-2 flex items-center gap-2">
+                  <Wrench className="w-4 h-4 text-yellow-600" />
+                  Cableado interno del inmueble
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  El estado del cableado físico dentro del apartamento o casa (responsabilidad 
+                  del propietario del inmueble) puede afectar la calidad de la señal entregada 
+                  por FITEL al punto final.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Tip box */}
+          <div className="bg-neutral-dark rounded-xl p-5">
+            <div className="flex items-start gap-3">
+              <Zap className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-white font-semibold mb-1">Consejo: cómo medir tu velocidad real</p>
+                <p className="text-white/80 text-sm">
+                  Para medir la velocidad real de tu conexión, conecta tu dispositivo directamente 
+                  al router por cable Ethernet y usa nuestra herramienta oficial{' '}
+                  <a 
+                    href="https://fitelcolombia.speedtestcustom.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-yellow-400 hover:underline font-semibold"
+                  >
+                    SpeedTest FITEL
+                  </a>. 
+                  Si la velocidad medida es inferior al 70% de tu plan contratado, contáctanos.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'indicadores-calidad',
+      title: 'Indicadores de calidad del servicio de Internet',
+      icon: <BarChart2 className="w-6 h-6" />,
+      renderContent: () => (
+        <div className="space-y-6">
+          <p className="text-neutral-gray">
+            La Comisión de Regulación de Comunicaciones (CRC) establece los indicadores mínimos
+            de calidad que todo proveedor de internet en Colombia debe cumplir (Resolución CRC 5110 de 2017
+            y modificatorias). A continuación encontrarás qué significa cada indicador, cuál es el
+            mínimo legal exigido y cómo puedes medirlo tú mismo.
+          </p>
+
+          {/* Aviso de transparencia */}
+          <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-blue-800 mb-1">Transparencia sobre nuestros datos</p>
+              <p className="text-sm text-blue-700">
+                FITEL publica los parámetros mínimos regulatorios garantizados. Si tienes dudas sobre
+                el desempeño específico de tu conexión, puedes medirlo con las herramientas indicadas
+                más abajo o solicitarnos un reporte técnico a través de una PQR.
+              </p>
+            </div>
+          </div>
+
+          {/* Indicadores */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+            {/* Velocidad */}
+            <div className="bg-neutral-white border border-neutral-gray-light rounded-xl p-5 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 flex items-center justify-center bg-primary-red/10 rounded-lg text-primary-red">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-neutral-dark">Velocidad efectiva</h3>
+              </div>
+              <p className="text-sm text-neutral-gray">
+                Es la velocidad real de descarga y carga que llega a tu dispositivo. Puede diferir
+                de la velocidad nominal del plan por los factores descritos en la sección anterior.
+              </p>
+              <div className="bg-green-50 rounded-lg px-4 py-2 text-sm">
+                <span className="font-semibold text-green-800">Mínimo regulatorio: </span>
+                <span className="text-green-700">≥ 40% de la velocidad contratada para descarga; ≥ 20% para carga (CRC).</span>
+              </div>
+              <p className="text-xs text-neutral-gray">
+                Ejemplo: si tienes un plan de 100 Mbps, la velocidad mínima garantizada es de 40 Mbps de bajada.
+              </p>
+            </div>
+
+            {/* Latencia */}
+            <div className="bg-neutral-white border border-neutral-gray-light rounded-xl p-5 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 flex items-center justify-center bg-secondary-blue/10 rounded-lg text-secondary-blue">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-neutral-dark">Latencia (ping)</h3>
+              </div>
+              <p className="text-sm text-neutral-gray">
+                Es el tiempo que tarda un paquete de datos en ir desde tu dispositivo hasta el servidor
+                y volver. Afecta directamente videollamadas, videojuegos y aplicaciones en tiempo real.
+              </p>
+              <div className="bg-green-50 rounded-lg px-4 py-2 text-sm">
+                <span className="font-semibold text-green-800">Mínimo regulatorio: </span>
+                <span className="text-green-700">≤ 150 ms en condiciones normales de red (CRC).</span>
+              </div>
+              <p className="text-xs text-neutral-gray">
+                Un valor de 10–40 ms es excelente; 40–100 ms es aceptable; más de 150 ms se considera
+                degradación del servicio.
+              </p>
+            </div>
+
+            {/* Jitter */}
+            <div className="bg-neutral-white border border-neutral-gray-light rounded-xl p-5 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 flex items-center justify-center bg-purple-100 rounded-lg text-purple-600">
+                  <Signal className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-neutral-dark">Jitter (variación de latencia)</h3>
+              </div>
+              <p className="text-sm text-neutral-gray">
+                Mide la variabilidad en los tiempos de entrega de los paquetes. Un jitter alto provoca
+                cortes en videollamadas, tartamudeo en streaming y problemas en VoIP.
+              </p>
+              <div className="bg-green-50 rounded-lg px-4 py-2 text-sm">
+                <span className="font-semibold text-green-800">Mínimo regulatorio: </span>
+                <span className="text-green-700">≤ 50 ms (CRC).</span>
+              </div>
+              <p className="text-xs text-neutral-gray">
+                Valores de jitter menores a 20 ms son ideales para videollamadas y streaming de alta calidad.
+              </p>
+            </div>
+
+            {/* Pérdida de paquetes */}
+            <div className="bg-neutral-white border border-neutral-gray-light rounded-xl p-5 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 flex items-center justify-center bg-orange-100 rounded-lg text-orange-500">
+                  <CloudOff className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-neutral-dark">Pérdida de paquetes</h3>
+              </div>
+              <p className="text-sm text-neutral-gray">
+                Porcentaje de paquetes de datos que no llegan a su destino. Una pérdida alta provoca
+                recargas de página, congelamiento de video y errores de conexión.
+              </p>
+              <div className="bg-green-50 rounded-lg px-4 py-2 text-sm">
+                <span className="font-semibold text-green-800">Mínimo regulatorio: </span>
+                <span className="text-green-700">≤ 3% de pérdida de paquetes (CRC).</span>
+              </div>
+              <p className="text-xs text-neutral-gray">
+                Lo ideal es 0%. Valores por encima del 3% indican un problema que debe reportarse
+                mediante PQR o llamando a soporte técnico.
+              </p>
+            </div>
+
+            {/* Disponibilidad */}
+            <div className="bg-neutral-white border border-neutral-gray-light rounded-xl p-5 space-y-3 md:col-span-2">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 flex items-center justify-center bg-green-100 rounded-lg text-green-600">
+                  <CheckCircle className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-neutral-dark">Disponibilidad del servicio</h3>
+              </div>
+              <p className="text-sm text-neutral-gray">
+                Porcentaje del tiempo en que el servicio está efectivamente activo y funcional durante
+                un período medido (generalmente mensual). Incluye todas las interrupciones no programadas.
+              </p>
+              <div className="bg-green-50 rounded-lg px-4 py-2 text-sm">
+                <span className="font-semibold text-green-800">Mínimo regulatorio: </span>
+                <span className="text-green-700">≥ 95% de disponibilidad mensual (CRC). Esto equivale a un máximo de ~36 horas de interrupción por mes.</span>
+              </div>
+              <p className="text-xs text-neutral-gray">
+                El tiempo de inactividad por mantenimientos programados y notificados previamente no
+                se conta como interrupción del servicio según la regulación colombiana.
+              </p>
+            </div>
+          </div>
+
+          {/* Cómo medir */}
+          <div className="bg-neutral-dark rounded-xl p-5 space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Wrench className="w-5 h-5 text-yellow-400" />
+              <h3 className="font-bold text-white">¿Cómo mido estos indicadores?</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <a
+                href="https://fitelcolombia.speedtestcustom.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center bg-white/10 hover:bg-white/20 transition-colors rounded-lg p-4 text-center"
+              >
+                <Zap className="w-7 h-7 text-yellow-400 mb-2" />
+                <span className="text-white font-semibold text-sm">SpeedTest FITEL</span>
+                <span className="text-white/60 text-xs mt-1">Velocidad, latencia y jitter</span>
+              </a>
+              <a
+                href="https://www.speedtest.net/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center bg-white/10 hover:bg-white/20 transition-colors rounded-lg p-4 text-center"
+              >
+                <Globe className="w-7 h-7 text-blue-300 mb-2" />
+                <span className="text-white font-semibold text-sm">Speedtest by Ookla</span>
+                <span className="text-white/60 text-xs mt-1">Estándar internacional</span>
+              </a>
+              <a
+                href="https://fast.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center bg-white/10 hover:bg-white/20 transition-colors rounded-lg p-4 text-center"
+              >
+                <Monitor className="w-7 h-7 text-green-300 mb-2" />
+                <span className="text-white font-semibold text-sm">Fast.com</span>
+                <span className="text-white/60 text-xs mt-1">Medición de velocidad Netflix</span>
+              </a>
+            </div>
+            <p className="text-white/60 text-xs pt-1">
+              Para una medición precisa, conecta tu dispositivo al router por cable Ethernet y cierra
+              todas las aplicaciones que consuman datos antes de realizar la prueba.
+            </p>
+          </div>
+
+          {/* Qué hacer si no cumple */}
+          <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+            <AlertCircle className="w-5 h-5 text-primary-red flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-red-800 mb-1">¿Tu conexión no cumple los mínimos?</p>
+              <p className="text-sm text-red-700 mb-2">
+                Si la medición de tu velocidad está por debajo del 40% de tu plan contratado, o si
+                experimentas latencia mayor a 150 ms de forma constante, tienes derecho a:
+              </p>
+              <ul className="text-sm text-red-700 space-y-1 list-disc list-inside">
+                <li>Solicitar una revisión técnica sin costo adicional.</li>
+                <li>Presentar una PQR exigiendo la corrección del servicio.</li>
+                <li>Exigir descuento proporcional por el tiempo de degradación comprobada.</li>
+              </ul>
+              <Link
+                href="/pqrs/realizar"
+                className="inline-flex items-center gap-2 mt-3 text-sm font-semibold text-primary-red hover:underline"
+              >
+                <FileCheck className="w-4 h-4" />
+                Presentar una PQR ahora
+              </Link>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'practicas-trafico',
+      title: 'Prácticas de gestión de tráfico',
+      icon: <Network className="w-6 h-6" />,
+      renderContent: () => (
+        <div className="space-y-6">
+          <p className="text-neutral-gray">
+            La gestión de tráfico son las técnicas que FITEL aplica sobre su red para garantizar
+            una experiencia de calidad a todos los usuarios. Esta sección describe de forma
+            transparente qué hacemos y qué no hacemos con el tráfico de datos de nuestros clientes,
+            en cumplimiento del principio de <strong>neutralidad de red</strong> (CRC Resolución
+            3067 de 2011 y modificatorias).
+          </p>
+
+          {/* Neutralidad de red — destacado */}
+          <div className="bg-gradient-to-r from-primary-red/10 to-secondary-blue/10 border border-primary-red/20 rounded-xl p-5">
+            <div className="flex items-start gap-3">
+              <Shield className="w-6 h-6 text-primary-red flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-neutral-dark mb-1">Neutralidad de red</p>
+                <p className="text-sm text-neutral-gray">
+                  FITEL respeta el principio de neutralidad de red. <strong>No bloqueamos,
+                  degradamos ni priorizamos</strong> contenidos, aplicaciones o servicios de
+                  forma discriminatoria por razones comerciales. Todo el tráfico legal de
+                  Internet es tratado de forma equitativa.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Lo que SÍ hacemos */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 flex items-center justify-center bg-green-100 rounded-lg text-green-600 flex-shrink-0">
+                <CheckCircle className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-dark">Prácticas que aplicamos</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-neutral-white border border-neutral-gray-light rounded-xl p-4 space-y-2">
+                <h4 className="font-semibold text-neutral-dark flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-green-600" />
+                  Gestión de congestión en horas pico
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  Durante períodos de alta demanda (principalmente 7–10 p.m.), aplicamos técnicas
+                  de <em>traffic shaping</em> para distribuir el ancho de banda disponible de
+                  forma equitativa entre todos los usuarios activos, evitando que unos pocos
+                  saturen la red en perjuicio de los demás.
+                </p>
+              </div>
+              <div className="bg-neutral-white border border-neutral-gray-light rounded-xl p-4 space-y-2">
+                <h4 className="font-semibold text-neutral-dark flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-green-600" />
+                  Priorización QoS para tráfico en tiempo real
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  Aplicamos reglas de Calidad de Servicio (QoS) para priorizar el tráfico
+                  sensible a latencia: videollamadas, VoIP y videoconferencias. Esto garantiza
+                  que estas aplicaciones no se degraden durante congestiones de red.
+                </p>
+              </div>
+              <div className="bg-neutral-white border border-neutral-gray-light rounded-xl p-4 space-y-2">
+                <h4 className="font-semibold text-neutral-dark flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-green-600" />
+                  Filtrado de tráfico malicioso
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  Bloqueamos activamente el tráfico asociado a amenazas de seguridad conocidas:
+                  ataques DDoS, spam masivo, botnets y malware. Este filtrado protege tanto
+                  la integridad de la red como la seguridad de los propios usuarios.
+                </p>
+              </div>
+              <div className="bg-neutral-white border border-neutral-gray-light rounded-xl p-4 space-y-2">
+                <h4 className="font-semibold text-neutral-dark flex items-center gap-2">
+                  <Monitor className="w-4 h-4 text-green-600" />
+                  Monitoreo de disponibilidad
+                </h4>
+                <p className="text-sm text-neutral-gray">
+                  Monitoreamos continuamente el estado de nuestra red para detectar y atender
+                  fallas de forma proactiva. Cuando detectamos una interrupción antes de que
+                  los usuarios la reporten, iniciamos el proceso de restauración de inmediato.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Lo que NO hacemos */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 flex items-center justify-center bg-red-100 rounded-lg text-primary-red flex-shrink-0">
+                <AlertCircle className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold text-neutral-dark">Lo que FITEL no hace</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-red-50 border border-red-100 rounded-xl p-4 space-y-1">
+                <p className="font-semibold text-neutral-dark text-sm">❌ No bloqueamos contenidos</p>
+                <p className="text-xs text-neutral-gray">
+                  No bloqueamos ningún sitio web, aplicación o servicio legal, sin importar
+                  si es de un competidor o de cualquier otro proveedor.
+                </p>
+              </div>
+              <div className="bg-red-50 border border-red-100 rounded-xl p-4 space-y-1">
+                <p className="font-semibold text-neutral-dark text-sm">❌ No throttling comercial</p>
+                <p className="text-xs text-neutral-gray">
+                  No reducimos deliberadamente la velocidad de plataformas específicas
+                  (Netflix, YouTube, WhatsApp, etc.) para favorecer servicios propios o
+                  de terceros pagantes.
+                </p>
+              </div>
+              <div className="bg-red-50 border border-red-100 rounded-xl p-4 space-y-1">
+                <p className="font-semibold text-neutral-dark text-sm">❌ No priorizamos por pago</p>
+                <p className="text-xs text-neutral-gray">
+                  No ofrecemos trato preferencial en la red a ningún proveedor de contenido
+                  o aplicación a cambio de contraprestación económica.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Marco regulatorio */}
+          <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-blue-800 mb-1">Marco regulatorio</p>
+              <p className="text-sm text-blue-700">
+                Las prácticas de gestión de tráfico de FITEL se rigen por la{' '}
+                <strong>Resolución CRC 3067 de 2011</strong> (neutralidad de red),
+                la <strong>Circular SIC 005 de 2022</strong> y demás normas de la Comisión
+                de Regulación de Comunicaciones (CRC). Si consideras que alguna práctica
+                viola tus derechos como usuario, puedes presentar una PQR ante FITEL o
+                una queja ante la CRC o la SIC.
+              </p>
+              <Link
+                href="/pqrs/realizar"
+                className="inline-flex items-center gap-2 mt-3 text-sm font-semibold text-blue-700 hover:underline"
+              >
+                <FileCheck className="w-4 h-4" />
+                Presentar una PQR
+              </Link>
+            </div>
           </div>
         </div>
       )

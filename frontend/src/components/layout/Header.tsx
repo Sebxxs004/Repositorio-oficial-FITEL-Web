@@ -1,19 +1,31 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Menu, X, Gauge } from 'lucide-react'
+import { Menu, X, Gauge, ChevronDown, Info } from 'lucide-react'
 import { NavigationService } from '@/services/navigation/NavigationService'
 import { PQRsDropdown } from './PQRsDropdown'
 import { ServicesDropdown } from './ServicesDropdown'
 import { FITEL_WHATSAPP_URL } from '@/config/constants'
 
+const INFO_LINKS = [
+  { label: 'Mapas de Cobertura', href: '/cobertura' },
+  { label: 'Comparador de planes y tarifas', href: '/planes' },
+  { label: 'Factores de limitación de la velocidad de Internet', href: '/informacion-usuarios#factores-limitacion' },
+  { label: 'Indicadores de calidad del servicio de Internet', href: '/informacion-usuarios#indicadores-calidad' },
+  { label: 'Prácticas de gestión de tráfico', href: '/informacion-usuarios#practicas-trafico' },
+  { label: 'Parrilla de canales', href: '/malla-canales' },
+  { label: 'Procedimiento y trámite de PQR', href: '/pqrs' },
+]
+
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isInfoOpen, setIsInfoOpen] = useState(false)
   const pathname = usePathname()
+  const infoRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,7 +38,19 @@ export function Header() {
   // Cerrar menú móvil cuando cambia la ruta
   useEffect(() => {
     setIsMenuOpen(false)
+    setIsInfoOpen(false)
   }, [pathname])
+
+  // Cerrar dropdown info al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (infoRef.current && !infoRef.current.contains(e.target as Node)) {
+        setIsInfoOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const navigationItems = NavigationService.getNavigationItems()
 
@@ -58,6 +82,40 @@ export function Header() {
           : 'bg-neutral-white/95 backdrop-blur-sm'
       }`}
     >
+      {/* TOP BAR — Información importante para usuarios (Circular SIC 005/2022) */}
+      <div className="bg-[#1a1a2e] text-white">
+        <div className="container-custom flex items-center justify-end h-9">
+          <div className="relative" ref={infoRef}>
+            <button
+              onClick={() => setIsInfoOpen(!isInfoOpen)}
+              className="flex items-center space-x-1.5 text-xs text-white/85 hover:text-white py-2 px-2 transition-colors duration-200"
+              aria-expanded={isInfoOpen}
+              aria-label="Información importante para usuarios"
+            >
+              <Info className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="font-medium hidden sm:inline">Información importante para usuarios</span>
+              <span className="font-medium sm:hidden">Info usuarios</span>
+              <ChevronDown className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${isInfoOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isInfoOpen && (
+              <div className="absolute right-0 top-full bg-white shadow-xl border border-neutral-gray-light rounded-b-lg w-72 overflow-hidden z-50">
+                {INFO_LINKS.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="flex items-start px-4 py-2.5 text-sm text-neutral-dark hover:bg-red-50 hover:text-primary-red transition-colors border-b border-neutral-gray-light/50 last:border-0"
+                    onClick={() => setIsInfoOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       <nav className="container-custom">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function PlanesPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-gray-light to-neutral-white pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-gray-light to-neutral-white pt-[116px]">
       <PlanComparator />
     </div>
   )

@@ -156,7 +156,7 @@ export default function MallaCanalesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-gray-light flex items-center justify-center pt-20">
+      <div className="min-h-screen bg-neutral-gray-light flex items-center justify-center pt-[116px]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-red mx-auto mb-4"></div>
           <p className="text-neutral-gray">Cargando canales...</p>
@@ -167,7 +167,7 @@ export default function MallaCanalesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-neutral-gray-light flex items-center justify-center pt-20">
+      <div className="min-h-screen bg-neutral-gray-light flex items-center justify-center pt-[116px]">
         <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md mx-auto">
           <div className="text-red-500 mb-4 flex justify-center">
              <RefreshCcw className="w-12 h-12" />
@@ -186,7 +186,7 @@ export default function MallaCanalesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-gray-light to-neutral-white pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-gray-light to-neutral-white pt-[116px]">
       <div className="container-custom py-12">
         {/* Header */}
         <div className="text-center mb-8">

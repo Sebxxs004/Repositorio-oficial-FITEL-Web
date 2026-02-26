@@ -5,7 +5,7 @@ import { Metadata } from 'next'
 const CoverageMap = dynamic(() => import('@/components/coverage/CoverageMap').then(mod => ({ default: mod.CoverageMap })), {
   ssr: false,
   loading: () => (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-gray-light to-neutral-white pt-20 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-gray-light to-neutral-white pt-[116px] flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-red mx-auto mb-4"></div>
         <p className="text-neutral-gray">Cargando mapa de cobertura...</p>
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function CoberturaPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-gray-light to-neutral-white pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-gray-light to-neutral-white pt-[116px]">
       <CoverageMap />
     </div>
   )
