@@ -47,6 +47,7 @@ const pqrFormSchema = z.object({
   subject: z.string().min(5, 'El asunto debe tener al menos 5 caracteres'),
   description: z.string().min(20, 'La descripción debe tener al menos 20 caracteres'),
   expectedResolution: z.string().optional(),
+  resourceType: z.string().optional(),
   isAnonymous: z.boolean().optional(),
   privacyPolicyAccepted: z.boolean().refine(val => val === true, {
     message: 'Debes aceptar la política de privacidad y tratamiento de datos',
@@ -106,6 +107,14 @@ const pqrFormSchema = z.object({
         path: ['customerEmail'],
       })
     }
+  }
+  // Validación: Si es RECLAMO, el campo resourceType es obligatorio
+  if (data.type === 'RECLAMO' && (!data.resourceType || data.resourceType === '')) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Selecciona el tipo de recurso legal',
+      path: ['resourceType'],
+    })
   }
 })
 
@@ -200,6 +209,7 @@ export function PQRsModule() {
   })
 
   const selectedType = watch('type')
+  const selectedResourceType = watch('resourceType')
   const isAnonymous = watch('isAnonymous')
   const isDocumentOptional = selectedType === 'SUGERENCIA' || selectedType === 'QUEJA'
   
@@ -531,6 +541,38 @@ export function PQRsModule() {
                   <p className="mt-1 text-sm text-red-600">{errors.customerAddress.message}</p>
                 )}
               </div>
+              )}
+
+              {/* Campo de recurso legal y aviso de 6 meses (solo para RECLAMO) */}
+              {selectedType === 'RECLAMO' && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 animate-fade-in">
+                  <label htmlFor="resourceType" className="block text-sm font-semibold text-neutral-dark mb-2">
+                    Tipo de recurso legal *
+                  </label>
+                  <select
+                    id="resourceType"
+                    {...register('resourceType')}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors bg-white ${
+                      errors.resourceType
+                        ? 'border-red-500 focus:ring-red-500'
+                        : 'border-neutral-gray-light focus:ring-primary-red focus:border-transparent'
+                    }`}
+                  >
+                    <option value="">Selecciona el tipo de recurso...</option>
+                    {RESOURCE_TYPE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                  {errors.resourceType && (
+                    <p className="mt-1 text-sm text-red-600">{errors.resourceType.message}</p>
+                  )}
+                  <div className="mt-3 p-3 bg-yellow-100 border border-yellow-300 rounded text-yellow-900 text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-yellow-700" />
+                    <span>
+                      Recuerda: Solo puedes presentar reclamaciones de facturación dentro de los 6 meses siguientes a la fecha de cobro, según la Circular SIC 005/2022.
+                    </span>
+                  </div>
+                </div>
               )}
 
               {/* Asunto */}
