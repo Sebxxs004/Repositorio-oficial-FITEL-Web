@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
                 Revisa tu bandeja de entrada y la carpeta de spam.
               </p>
               <button
-                onClick={() => router.push('/operaciones-internas')}
+                onClick={() => router.push('/operaciones-internas/login')}
                 className="w-full flex items-center justify-center space-x-2 btn-primary"
               >
                 <ArrowLeft className="w-4 h-4" />

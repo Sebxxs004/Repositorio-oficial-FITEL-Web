@@ -294,20 +294,18 @@ public class AuthService {
         // Generar link de recuperación
         String resetLink = emailService.generatePasswordResetLink(token);
         
-        // Intentar enviar email; si falla, registrar el link SOLO en logs del servidor
-        boolean hasEmail = user.getEmail() != null && !user.getEmail().trim().isEmpty();
-        if (hasEmail) {
-            try {
-                emailService.sendPasswordResetEmail(user.getEmail(), user.getFullName(), resetLink);
-                log.info("Email de recuperación enviado a: {}", user.getEmail());
-            } catch (Exception e) {
-                // SEGURIDAD: el link solo se expone en logs del servidor, nunca en la respuesta HTTP
-                log.warn("[ADMIN-ACTION-REQUIRED] No se pudo enviar email de recuperación para usuario '{}'. "
-                    + "Link de reset (válido 1h): {}", user.getUsername(), resetLink);
-            }
-        } else {
+        // Si el campo email está vacío, usar el username como destinatario
+        // (en este sistema el username es la dirección de correo del usuario)
+        String emailDestino = (user.getEmail() != null && !user.getEmail().trim().isEmpty())
+            ? user.getEmail()
+            : user.getUsername();
+        
+        try {
+            emailService.sendPasswordResetEmail(emailDestino, user.getFullName(), resetLink);
+            log.info("Email de recuperación enviado a: {}", emailDestino);
+        } catch (Exception e) {
             // SEGURIDAD: el link solo se expone en logs del servidor, nunca en la respuesta HTTP
-            log.warn("[ADMIN-ACTION-REQUIRED] Usuario '{}' sin email configurado. "
+            log.warn("[ADMIN-ACTION-REQUIRED] No se pudo enviar email de recuperación para usuario '{}'. "
                 + "Link de reset (válido 1h): {}", user.getUsername(), resetLink);
         }
     }
