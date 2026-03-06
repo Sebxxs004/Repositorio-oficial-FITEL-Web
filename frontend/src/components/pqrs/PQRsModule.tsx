@@ -108,11 +108,11 @@ const pqrFormSchema = z.object({
       })
     }
   }
-  // Validación: Si es RECLAMO, el campo resourceType es obligatorio
-  if (data.type === 'RECLAMO' && (!data.resourceType || data.resourceType === '')) {
+  // Validación: Para PETICION, QUEJA y RECLAMO, el campo resourceType es obligatorio (Circular SIC 005/2022, Art. 1.3.4)
+  if (['PETICION', 'QUEJA', 'RECLAMO'].includes(data.type) && (!data.resourceType || data.resourceType === '')) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'Selecciona el tipo de recurso legal',
+      message: 'Selecciona el tipo de recurso legal (reposición o apelación)',
       path: ['resourceType'],
     })
   }
@@ -543,12 +543,15 @@ export function PQRsModule() {
               </div>
               )}
 
-              {/* Campo de recurso legal y aviso de 6 meses (solo para RECLAMO) */}
-              {selectedType === 'RECLAMO' && (
+              {/* Campo de recurso legal (para PETICION, QUEJA y RECLAMO — Circular SIC 005/2022, Art. 1.3.4) */}
+              {selectedType && selectedType !== 'SUGERENCIA' && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 animate-fade-in">
                   <label htmlFor="resourceType" className="block text-sm font-semibold text-neutral-dark mb-2">
-                    Tipo de recurso legal *
+                    Tipo de recurso legal que desea interponer *
                   </label>
+                  <p className="text-xs text-neutral-gray mb-2">
+                    De acuerdo con el artículo 2.1.24.1.3 de la Resolución CRC 5050 de 2016, indique si desea presentar únicamente recurso de reposición, o recurso de reposición y en subsidio de apelación.
+                  </p>
                   <select
                     id="resourceType"
                     {...register('resourceType')}
@@ -566,12 +569,15 @@ export function PQRsModule() {
                   {errors.resourceType && (
                     <p className="mt-1 text-sm text-red-600">{errors.resourceType.message}</p>
                   )}
-                  <div className="mt-3 p-3 bg-yellow-100 border border-yellow-300 rounded text-yellow-900 text-xs flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-yellow-700" />
-                    <span>
-                      Recuerda: Solo puedes presentar reclamaciones de facturación dentro de los 6 meses siguientes a la fecha de cobro, según la Circular SIC 005/2022.
-                    </span>
-                  </div>
+                  {/* Aviso especial de 6 meses solo para RECLAMO de facturación */}
+                  {selectedType === 'RECLAMO' && (
+                    <div className="mt-3 p-3 bg-yellow-100 border border-yellow-300 rounded text-yellow-900 text-xs flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-yellow-700" />
+                      <span>
+                        Recuerda: Solo puedes presentar reclamaciones de facturación dentro de los 6 meses siguientes a la fecha de cobro, según la Circular SIC 005/2022.
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
 

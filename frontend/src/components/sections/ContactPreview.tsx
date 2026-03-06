@@ -3,10 +3,28 @@
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Phone, Mail, MessageCircle, MapPin, ArrowRight } from 'lucide-react'
-import { FITEL_PHONE_DISPLAY, FITEL_PHONE_TEL, FITEL_EMAIL, FITEL_WHATSAPP_URL } from '@/config/constants'
+import { FITEL_PHONE_DISPLAY, FITEL_PHONE_NUMBER, FITEL_EMAIL } from '@/config/constants'
 
-export function ContactPreview() {
+export interface ContactData {
+  phone: string
+  phoneDisplay: string
+  email: string
+  whatsapp: string
+}
+
+interface ContactPreviewProps {
+  contact?: ContactData
+}
+
+export function ContactPreview({ contact }: ContactPreviewProps) {
   const sectionRef = useRef<HTMLElement>(null)
+
+  const data: ContactData = contact ?? {
+    phone: FITEL_PHONE_NUMBER,
+    phoneDisplay: FITEL_PHONE_DISPLAY,
+    email: FITEL_EMAIL,
+    whatsapp: FITEL_PHONE_NUMBER,
+  }
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -32,8 +50,8 @@ export function ContactPreview() {
     {
       icon: Phone,
       title: 'Teléfono',
-      value: FITEL_PHONE_DISPLAY,
-      link: FITEL_PHONE_TEL,
+      value: data.phoneDisplay,
+      link: `tel:+${data.phone}`,
       description: 'Llámanos de lunes a domingo',
       color: 'text-primary-red',
       bgColor: 'bg-primary-red/10',
@@ -42,7 +60,7 @@ export function ContactPreview() {
       icon: MessageCircle,
       title: 'WhatsApp',
       value: 'Escribir por WhatsApp',
-      link: FITEL_WHATSAPP_URL,
+      link: `https://wa.me/${data.whatsapp}`,
       description: 'Atención inmediata',
       color: 'text-secondary-blue',
       bgColor: 'bg-secondary-blue/10',
@@ -50,12 +68,13 @@ export function ContactPreview() {
     {
       icon: Mail,
       title: 'Email',
-      value: FITEL_EMAIL,
-      link: `mailto:${FITEL_EMAIL}`,
+      value: data.email,
+      link: `mailto:${data.email}`,
       description: 'Respuesta en 24 horas',
       color: 'text-primary-red',
       bgColor: 'bg-primary-red/10',
     },
+
     {
       icon: MapPin,
       title: 'Oficina',

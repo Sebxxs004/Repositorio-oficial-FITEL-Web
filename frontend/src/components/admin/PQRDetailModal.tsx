@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Save, AlertTriangle, Calendar, User, Mail, Phone, FileText, Paperclip, ArrowRight } from 'lucide-react'
+import { X, Save, AlertTriangle, Calendar, User, Mail, Phone, FileText, Paperclip, ArrowRight, Info } from 'lucide-react'
 
 interface PQR {
   id: number
@@ -613,6 +613,16 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                     className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"
                     placeholder="Respuesta formal para el cliente..."
                   />
+                  {/* Aviso legal obligatorio para TODAS las PQRs (Circular SIC 005/2022, Art. 1.3.6) */}
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2 text-xs text-blue-900">
+                    <Info className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold mb-1">Aviso legal obligatorio en la respuesta al usuario (Circular SIC 005/2022, Numeral 1.3.6):</p>
+                      <p className="leading-relaxed">
+                        &ldquo;En caso de no estar de acuerdo con la respuesta que le hemos dado, usted puede presentar ante nosotros recurso de <strong>reposición</strong> y en subsidio de <strong>apelación</strong> dentro de los <strong>diez (10) días hábiles</strong> siguientes a la notificación de esta decisión. Lo puede hacer a través de medios electrónicos (página web, correo electrónico o canal previamente informado) o mediante comunicación escrita. Los recursos legales se entienden en el sentido del artículo 2.1.24.1.3 de la Resolución CRC 5050 de 2016.&rdquo;
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </>
             ) : (
@@ -744,6 +754,16 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                     className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red resize-none"
                     placeholder="Respuesta formal para el cliente..."
                   />
+                  {/* Aviso legal obligatorio para TODAS las PQRs (Circular SIC 005/2022, Art. 1.3.6) */}
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2 text-xs text-blue-900">
+                    <Info className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold mb-1">Aviso legal obligatorio en la respuesta al usuario (Circular SIC 005/2022, Numeral 1.3.6):</p>
+                      <p className="leading-relaxed">
+                        &ldquo;En caso de no estar de acuerdo con la respuesta que le hemos dado, usted puede presentar ante nosotros recurso de <strong>reposición</strong> y en subsidio de <strong>apelación</strong> dentro de los <strong>diez (10) días hábiles</strong> siguientes a la notificación de esta decisión. Lo puede hacer a través de medios electrónicos (página web, correo electrónico o canal previamente informado) o mediante comunicación escrita. Los recursos legales se entienden en el sentido del artículo 2.1.24.1.3 de la Resolución CRC 5050 de 2016.&rdquo;
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </>
             )}

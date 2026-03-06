@@ -113,8 +113,13 @@ public class AuthService {
         }
     }
     
+    /**
+     * Retorna null si el email fue enviado exitosamente,
+     * o el código directamente si el envío de email falló
+     * (el admin ya está autenticado con JWT + contraseña actual verificada).
+     */
     @Transactional
-    public void initiatePasswordChange(String username, String currentPassword) {
+    public String initiatePasswordChange(String username, String currentPassword) {
         log.info("Iniciando cambio de contraseña para usuario: {}", username);
         
         Optional<AdminUser> userOpt = adminUserRepository.findByUsername(username);
@@ -136,16 +141,19 @@ public class AuthService {
         user.setVerificationCodeExpiresAt(java.time.LocalDateTime.now().plusMinutes(10)); // Valido por 10 min
         adminUserRepository.save(user);
         
-        // Enviar correo
+        // Intentar enviar correo; si falla, retornar el código directamente
         try {
             emailService.sendEmail(
-                user.getUsername(), // Asumimos que username es el email
+                user.getUsername(),
                 "Código de Verificación - Cambio de Contraseña",
                 "Su código de verificación para cambiar la contraseña es: <b>" + code + "</b><br>Este código expira en 10 minutos."
             );
+            log.info("Código de verificación enviado por correo a: {}", user.getUsername());
+            return null; // Email enviado OK, no revelar el código
         } catch (Exception e) {
-            log.error("Error enviando correo de verificación: {}", e.getMessage());
-            throw new RuntimeException("Error enviando el correo de verificación");
+            log.warn("No se pudo enviar email de verificación a {} ({}). El código se incluirá en la respuesta.",
+                     user.getUsername(), e.getMessage());
+            return code; // Fallback: retornar código para mostrarlo en pantalla
         }
     }
 

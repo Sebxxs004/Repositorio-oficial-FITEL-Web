@@ -6,7 +6,18 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Phone, Mail, MessageCircle, MapPin, Clock, Send, Loader2, Copy, Check } from 'lucide-react'
 import { ContactForm } from '@/types'
-import { FITEL_PHONE_NUMBER, FITEL_PHONE_DISPLAY, FITEL_EMAIL, FITEL_WHATSAPP_URL, FITEL_PHONE_TEL } from '@/config/constants'
+import { FITEL_PHONE_NUMBER, FITEL_PHONE_DISPLAY, FITEL_EMAIL } from '@/config/constants'
+
+interface ContactData {
+  phone: string
+  phoneDisplay: string
+  email: string
+  whatsapp: string
+}
+
+interface ContactProps {
+  contact?: ContactData
+}
 
 // Opciones de asunto para el formulario de contacto
 export const CONTACT_SUBJECT_OPTIONS = [
@@ -34,12 +45,19 @@ const contactFormSchema = z.object({
 
 type ContactFormData = z.infer<typeof contactFormSchema>
 
-export function Contact() {
+export function Contact({ contact: contactProp }: ContactProps = {}) {
   const sectionRef = useRef<HTMLElement>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [phoneCopied, setPhoneCopied] = useState(false)
+
+  const contact: ContactData = contactProp ?? {
+    phone: FITEL_PHONE_NUMBER,
+    phoneDisplay: FITEL_PHONE_DISPLAY,
+    email: FITEL_EMAIL,
+    whatsapp: FITEL_PHONE_NUMBER,
+  }
 
   const {
     register,
@@ -105,7 +123,7 @@ export function Contact() {
       
       // También abrir WhatsApp con el mensaje prellenado (opcional)
       const whatsappMessage = `Hola, mi nombre es ${data.name}.\n\nAsunto: ${subjectLabel}\n\nMensaje: ${data.message}\n\nContacto: ${data.email} - ${data.phone}`
-      const whatsappUrl = `${FITEL_WHATSAPP_URL}?text=${encodeURIComponent(whatsappMessage)}`
+      const whatsappUrl = `https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(whatsappMessage)}`
       window.open(whatsappUrl, '_blank')
       
       setSubmitSuccess(true)
@@ -122,15 +140,15 @@ export function Contact() {
   }
 
   const handleCall = () => {
-    window.location.href = FITEL_PHONE_TEL
+    window.location.href = `tel:+${contact.phone}`
   }
 
   const handleWhatsApp = () => {
-    window.open(FITEL_WHATSAPP_URL, '_blank')
+    window.open(`https://wa.me/${contact.whatsapp}`, '_blank')
   }
 
   const handleCopyPhone = async () => {
-    const phoneNumber = `+${FITEL_PHONE_NUMBER}`
+    const phoneNumber = `+${contact.phone}`
     try {
       await navigator.clipboard.writeText(phoneNumber)
       setPhoneCopied(true)
@@ -163,8 +181,8 @@ export function Contact() {
     {
       icon: Phone,
       title: 'Teléfono',
-      value: FITEL_PHONE_DISPLAY,
-      link: FITEL_PHONE_TEL,
+      value: contact.phoneDisplay,
+      link: `tel:+${contact.phone}`,
       description: 'Llámanos de lunes a domingo',
       color: 'text-primary-red',
       bgColor: 'bg-primary-red/10',
@@ -173,7 +191,7 @@ export function Contact() {
       icon: MessageCircle,
       title: 'WhatsApp',
       value: 'Escribir por WhatsApp',
-      link: FITEL_WHATSAPP_URL,
+      link: `https://wa.me/${contact.whatsapp}`,
       description: 'Atención inmediata',
       color: 'text-secondary-blue',
       bgColor: 'bg-secondary-blue/10',
@@ -181,8 +199,8 @@ export function Contact() {
     {
       icon: Mail,
       title: 'Email',
-      value: FITEL_EMAIL,
-      link: `mailto:${FITEL_EMAIL}`,
+      value: contact.email,
+      link: `mailto:${contact.email}`,
       description: 'Respuesta en 24 horas',
       color: 'text-primary-red',
       bgColor: 'bg-primary-red/10',

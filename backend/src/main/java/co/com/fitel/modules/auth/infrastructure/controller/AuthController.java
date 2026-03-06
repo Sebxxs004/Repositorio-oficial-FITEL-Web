@@ -201,7 +201,7 @@ public class AuthController {
     }
 
     @PostMapping("/change-password/init")
-    public ResponseEntity<ApiResponse<Void>> initChangePassword(
+    public ResponseEntity<ApiResponse<String>> initChangePassword(
             @Valid @RequestBody co.com.fitel.modules.auth.application.dto.ChangePasswordInitRequest request) {
         
         try {
@@ -209,17 +209,28 @@ public class AuthController {
             
             if (username == null || "anonymousUser".equals(username)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    ApiResponse.<Void>builder()
+                    ApiResponse.<String>builder()
                         .success(false)
                         .message("No autenticado")
                         .build()
                 );
             }
 
-            authService.initiatePasswordChange(username, request.getCurrentPassword());
+            String fallbackCode = authService.initiatePasswordChange(username, request.getCurrentPassword());
             
+            if (fallbackCode != null) {
+                // Email falló → devolver código directamente (admin ya autenticado con JWT + contraseña)
+                return ResponseEntity.ok(
+                    ApiResponse.<String>builder()
+                        .success(true)
+                        .message("No se pudo enviar el correo (configura el email en el panel). Usa el código que aparece en pantalla.")
+                        .data(fallbackCode)
+                        .build()
+                );
+            }
+
             return ResponseEntity.ok(
-                ApiResponse.<Void>builder()
+                ApiResponse.<String>builder()
                     .success(true)
                     .message("Código de verificación enviado al correo")
                     .build()
@@ -227,7 +238,7 @@ public class AuthController {
         } catch (Exception e) {
             log.error("Error iniciando cambio contraseña: {}", e.getMessage());
             return ResponseEntity.badRequest().body(
-                ApiResponse.<Void>builder()
+                ApiResponse.<String>builder()
                     .success(false)
                     .message(e.getMessage())
                     .build()

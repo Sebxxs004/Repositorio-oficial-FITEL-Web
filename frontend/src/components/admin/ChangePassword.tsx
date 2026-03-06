@@ -7,6 +7,7 @@ export function ChangePassword() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [verificationCode, setVerificationCode] = useState('')
+  const [fallbackCode, setFallbackCode] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
@@ -29,7 +30,15 @@ export function ChangePassword() {
 
       if (data.success) {
         setStep('confirm')
-        setMessage({ type: 'success', text: 'Código de verificación enviado a tu correo' })
+        if (data.data) {
+          // El email no pudo enviarse: el backend devolvió el código directamente
+          setFallbackCode(data.data)
+          setVerificationCode(data.data)
+          setMessage({ type: 'success', text: `El correo no pudo enviarse. Tu código de verificación es: ${data.data} (ya está rellenado automáticamente)` })
+        } else {
+          setFallbackCode(null)
+          setMessage({ type: 'success', text: 'Código de verificación enviado a tu correo' })
+        }
       } else {
         setMessage({ type: 'error', text: data.message || 'Error al iniciar cambio de contraseña' })
       }
@@ -78,6 +87,7 @@ export function ChangePassword() {
         setNewPassword('')
         setConfirmNewPassword('')
         setVerificationCode('')
+        setFallbackCode(null)
         setStep('init')
       } else {
         setMessage({ type: 'error', text: data.message || 'Error al confirmar cambio de contraseña' })
@@ -162,9 +172,15 @@ export function ChangePassword() {
                   />
                   <Shield className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
                 </div>
-                <p className="text-sm text-gray-500 mt-1">
-                  Revisa tu correo electrónico para ver el código
-                </p>
+                {fallbackCode ? (
+                  <p className="text-sm text-amber-600 mt-1 font-medium">
+                    El correo no está configurado. Código mostrado arriba (ya rellenado).
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Revisa tu correo electrónico para ver el código
+                  </p>
+                )}
               </div>
 
               <div>
@@ -210,6 +226,7 @@ export function ChangePassword() {
                 onClick={() => {
                    setStep('init');
                    setMessage(null);
+                   setFallbackCode(null);
                 }}
                 className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-lg transition-colors"
               >
