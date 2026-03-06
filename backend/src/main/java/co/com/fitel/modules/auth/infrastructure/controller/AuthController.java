@@ -61,21 +61,23 @@ public class AuthController {
             );
         }
 
-        // --- 2. Configurar cookies htpOnly (SameSite=None para cross-domain) ---
+        // --- 2. Configurar cookies httpOnly ---
+        // secure=false para funcionar sobre HTTP (sin dominio/SSL).
+        // Cambiar a secure=true + sameSite=None cuando se configure HTTPS con dominio.
         ResponseCookie tokenCookie = ResponseCookie.from("admin_token", loginResponse.getToken())
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60)
-                .sameSite("None")
+                .sameSite("Lax")
                 .build();
 
         ResponseCookie sessionCookie = ResponseCookie.from("admin_session", loginResponse.getSessionToken())
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)
                 .path("/")
                 .maxAge(60 * 60)
-                .sameSite("None")
+                .sameSite("Lax")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, tokenCookie.toString());
