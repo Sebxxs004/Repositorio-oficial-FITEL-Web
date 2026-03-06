@@ -137,7 +137,10 @@ if ($DeployDB) {
 # --- Backend ---
 if ($DeployBackend) {
     Write-Host "==== [Backend] Construyendo y Subiendo ====" -ForegroundColor Magenta
-    docker build -t "$acrLoginServer/fitel-backend:latest" ./backend
+    docker build `
+    --no-cache `
+    -t "$acrLoginServer/fitel-backend:latest" `
+    ./backend
     Check-LastExitCode "Falló la construcción de la imagen de Backend"
     docker push "$acrLoginServer/fitel-backend:latest"
     Check-LastExitCode "Falló la subida de la imagen de Backend"
@@ -436,6 +439,7 @@ Write-Host "Backend disponible en: $backendFullUrl" -ForegroundColor Green
 if ($DeployFrontend) {
     Write-Host "==== [Frontend] Construyendo con URL: $backendFullUrl ====" -ForegroundColor Magenta
     docker build `
+    --no-cache `
     --build-arg "NEXT_PUBLIC_API_URL=$backendFullUrl" `
     -t "$acrLoginServer/fitel-frontend:latest" `
     ./frontend

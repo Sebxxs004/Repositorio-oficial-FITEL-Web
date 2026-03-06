@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <h2 className="text-2xl font-bold text-neutral-dark mb-3">¡Correo Enviado!</h2>
+              <h2 className="text-2xl font-bold text-neutral-dark mb-3">¡Solicitud Enviada!</h2>
               <p className="text-neutral-gray text-sm mb-2">
                 Si el usuario existe, recibirás un correo electrónico con las instrucciones para recuperar tu contraseña.
               </p>
@@ -130,7 +130,7 @@ export default function ForgotPasswordPage() {
             <div className="text-center">
               <button
                 type="button"
-                onClick={() => router.push('/operaciones-internas')}
+                onClick={() => router.push('/operaciones-internas/login')}
                 className="inline-flex items-center space-x-1 text-sm text-primary-red hover:text-primary-red/80 font-medium transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />

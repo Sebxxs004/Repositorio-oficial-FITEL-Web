@@ -281,11 +281,6 @@ public class AuthService {
         
         AdminUser user = userOpt.get();
         
-        // Verificar que el usuario tenga un email configurado
-        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
-            throw new RuntimeException("El usuario no tiene un email configurado. Contacte al administrador.");
-        }
-        
         // Generar token único
         String token = UUID.randomUUID().toString();
         
@@ -296,11 +291,25 @@ public class AuthService {
         user.setPasswordResetTokenExpiresAt(expiresAt);
         adminUserRepository.save(user);
         
-        // Enviar email con el link de recuperación
+        // Generar link de recuperación
         String resetLink = emailService.generatePasswordResetLink(token);
-        emailService.sendPasswordResetEmail(user.getEmail(), user.getFullName(), resetLink);
         
-        log.info("Email de recuperación enviado a: {}", user.getEmail());
+        // Intentar enviar email; si falla, registrar el link SOLO en logs del servidor
+        boolean hasEmail = user.getEmail() != null && !user.getEmail().trim().isEmpty();
+        if (hasEmail) {
+            try {
+                emailService.sendPasswordResetEmail(user.getEmail(), user.getFullName(), resetLink);
+                log.info("Email de recuperación enviado a: {}", user.getEmail());
+            } catch (Exception e) {
+                // SEGURIDAD: el link solo se expone en logs del servidor, nunca en la respuesta HTTP
+                log.warn("[ADMIN-ACTION-REQUIRED] No se pudo enviar email de recuperación para usuario '{}'. "
+                    + "Link de reset (válido 1h): {}", user.getUsername(), resetLink);
+            }
+        } else {
+            // SEGURIDAD: el link solo se expone en logs del servidor, nunca en la respuesta HTTP
+            log.warn("[ADMIN-ACTION-REQUIRED] Usuario '{}' sin email configurado. "
+                + "Link de reset (válido 1h): {}", user.getUsername(), resetLink);
+        }
     }
     
     /**

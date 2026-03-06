@@ -290,33 +290,17 @@ public class AuthController {
             @Valid @RequestBody co.com.fitel.modules.auth.application.dto.ForgotPasswordRequest request) {
         try {
             authService.initiateForgotPassword(request.getUsernameOrEmail());
-            
-            // Por seguridad, siempre devolver éxito aunque el usuario no exista
-            return ResponseEntity.ok(
-                ApiResponse.<Void>builder()
-                    .success(true)
-                    .message("Si el usuario existe, recibirás un correo con las instrucciones para recuperar tu contraseña")
-                    .build()
-            );
         } catch (Exception e) {
             log.error("Error en forgot password: {}", e.getMessage());
-            // Si hay error enviando email, informar al usuario
-            if (e.getMessage().contains("email")) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    ApiResponse.<Void>builder()
-                        .success(false)
-                        .message(e.getMessage())
-                        .build()
-                );
-            }
-            // Para otros errores, devolver mensaje genérico por seguridad
-            return ResponseEntity.ok(
-                ApiResponse.<Void>builder()
-                    .success(true)
-                    .message("Si el usuario existe, recibirás un correo con las instrucciones")
-                    .build()
-            );
         }
+        // Por seguridad, SIEMPRE devolver el mismo mensaje genérico
+        // independientemente de si el usuario existe, si el email se envió o no
+        return ResponseEntity.ok(
+            ApiResponse.<Void>builder()
+                .success(true)
+                .message("Si el usuario existe, recibirás un correo con las instrucciones para recuperar tu contraseña")
+                .build()
+        );
     }
     
     /**
