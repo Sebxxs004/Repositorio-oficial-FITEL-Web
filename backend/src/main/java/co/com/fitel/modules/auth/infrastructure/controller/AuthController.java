@@ -46,42 +46,11 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request,
             HttpServletResponse response,
             HttpServletRequest httpRequest) {
-        try {
-            LoginResponse loginResponse = authService.login(request);
-            
-            // Configurar cookies httpOnly para mayor seguridad con SameSite=None para cross-domain
-            ResponseCookie tokenCookie = ResponseCookie.from("admin_token", loginResponse.getToken())
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/")
-                    .maxAge(7 * 24 * 60 * 60)
-                    .sameSite("None")
-                    .build();
-            
-            ResponseCookie sessionCookie = ResponseCookie.from("admin_session", loginResponse.getSessionToken())
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/")
-                    .maxAge(60 * 60)
-                    .sameSite("None")
-                    .build();
-            
-            response.addHeader(HttpHeaders.SET_COOKIE, tokenCookie.toString());
-            response.addHeader(HttpHeaders.SET_COOKIE, sessionCookie.toString());
 
-            // Enviar notificación de login (no bloquea la respuesta si falla)
-            String ip = httpRequest.getHeader("X-Forwarded-For");
-            if (ip == null || ip.isBlank()) ip = httpRequest.getRemoteAddr();
-            String userAgent = httpRequest.getHeader("User-Agent");
-            authService.sendLoginNotification(request.getUsername(), ip, userAgent);
-            
-            return ResponseEntity.ok(
-                ApiResponse.<LoginResponse>builder()
-                    .success(true)
-                    .data(loginResponse)
-                    .message("Login exitoso")
-                    .build()
-            );
+        // --- 1. Autenticar credenciales ---
+        LoginResponse loginResponse;
+        try {
+            loginResponse = authService.login(request);
         } catch (Exception e) {
             log.error("Error en login: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
@@ -91,6 +60,43 @@ public class AuthController {
                     .build()
             );
         }
+
+        // --- 2. Configurar cookies htpOnly (SameSite=None para cross-domain) ---
+        ResponseCookie tokenCookie = ResponseCookie.from("admin_token", loginResponse.getToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("None")
+                .build();
+
+        ResponseCookie sessionCookie = ResponseCookie.from("admin_session", loginResponse.getSessionToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(60 * 60)
+                .sameSite("None")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, tokenCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, sessionCookie.toString());
+
+        // --- 3. Enviar notificación de seguridad (NUNCA bloquea ni afecta el login) ---
+        try {
+            String ip = httpRequest.getHeader("X-Forwarded-For");
+            if (ip == null || ip.isBlank()) ip = httpRequest.getRemoteAddr();
+            authService.sendLoginNotification(request.getUsername(), ip, httpRequest.getHeader("User-Agent"));
+        } catch (Exception e) {
+            log.warn("[LOGIN-NOTIFY] Error al enviar notificación (ignorado): {}", e.getMessage());
+        }
+
+        return ResponseEntity.ok(
+            ApiResponse.<LoginResponse>builder()
+                .success(true)
+                .data(loginResponse)
+                .message("Login exitoso")
+                .build()
+        );
     }
     
     @GetMapping("/verify")

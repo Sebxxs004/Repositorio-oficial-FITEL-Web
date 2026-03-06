@@ -7,6 +7,8 @@ WORKDIR /app
 
 COPY package.json package-lock.json* ./
 RUN npm ci
+# Instalar binario SWC para Alpine/musl (el lockfile se genera en Windows y no lo incluye)
+RUN npm install @next/swc-linux-x64-musl --ignore-scripts=false 2>/dev/null || true
 
 # Rebuild the source code only when needed
 FROM base AS builder
