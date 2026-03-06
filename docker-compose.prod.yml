@@ -1,7 +1,9 @@
 services:
   # Base de Datos (Producción)
   mariadb:
-    image: mariadb:10.11
+    build:
+      context: ./database
+      dockerfile: Dockerfile
     container_name: fitel-mariadb
     environment:
       MYSQL_DATABASE: fitel_db
@@ -10,7 +12,6 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
       - mariadb_data:/var/lib/mysql
-      - ./database/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s

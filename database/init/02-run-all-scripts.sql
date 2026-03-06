@@ -20,6 +20,13 @@ SOURCE /docker-entrypoint-initdb.d/sql/09_migrate_ips_to_encrypted.sql;
 SOURCE /docker-entrypoint-initdb.d/sql/10_create_config_tables.sql;
 SOURCE /docker-entrypoint-initdb.d/sql/11_update_pqr_table.sql;
 SOURCE /docker-entrypoint-initdb.d/sql/12_create_email_config.sql;
+SOURCE /docker-entrypoint-initdb.d/sql/13_create_operation_logs.sql;
+SOURCE /docker-entrypoint-initdb.d/sql/14_remove_assigned_to_column.sql;
+SOURCE /docker-entrypoint-initdb.d/sql/15_add_background_image_to_plans.sql;
+SOURCE /docker-entrypoint-initdb.d/sql/16_add_password_recovery_fields.sql;
+SOURCE /docker-entrypoint-initdb.d/sql/16_add_response_attachment_path.sql;
+SOURCE /docker-entrypoint-initdb.d/sql/16_create_channels_table.sql;
+SOURCE /docker-entrypoint-initdb.d/sql/17_add_appeal_reason.sql;
 
 -- Ejecutar script de actualización siempre (verifica y actualiza)
 SOURCE /docker-entrypoint-initdb.d/always-run.sql;
