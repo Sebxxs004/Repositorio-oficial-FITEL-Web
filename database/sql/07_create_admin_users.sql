@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS admin_users (
 INSERT INTO admin_users (username, password_hash, full_name, role, active) 
 VALUES (
     'admin',
-    '$2a$12$JZJFs040VKjwjEkJ/FZps.Q20USu7FWjybtk9g.i2MUK80YjtWyVG',
+    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
     'Administrador Principal',
     'ADMIN',
     TRUE
