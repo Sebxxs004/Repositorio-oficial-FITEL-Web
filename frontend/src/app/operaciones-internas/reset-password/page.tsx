@@ -1,7 +1,8 @@
-"use client";
+'use client'
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Lock, Eye, EyeOff, Loader2, AlertCircle, CheckCircle, ArrowLeft, KeyRound } from 'lucide-react'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
@@ -106,87 +107,83 @@ function ResetPasswordContent() {
 
   if (validating) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-800">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-gray-light to-neutral-white flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-white mx-auto mb-4"></div>
-          <p className="text-white text-lg">Validando enlace...</p>
+          <Loader2 className="w-10 h-10 animate-spin text-primary-red mx-auto mb-4" />
+          <p className="text-neutral-gray text-sm">Validando enlace...</p>
         </div>
       </div>
-    );
+    )
   }
 
   if (!tokenValid) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-800 px-4">
-        <div className="max-w-md w-full">
-          <div className="bg-white rounded-2xl shadow-2xl p-8">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-gray-light to-neutral-white flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-xl shadow-2xl p-8 border border-neutral-gray-light">
             <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-                <svg className="h-10 w-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                <AlertCircle className="w-8 h-8 text-red-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Enlace Inválido
-              </h2>
-              <p className="text-gray-600 mb-6">{error}</p>
+              <h2 className="text-2xl font-bold text-neutral-dark mb-3">Enlace Inválido</h2>
+              <p className="text-neutral-gray text-sm mb-6">{error}</p>
               <button
                 onClick={() => router.push('/operaciones-internas/forgot-password')}
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-200"
+                className="w-full flex items-center justify-center space-x-2 btn-primary"
               >
-                Solicitar Nuevo Enlace
+                <ArrowLeft className="w-4 h-4" />
+                <span>Solicitar Nuevo Enlace</span>
               </button>
             </div>
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-800 px-4">
-        <div className="max-w-md w-full">
-          <div className="bg-white rounded-2xl shadow-2xl p-8">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-gray-light to-neutral-white flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-xl shadow-2xl p-8 border border-neutral-gray-light">
             <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-                <svg className="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                ¡Contraseña Actualizada!
-              </h2>
-              <p className="text-gray-600 mb-6">
+              <h2 className="text-2xl font-bold text-neutral-dark mb-3">¡Contraseña Actualizada!</h2>
+              <p className="text-neutral-gray text-sm mb-6">
                 Tu contraseña ha sido restablecida exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.
               </p>
               <button
                 onClick={() => router.push('/operaciones-internas')}
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-200"
+                className="w-full flex items-center justify-center space-x-2 btn-primary"
               >
-                Ir al Login
+                <ArrowLeft className="w-4 h-4" />
+                <span>Ir al Login</span>
               </button>
             </div>
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-indigo-800 px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Nueva Contraseña</h1>
-          <p className="text-purple-200">
-            Ingresa tu nueva contraseña
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-neutral-gray-light to-neutral-white flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-xl shadow-2xl p-8 border border-neutral-gray-light">
+          {/* Encabezado */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-red/10 rounded-full mb-4">
+              <KeyRound className="w-8 h-8 text-primary-red" />
+            </div>
+            <h1 className="text-2xl font-bold text-neutral-dark mb-2">Nueva Contraseña</h1>
+            <p className="text-neutral-gray text-sm">Ingresa y confirma tu nueva contraseña</p>
+          </div>
 
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="newPassword" className="block text-sm font-semibold text-neutral-dark mb-2">
                 Nueva Contraseña
               </label>
               <div className="relative">
@@ -196,34 +193,25 @@ function ResetPasswordContent() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all pr-12"
+                  className="w-full px-4 py-3 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red focus:border-transparent transition-all pr-12"
                   placeholder="Mínimo 8 caracteres"
                   disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-gray hover:text-neutral-dark transition-colors"
                 >
-                  {showPassword ? (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
-                  )}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-neutral-gray mt-1">
                 Debe contener al menos una mayúscula, una minúscula y un número
               </p>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-semibold text-neutral-dark mb-2">
                 Confirmar Contraseña
               </label>
               <div className="relative">
@@ -233,70 +221,79 @@ function ResetPasswordContent() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all pr-12"
+                  className="w-full px-4 py-3 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red focus:border-transparent transition-all pr-12"
                   placeholder="Confirma tu contraseña"
                   disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-gray hover:text-neutral-dark transition-colors"
                 >
-                  {showConfirmPassword ? (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
-                  )}
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-red-800 text-sm">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
+              className="w-full flex items-center justify-center space-x-2 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Actualizando...
-                </span>
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Actualizando...</span>
+                </>
               ) : (
-                'Restablecer Contraseña'
+                <>
+                  <Lock className="w-5 h-5" />
+                  <span>Restablecer Contraseña</span>
+                </>
               )}
             </button>
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => router.push('/operaciones-internas')}
+                className="inline-flex items-center space-x-1 text-sm text-primary-red hover:text-primary-red/80 font-medium transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Volver al Login</span>
+              </button>
+            </div>
           </form>
+
+          <div className="mt-6 pt-6 border-t border-neutral-gray-light">
+            <p className="text-xs text-neutral-gray text-center">
+              Acceso restringido. Solo personal autorizado.
+            </p>
+          </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-neutral-gray-light to-neutral-white flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
+          <Loader2 className="w-10 h-10 animate-spin text-primary-red mx-auto mb-4" />
+          <p className="text-neutral-gray text-sm">Cargando...</p>
         </div>
       </div>
     }>
       <ResetPasswordContent />
     </Suspense>
-  );
+  )
 }
