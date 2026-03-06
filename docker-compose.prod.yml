@@ -38,12 +38,12 @@ services:
       MAIL_PASSWORD: ${MAIL_PASSWORD}
       MAIL_FROM: ${MAIL_FROM}
       # Configuración de URLs para correos y redirecciones
-      APP_FRONTEND_URL: http://${SERVER_IP}:3000
+      APP_FRONTEND_URL: https://${SERVER_IP}
     depends_on:
       mariadb:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     volumes:
       - ./backend/logs:/app/logs
       - ./backend/uploads:/app/uploads
@@ -58,13 +58,13 @@ services:
       dockerfile: Dockerfile
       args:
         # Importante: Next.js 'quema' esta variable al momento de construir (build)
-        NEXT_PUBLIC_API_URL: http://${SERVER_IP}:8080/api
+        NEXT_PUBLIC_API_URL: https://${SERVER_IP}/api
     container_name: fitel-frontend
     environment:
       NODE_ENV: production
       ALLOWED_ADMIN_IPS: ${ALLOWED_ADMIN_IPS}
     ports:
-      - "80:3000" # Expone el puerto 3000 del contenedor en el puerto 80 del servidor (Web estándar)
+      - "127.0.0.1:3000:3000" # Solo accesible desde localhost (Nginx proxea)
     depends_on:
       - backend
     networks:

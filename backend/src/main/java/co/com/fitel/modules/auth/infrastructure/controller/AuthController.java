@@ -61,12 +61,10 @@ public class AuthController {
             );
         }
 
-        // --- 2. Configurar cookies httpOnly ---
-        // secure=false para funcionar sobre HTTP (sin dominio/SSL).
-        // Cambiar a secure=true + sameSite=None cuando se configure HTTPS con dominio.
+        // --- 2. Configurar cookies httpOnly (HTTPS con dominio fitelcolombia.com) ---
         ResponseCookie tokenCookie = ResponseCookie.from("admin_token", loginResponse.getToken())
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .maxAge(60 * 60) // 1 hora
                 .sameSite("Lax")
@@ -74,7 +72,7 @@ public class AuthController {
 
         ResponseCookie sessionCookie = ResponseCookie.from("admin_session", loginResponse.getSessionToken())
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .maxAge(60 * 60)
                 .sameSite("Lax")
