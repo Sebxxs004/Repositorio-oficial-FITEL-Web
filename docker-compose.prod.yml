@@ -35,6 +35,7 @@ services:
       STORAGE_PROVIDER: local
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM}
       # Configuración de URLs para correos y redirecciones
       APP_FRONTEND_URL: http://${SERVER_IP}:3000
     depends_on:
