@@ -155,7 +155,7 @@ function ResetPasswordContent() {
                 Tu contraseña ha sido restablecida exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.
               </p>
               <button
-                onClick={() => router.push('/operaciones-internas')}
+                onClick={() => router.push('/operaciones-internas/login')}
                 className="w-full flex items-center justify-center space-x-2 btn-primary"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -263,7 +263,7 @@ function ResetPasswordContent() {
             <div className="text-center">
               <button
                 type="button"
-                onClick={() => router.push('/operaciones-internas')}
+                onClick={() => router.push('/operaciones-internas/login')}
                 className="inline-flex items-center space-x-1 text-sm text-primary-red hover:text-primary-red/80 font-medium transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />

@@ -154,3 +154,11 @@ ON DUPLICATE KEY UPDATE
     smtp_host = COALESCE(VALUES(smtp_host), smtp_host),
     smtp_port = COALESCE(VALUES(smtp_port), smtp_port),
     enabled = COALESCE(VALUES(enabled), enabled);
+
+-- =====================================================
+-- Migración 18: Campos de seguridad de login en admin_users
+-- =====================================================
+ALTER TABLE admin_users
+    ADD COLUMN IF NOT EXISTS session_revoked_at TIMESTAMP NULL COMMENT 'Fecha desde la que los tokens JWT anteriores son inválidos',
+    ADD COLUMN IF NOT EXISTS security_alert_token VARCHAR(36) NULL COMMENT 'Token único enviado por email para acción No fui yo',
+    ADD COLUMN IF NOT EXISTS security_alert_token_expires_at TIMESTAMP NULL COMMENT 'Expiración del security_alert_token';

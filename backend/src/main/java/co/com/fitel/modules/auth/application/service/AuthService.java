@@ -362,7 +362,83 @@ public class AuthService {
         
         log.info("Contraseña restablecida exitosamente para usuario: {}", user.getUsername());
         
-        // Enviar email de confirmación
-        emailService.sendPasswordChangedConfirmation(user.getEmail(), user.getFullName());
+        // Enviar email de confirmación usando username como fallback si email está vacío
+        String emailDestino = (user.getEmail() != null && !user.getEmail().trim().isEmpty())
+            ? user.getEmail()
+            : user.getUsername();
+        try {
+            emailService.sendPasswordChangedConfirmation(emailDestino, user.getFullName());
+        } catch (Exception e) {
+            log.warn("No se pudo enviar email de confirmación a {}: {}", emailDestino, e.getMessage());
+        }
+    }
+
+    /**
+     * Enviar notificación de inicio de sesión al usuario.
+     * Genera un securityAlertToken y envía email con botón "No fui yo".
+     * Se llama después del login exitoso desde el controlador.
+     */
+    @Transactional
+    public void sendLoginNotification(String username, String ip, String userAgent) {
+        try {
+            Optional<AdminUser> userOpt = adminUserRepository.findByUsername(username);
+            if (userOpt.isEmpty()) return;
+            AdminUser user = userOpt.get();
+
+            // Generar security alert token (válido 24 horas)
+            String alertToken = UUID.randomUUID().toString();
+            user.setSecurityAlertToken(alertToken);
+            user.setSecurityAlertTokenExpiresAt(LocalDateTime.now().plusHours(24));
+            adminUserRepository.save(user);
+
+            String destino = (user.getEmail() != null && !user.getEmail().trim().isEmpty())
+                ? user.getEmail()
+                : user.getUsername();
+
+            String notMeLink = emailService.generateSecurityAlertLink(alertToken);
+            String loginTime = java.time.format.DateTimeFormatter
+                .ofPattern("dd/MM/yyyy HH:mm:ss")
+                .format(LocalDateTime.now());
+
+            emailService.sendLoginNotificationEmail(destino, user.getFullName(), loginTime, ip, userAgent, notMeLink);
+            log.info("Notificación de login enviada a: {}", destino);
+        } catch (Exception e) {
+            // No fallar el login por un error en la notificación
+            log.warn("No se pudo enviar notificación de login a {}: {}", username, e.getMessage());
+        }
+    }
+
+    /**
+     * Revocar todas las sesiones activas usando el security alert token.
+     * Retorna un nuevo passwordResetToken para cambio inmediato de contraseña.
+     */
+    @Transactional
+    public String revokeAllSessions(String securityAlertToken) {
+        Optional<AdminUser> userOpt = adminUserRepository.findBySecurityAlertToken(securityAlertToken);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("Enlace inválido o ya utilizado");
+        }
+        AdminUser user = userOpt.get();
+        if (user.getSecurityAlertTokenExpiresAt() == null ||
+                LocalDateTime.now().isAfter(user.getSecurityAlertTokenExpiresAt())) {
+            throw new RuntimeException("El enlace ha expirado. Vuelve a iniciar sesión para recibir uno nuevo.");
+        }
+
+        // Revocar: cualquier JWT emitido antes de este momento queda inválido
+        user.setSessionRevokedAt(LocalDateTime.now());
+
+        // Generar reset token para cambio inmediato de contraseña
+        String resetToken = UUID.randomUUID().toString();
+        user.setPasswordResetToken(resetToken);
+        user.setPasswordResetTokenExpiresAt(LocalDateTime.now().plusHours(1));
+
+        // Limpiar security alert token (uso único)
+        user.setSecurityAlertToken(null);
+        user.setSecurityAlertTokenExpiresAt(null);
+
+        adminUserRepository.save(user);
+        log.warn("[SECURITY] Sesiones revocadas para usuario: '{}'.", user.getUsername());
+
+        return resetToken;
     }
 }

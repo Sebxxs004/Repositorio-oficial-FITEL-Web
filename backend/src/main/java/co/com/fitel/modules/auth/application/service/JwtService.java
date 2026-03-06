@@ -81,4 +81,11 @@ public class JwtService {
     public String getUsernameFromToken(String token) {
         return getClaims(token).getSubject();
     }
+
+    public java.time.LocalDateTime getIssuedAt(String token) {
+        java.util.Date issuedAt = getClaims(token).getIssuedAt();
+        return issuedAt.toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDateTime();
+    }
 }

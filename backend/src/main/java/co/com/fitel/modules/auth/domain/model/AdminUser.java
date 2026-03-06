@@ -63,6 +63,15 @@ public class AdminUser {
     @Column(length = 200)
     private String email;
 
+    @Column
+    private LocalDateTime sessionRevokedAt;
+
+    @Column(length = 36)
+    private String securityAlertToken;
+
+    @Column
+    private LocalDateTime securityAlertTokenExpiresAt;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

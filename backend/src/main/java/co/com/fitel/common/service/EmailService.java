@@ -1806,5 +1806,114 @@ public class EmailService {
         }
     }
 
+    /**
+     * Generar link de alerta de seguridad (botón "No fui yo")
+     */
+    public String generateSecurityAlertLink(String token) {
+        String frontendUrl = System.getenv("FRONTEND_URL");
+        if (frontendUrl == null || frontendUrl.isEmpty()) {
+            frontendUrl = "https://fitel-frontend.blackocean-69d60157.eastus.azurecontainerapps.io";
+        }
+        return frontendUrl + "/operaciones-internas/security-alert?token=" + token;
+    }
+
+    /**
+     * Enviar notificación de inicio de sesión con botón "No fui yo"
+     */
+    public void sendLoginNotificationEmail(String to, String name, String loginTime, String ip, String userAgent, String notMeLink) {
+        JavaMailSender configuredSender = getConfiguredMailSender();
+        if (configuredSender == null) {
+            log.warn("Email no configurado, omitiendo notificación de login para: {}", to);
+            return;
+        }
+
+        EmailConfig emailConfig = getEmailConfig();
+
+        // Abreviar user-agent si es muy largo
+        String deviceInfo = userAgent != null && userAgent.length() > 80
+            ? userAgent.substring(0, 80) + "..."
+            : (userAgent != null ? userAgent : "Desconocido");
+
+        try {
+            MimeMessage message = configuredSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(emailConfig.getFromEmail());
+            helper.setTo(to);
+            helper.setSubject("⚠️ Nuevo inicio de sesión detectado - FITEL");
+
+            String htmlContent = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .container { background-color: #f9f9f9; border-radius: 10px; padding: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+                        .header { background: linear-gradient(135deg, #c0392b 0%, #922b21 100%); color: white; padding: 20px; border-radius: 10px 10px 0 0; text-align: center; }
+                        .content { padding: 20px; background: white; }
+                        .info-box { background: #f0f4f8; border-left: 4px solid #c0392b; padding: 15px; margin: 15px 0; border-radius: 0 5px 5px 0; }
+                        .info-row { margin: 8px 0; font-size: 0.9em; }
+                        .info-label { font-weight: bold; color: #555; }
+                        .btn-danger { display: inline-block; padding: 14px 28px; background: #c0392b; color: white !important; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: bold; font-size: 1em; }
+                        .btn-ok { display: inline-block; padding: 10px 20px; background: #27ae60; color: white !important; text-decoration: none; border-radius: 6px; margin: 5px 0; font-size: 0.9em; }
+                        .footer { text-align: center; padding: 20px; color: #888; font-size: 0.85em; }
+                        .warning { background: #fef9c3; border-left: 4px solid #f59e0b; padding: 12px 15px; margin: 15px 0; border-radius: 0 5px 5px 0; font-size: 0.9em; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h2 style="margin:0">🔐 Nuevo Inicio de Sesión</h2>
+                            <p style="margin:5px 0 0; font-size:0.9em; opacity:0.9">Panel Administrativo FITEL</p>
+                        </div>
+                        <div class="content">
+                            <p>Hola <strong>{{NAME}}</strong>,</p>
+                            <p>Se detectó un nuevo inicio de sesión en tu cuenta de administrador FITEL:</p>
+
+                            <div class="info-box">
+                                <div class="info-row"><span class="info-label">🕐 Fecha y hora:</span> {{LOGIN_TIME}}</div>
+                                <div class="info-row"><span class="info-label">🌐 Dirección IP:</span> {{IP}}</div>
+                                <div class="info-row"><span class="info-label">💻 Dispositivo:</span> {{DEVICE}}</div>
+                            </div>
+
+                            <div class="warning">
+                                <strong>¿No fuiste tú?</strong> Si no reconoces este inicio de sesión, actúa de inmediato para proteger tu cuenta.
+                            </div>
+
+                            <div style="text-align: center; margin: 25px 0;">
+                                <a href="{{NOT_ME_LINK}}" class="btn-danger">🚨 No fui yo — Revocar sesiones y cambiar contraseña</a>
+                            </div>
+
+                            <p style="font-size:0.85em; color:#666; text-align:center">Si reconoces este acceso, puedes ignorar este mensaje.</p>
+                            <p style="font-size:0.8em; color:#999; text-align:center">Este enlace expira en <strong>24 horas</strong>.</p>
+                        </div>
+                        <div class="footer">
+                            <p>Este es un mensaje automático, por favor no responder.</p>
+                            <p>&copy; 2024 FITEL. Todos los derechos reservados.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """
+                .replace("{{NAME}}", name != null ? name : to)
+                .replace("{{LOGIN_TIME}}", loginTime)
+                .replace("{{IP}}", ip != null ? ip : "No disponible")
+                .replace("{{DEVICE}}", deviceInfo)
+                .replace("{{NOT_ME_LINK}}", notMeLink);
+
+            helper.setText(htmlContent, true);
+            configuredSender.send(message);
+            log.info("Notificación de login enviada a: {}", to);
+
+        } catch (MessagingException e) {
+            log.error("Error enviando notificación de login a {}: {}", to, e.getMessage());
+            throw new RuntimeException("Error al enviar notificación de login");
+        } catch (Exception e) {
+            log.error("Error inesperado enviando notificación de login a {}: {}", to, e.getMessage());
+            throw new RuntimeException("Error al enviar notificación de login");
+        }
+    }
+
 }
 

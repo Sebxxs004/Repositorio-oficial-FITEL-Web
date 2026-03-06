@@ -65,6 +65,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/admin/forgot-password").permitAll() // Solicitar recuperación de contraseña
                 .requestMatchers("/api/auth/admin/validate-reset-token").permitAll() // Validar token de recuperación
                 .requestMatchers("/api/auth/admin/reset-password").permitAll() // Resetear contraseña con token
+                .requestMatchers("/api/auth/admin/revoke-sessions").permitAll() // Acción "No fui yo" - revocar sesiones
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/public/**").permitAll() // Fallback por si NEXT_PUBLIC_API_URL no incluye /api
                 .requestMatchers("/api/channels").permitAll() // Canales públicos

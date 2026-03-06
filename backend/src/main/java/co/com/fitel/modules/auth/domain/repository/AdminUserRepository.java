@@ -14,6 +14,7 @@ public interface AdminUserRepository extends JpaRepository<AdminUser, Long> {
     Optional<AdminUser> findByUsername(String username);
     Optional<AdminUser> findByEmail(String email);
     Optional<AdminUser> findByPasswordResetToken(String passwordResetToken);
+    Optional<AdminUser> findBySecurityAlertToken(String securityAlertToken);
     boolean existsByUsername(String username);
     long countByActiveTrue();
 }

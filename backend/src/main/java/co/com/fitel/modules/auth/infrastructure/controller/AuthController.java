@@ -6,6 +6,7 @@ import co.com.fitel.modules.auth.application.dto.LoginRequest;
 import co.com.fitel.modules.auth.application.dto.LoginResponse;
 import co.com.fitel.modules.auth.application.service.AuthService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 /**
  * Controlador de autenticación para administradores
@@ -42,29 +44,36 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(
             @Valid @RequestBody LoginRequest request,
-            HttpServletResponse response) {
+            HttpServletResponse response,
+            HttpServletRequest httpRequest) {
         try {
             LoginResponse loginResponse = authService.login(request);
             
             // Configurar cookies httpOnly para mayor seguridad con SameSite=None para cross-domain
             ResponseCookie tokenCookie = ResponseCookie.from("admin_token", loginResponse.getToken())
                     .httpOnly(true)
-                    .secure(true) // true para HTTPS en producción
+                    .secure(true)
                     .path("/")
-                    .maxAge(7 * 24 * 60 * 60) // 7 días
-                    .sameSite("None") // Permite cookies entre subdominios en HTTPS
+                    .maxAge(7 * 24 * 60 * 60)
+                    .sameSite("None")
                     .build();
             
             ResponseCookie sessionCookie = ResponseCookie.from("admin_session", loginResponse.getSessionToken())
                     .httpOnly(true)
                     .secure(true)
                     .path("/")
-                    .maxAge(60 * 60) // 1 hora
+                    .maxAge(60 * 60)
                     .sameSite("None")
                     .build();
             
             response.addHeader(HttpHeaders.SET_COOKIE, tokenCookie.toString());
             response.addHeader(HttpHeaders.SET_COOKIE, sessionCookie.toString());
+
+            // Enviar notificación de login (no bloquea la respuesta si falla)
+            String ip = httpRequest.getHeader("X-Forwarded-For");
+            if (ip == null || ip.isBlank()) ip = httpRequest.getRemoteAddr();
+            String userAgent = httpRequest.getHeader("User-Agent");
+            authService.sendLoginNotification(request.getUsername(), ip, userAgent);
             
             return ResponseEntity.ok(
                 ApiResponse.<LoginResponse>builder()
@@ -351,6 +360,42 @@ public class AuthController {
             log.error("Error reseteando contraseña: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 ApiResponse.<Void>builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build()
+            );
+        }
+    }
+
+    /**
+     * Endpoint público - revocar todas las sesiones activas (acción "No fui yo")
+     * Recibe el securityAlertToken enviado por email, invalida todas las sesiones
+     * y devuelve un token para resetear la contraseña.
+     */
+    @PostMapping("/revoke-sessions")
+    public ResponseEntity<ApiResponse<String>> revokeSessions(@RequestBody Map<String, String> body) {
+        try {
+            String token = body.get("token");
+            if (token == null || token.isBlank()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ApiResponse.<String>builder()
+                        .success(false)
+                        .message("Token de seguridad requerido")
+                        .build()
+                );
+            }
+            String resetToken = authService.revokeAllSessions(token);
+            return ResponseEntity.ok(
+                ApiResponse.<String>builder()
+                    .success(true)
+                    .message("Sesiones revocadas correctamente. Ahora puedes cambiar tu contraseña.")
+                    .data(resetToken)
+                    .build()
+            );
+        } catch (Exception e) {
+            log.error("Error revocando sesiones: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ApiResponse.<String>builder()
                     .success(false)
                     .message(e.getMessage())
                     .build()

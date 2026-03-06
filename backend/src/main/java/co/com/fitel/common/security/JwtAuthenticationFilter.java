@@ -1,6 +1,8 @@
 package co.com.fitel.common.security;
 
 import co.com.fitel.modules.auth.application.service.JwtService;
+import co.com.fitel.modules.auth.domain.model.AdminUser;
+import co.com.fitel.modules.auth.domain.repository.AdminUserRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,8 +20,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final AdminUserRepository adminUserRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -52,29 +57,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // Si no hay JWT en header ni en cookies, continuar sin autenticar
-        if (jwt == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        // Si no hay JWT en header ni en cookies, continuar sin autenticar
         if (jwt == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Validar y procesar el JWT
         try {
             if (jwtService.validateToken(jwt)) {
                 Claims claims = jwtService.getClaims(jwt);
                 username = claims.getSubject();
-                String role = claims.get("role", String.class);
+
+                // Verificar si las sesiones del usuario han sido revocadas
+                if (username != null) {
+                    Optional<AdminUser> userOpt = adminUserRepository.findByUsername(username);
+                    if (userOpt.isPresent() && userOpt.get().getSessionRevokedAt() != null) {
+                        LocalDateTime tokenIssuedAt = jwtService.getIssuedAt(jwt);
+                        if (tokenIssuedAt.isBefore(userOpt.get().getSessionRevokedAt())) {
+                            log.warn("[SECURITY] Token revocado para usuario '{}', emitido en: {}", username, tokenIssuedAt);
+                            filterChain.doFilter(request, response);
+                            return;
+                        }
+                    }
+                }
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    String role = claims.get("role", String.class);
                     List<GrantedAuthority> authorities = new ArrayList<>();
                     if (role != null) {
-                        // Spring Security usually expects roles to prevent with custom authority checks
-                        // Using hasAuthority instead of hasRole gives more flexibility if prefix isn't standard
                         authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
                     }
 
