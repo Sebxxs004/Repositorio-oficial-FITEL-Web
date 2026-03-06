@@ -22,13 +22,13 @@ CREATE TABLE IF NOT EXISTS admin_users (
 -- Contraseña: admin123 (debe cambiarse en producción)
 -- =====================================================
 -- La contraseña 'admin123' hasheada con BCrypt (cost 10)
--- Hash: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
+-- Hash: $2b$10$KaF3aoHLvcK/wR58G6AjReTZfxEzQ02pFYjlDsR9DXaqrv2AfWsFW
 -- =====================================================
 
 INSERT INTO admin_users (username, password_hash, full_name, role, active) 
 VALUES (
     'admin',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+    '$2b$10$KaF3aoHLvcK/wR58G6AjReTZfxEzQ02pFYjlDsR9DXaqrv2AfWsFW',
     'Administrador Principal',
     'ADMIN',
     TRUE
