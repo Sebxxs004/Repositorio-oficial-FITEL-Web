@@ -31,16 +31,16 @@ git pull origin main
 
 echo ""
 echo "[2/4] Deteniendo contenedores anteriores (si existen)..."
-docker-compose -f docker-compose.prod.yml down --remove-orphans || true
+docker compose -f docker-compose.prod.yml down --remove-orphans || true
 
 echo ""
 echo "[3/4] Construyendo e iniciando contenedores..."
-docker-compose -f docker-compose.prod.yml up --build -d
+docker compose -f docker-compose.prod.yml up --build -d
 
 echo ""
 echo "[4/4] Verificando estado..."
 sleep 10
-docker-compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml ps
 
 echo ""
 echo "======================================================"
