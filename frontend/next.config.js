@@ -15,8 +15,11 @@ const nextConfig = {
   async rewrites() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
     const backendUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
-    // Use internal Docker network URL to avoid routing loop through Nginx
-    const internalBackendUrl = process.env.INTERNAL_BACKEND_URL || backendUrl;
+    // En producción usar URL interna Docker para evitar loop Nginx → Next.js → Nginx
+    // NODE_ENV es 'production' durante `next build`, así queda compilado correctamente
+    const internalBackendUrl = process.env.NODE_ENV === 'production'
+      ? 'http://fitel-backend:8080'
+      : backendUrl;
     return [
       {
         source: '/assets/:path*',
