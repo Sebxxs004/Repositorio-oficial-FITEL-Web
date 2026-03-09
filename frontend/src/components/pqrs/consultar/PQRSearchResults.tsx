@@ -268,6 +268,32 @@ export function PQRSearchResults({ pqrs }: PQRSearchResultsProps) {
                         <p className="text-neutral-dark">{pqr.response}</p>
                     </div>
 
+                    {pqr.responseAttachmentPath && (
+                      <div className="mt-4">
+                        <h4 className="text-sm font-semibold text-neutral-gray mb-2 flex items-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          Documento adjunto de la respuesta
+                        </h4>
+                        <a
+                          href={`/uploads/${pqr.responseAttachmentPath.replace(/\\/g, '/').replace(/^uploads\//, '')}?cun=${encodeURIComponent(pqr.cun)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group inline-flex items-center p-3 bg-neutral-50 hover:bg-white border border-neutral-gray-light hover:border-primary-red rounded-lg transition-all duration-200 shadow-sm hover:shadow-md gap-3"
+                        >
+                          <div className="bg-white p-2 rounded-md border border-neutral-gray-light group-hover:border-primary-red/30">
+                            <FileText className="w-5 h-5 text-neutral-gray group-hover:text-primary-red" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-neutral-dark">
+                              {pqr.responseAttachmentPath.split('/').pop()}
+                            </p>
+                            <p className="text-xs text-neutral-gray group-hover:text-primary-red">Clic para abrir en nueva pestaña</p>
+                          </div>
+                          <Eye className="w-4 h-4 text-neutral-gray group-hover:text-primary-red" />
+                        </a>
+                      </div>
+                    )}
+
                      {/* Botón de reanálisis */}
                     {(pqr.status === 'RESUELTA' || pqr.status === 'CERRADA') && (
                         <div className="mt-4 flex justify-end">

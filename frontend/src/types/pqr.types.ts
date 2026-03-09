@@ -29,6 +29,7 @@ export interface PQRResponse {
   realType?: string
   resourceType?: string
   response?: string
+  responseAttachmentPath?: string
   createdAt: string
   updatedAt: string
   responseDate?: string

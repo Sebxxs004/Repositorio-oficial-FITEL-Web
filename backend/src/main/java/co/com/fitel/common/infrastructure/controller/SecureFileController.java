@@ -76,6 +76,67 @@ public class SecureFileController {
     }
 
     /**
+     * Sirve adjuntos de respuesta de PQR - requiere CUN válido y valida que el archivo pertenezca a esa PQR
+     */
+    @GetMapping("/pqr-responses/**")
+    public ResponseEntity<Resource> servePQRResponseAttachment(HttpServletRequest request, @RequestParam(required = false) String cun) {
+        String fullPath = request.getRequestURI();
+        String relativePath = fullPath.substring(fullPath.indexOf("/pqr-responses/") + 1); // "pqr-responses/id/filename"
+
+        log.info("Requesting PQR response attachment: {} with CUN: {}", relativePath, cun);
+
+        if (cun == null || cun.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Optional<PQR> pqrOpt = pqrRepository.findByCun(cun);
+        if (pqrOpt.isEmpty()) {
+            log.warn("Access denied: Invalid CUN {}", cun);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        PQR pqr = pqrOpt.get();
+        String storedPath = pqr.getResponseAttachmentPath();
+        if (storedPath == null || storedPath.isBlank()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Normalizar separadores para comparación (Windows usa \, Linux usa /)
+        String normalizedStored = storedPath.replace("\\", "/");
+        String normalizedRequested = ("uploads/" + relativePath).replace("\\", "/");
+        if (!normalizedStored.equals(normalizedRequested)) {
+            log.warn("Access denied: file {} not linked to CUN {}", relativePath, cun);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        try {
+            Path rootLocation = Paths.get(localUploadPath).toAbsolutePath().normalize();
+            Path filePath = rootLocation.resolve(relativePath).normalize();
+
+            if (!filePath.startsWith(rootLocation)) {
+                log.warn("Path traversal attempt: {}", filePath);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            Resource resource = new FileSystemResource(filePath);
+            if (resource.exists() && resource.isReadable()) {
+                String filename = filePath.getFileName().toString();
+                String contentType = determineContentType(filename);
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                        .body(resource);
+            } else {
+                log.error("PQR response attachment NOT found at: {}", filePath);
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            log.error("Error serving PQR response attachment", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
      * Sirve archivos protegidos de PQR - requiere CUN válido
      */
     @GetMapping("/{filename:.+}")
