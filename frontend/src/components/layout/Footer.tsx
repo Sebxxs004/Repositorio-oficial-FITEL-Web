@@ -1,10 +1,28 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Facebook, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
-import { FITEL_PHONE_DISPLAY, FITEL_PHONE_TEL, FITEL_EMAIL } from '@/config/constants'
+import { FITEL_PHONE_NUMBER, FITEL_PHONE_DISPLAY, FITEL_PHONE_TEL, FITEL_EMAIL } from '@/config/constants'
 
-export function Footer() {
+async function getContactConfig() {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
+    const res = await fetch(`${apiUrl}/config/contact`, { next: { revalidate: 60 } })
+    if (!res.ok) return null
+    const json = await res.json()
+    return json?.data ?? null
+  } catch {
+    return null
+  }
+}
+
+export async function Footer() {
   const currentYear = new Date().getFullYear()
+  const contact = await getContactConfig() ?? {
+    phone: FITEL_PHONE_NUMBER,
+    phoneDisplay: FITEL_PHONE_DISPLAY,
+    email: FITEL_EMAIL,
+    whatsapp: FITEL_PHONE_NUMBER,
+  }
 
   return (
     <footer className="bg-neutral-dark text-neutral-white">
@@ -118,14 +136,14 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start space-x-3">
                 <Phone className="w-5 h-5 text-primary-red flex-shrink-0 mt-0.5" />
-                <a href={FITEL_PHONE_TEL} className="text-neutral-gray-light hover:text-primary-red transition-colors text-sm">
-                  {FITEL_PHONE_DISPLAY}
+                <a href={`tel:+${contact.phone}`} className="text-neutral-gray-light hover:text-primary-red transition-colors text-sm">
+                  {contact.phoneDisplay}
                 </a>
               </li>
               <li className="flex items-start space-x-3">
                 <Mail className="w-5 h-5 text-primary-red flex-shrink-0 mt-0.5" />
-                <a href={`mailto:${FITEL_EMAIL}`} className="text-neutral-gray-light hover:text-primary-red transition-colors text-sm">
-                  {FITEL_EMAIL}
+                <a href={`mailto:${contact.email}`} className="text-neutral-gray-light hover:text-primary-red transition-colors text-sm">
+                  {contact.email}
                 </a>
               </li>
               <li className="flex items-start space-x-3">
