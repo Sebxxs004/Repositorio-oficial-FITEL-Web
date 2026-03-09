@@ -31,7 +31,7 @@ export function Hero() {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen flex items-center overflow-hidden pt-36 md:pt-[116px] pb-24 md:pb-28"
+      className="relative min-h-screen flex items-center overflow-hidden pt-40 md:pt-[160px] pb-24 md:pb-28"
     >
       {/* Carrusel de imágenes como fondo */}
       <div className="absolute inset-0 z-0">
