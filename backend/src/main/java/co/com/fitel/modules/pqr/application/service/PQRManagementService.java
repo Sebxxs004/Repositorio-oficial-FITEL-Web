@@ -142,9 +142,10 @@ public class PQRManagementService {
                 pqr.setResponseDate(LocalDateTime.now());
             }
 
-            // Enviar respuesta por correo al cliente, incluyendo adjunto si existe
-            // Solo si no se ha solicitado omitir el envío del correo de respuesta
-            if (request.getSkipResponseEmail() == null || !request.getSkipResponseEmail()) {
+            // Enviar respuesta por correo al cliente solo cuando el nuevo estado es RESUELTA
+            // (evita enviar correo al guardar notas/borradores en estados intermedios como EN_ANALISIS)
+            boolean isBeingResolved = "RESUELTA".equals(request.getStatus());
+            if (isBeingResolved && (request.getSkipResponseEmail() == null || !request.getSkipResponseEmail())) {
                 try {
                     String attachmentPath = pqr.getResponseAttachmentPath();
                     // Si guardamos rutas relativas, construir la ruta absoluta
