@@ -95,7 +95,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/pqr" className="text-neutral-gray-light hover:text-primary-red transition-colors text-sm">
+                <Link href="/pqrs" className="text-neutral-gray-light hover:text-primary-red transition-colors text-sm">
                   PQR
                 </Link>
               </li>
