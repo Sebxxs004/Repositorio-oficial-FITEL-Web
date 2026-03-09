@@ -68,7 +68,7 @@ public class ConfigController {
             String extension = originalFilename != null && originalFilename.contains(".") 
                     ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
                     : ".png";
-            String filename = "carrousel_" + UUID.randomUUID().toString() + extension;
+            String filename = "slider_" + UUID.randomUUID().toString() + extension;
             String filePath = "/uploads/assets/" + filename;
             
             // Guardar el archivo
