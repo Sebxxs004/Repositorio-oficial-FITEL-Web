@@ -72,7 +72,7 @@ export function Hero() {
           </div>
 
           {/* Features Icons - Layout horizontal más compacto */}
-          <div className="flex flex-wrap gap-6 mt-12 animate-on-scroll delay-500">
+          <div className="grid grid-cols-3 gap-4 mt-12 animate-on-scroll delay-500">
             <div className="flex items-center space-x-3 p-4 rounded-lg bg-neutral-white/10 backdrop-blur-sm border border-neutral-white/20">
               <div className="w-12 h-12 rounded-full bg-primary-red/20 flex items-center justify-center flex-shrink-0">
                 <Wifi className="w-6 h-6 text-primary-red" />
