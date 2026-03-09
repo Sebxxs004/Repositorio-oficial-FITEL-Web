@@ -64,6 +64,7 @@ services:
     environment:
       NODE_ENV: production
       ALLOWED_ADMIN_IPS: ${ALLOWED_ADMIN_IPS}
+      INTERNAL_BACKEND_URL: http://fitel-backend:8080
     ports:
       - "127.0.0.1:3000:3000" # Solo accesible desde localhost (Nginx proxea)
     depends_on:
