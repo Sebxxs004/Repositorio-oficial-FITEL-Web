@@ -63,8 +63,8 @@ export function Benefits() {
     },
     {
       icon: Headphones,
-      title: 'Soporte Técnico 24/7',
-      description: 'Atención técnica especializada disponible todos los días del año, a cualquier hora. Resolución rápida de incidencias.',
+      title: 'Soporte Técnico',
+      description: 'Atención técnica especializada de lunes a sábado de 8:00 AM a 5:00 PM. Los domingos y festivos no se labora. Resolución rápida de incidencias.',
       color: 'text-secondary-blue',
       bgColor: 'bg-secondary-blue/10',
     },

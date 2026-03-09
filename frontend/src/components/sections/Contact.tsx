@@ -183,7 +183,7 @@ export function Contact({ contact: contactProp }: ContactProps = {}) {
       title: 'Teléfono',
       value: contact.phoneDisplay,
       link: `tel:+${contact.phone}`,
-      description: 'Llámanos de lunes a domingo',
+      description: 'Llámanos de lunes a sábado',
       color: 'text-primary-red',
       bgColor: 'bg-primary-red/10',
     },
@@ -489,13 +489,12 @@ export function Contact({ contact: contactProp }: ContactProps = {}) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="font-semibold text-neutral-dark mb-2">Atención al Cliente</p>
-                  <p className="text-neutral-gray">Lunes a Viernes: 8:00 AM - 8:00 PM</p>
-                  <p className="text-neutral-gray">Sábados: 9:00 AM - 6:00 PM</p>
-                  <p className="text-neutral-gray">Domingos: 10:00 AM - 4:00 PM</p>
+                  <p className="text-neutral-gray">Lunes a Sábado: 8:00 AM - 5:00 PM</p>
+                  <p className="text-neutral-gray">Domingos y festivos: No se labora</p>
                 </div>
                 <div>
                   <p className="font-semibold text-neutral-dark mb-2">Soporte Técnico</p>
-                  <p className="text-neutral-gray">24 horas, 7 días a la semana</p>
+                  <p className="text-neutral-gray">Lunes a Sábado: 8:00 AM - 5:00 PM</p>
                   <p className="text-primary-red font-semibold">Emergencias: Línea directa</p>
                 </div>
               </div>

@@ -52,7 +52,7 @@ export function ContactPreview({ contact }: ContactPreviewProps) {
       title: 'Teléfono',
       value: data.phoneDisplay,
       link: `tel:+${data.phone}`,
-      description: 'Llámanos de lunes a domingo',
+      description: 'Llámanos de lunes a sábado',
       color: 'text-primary-red',
       bgColor: 'bg-primary-red/10',
     },

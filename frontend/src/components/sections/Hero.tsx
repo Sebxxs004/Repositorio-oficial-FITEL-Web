@@ -98,8 +98,8 @@ export function Hero() {
                 <Users className="w-6 h-6 text-primary-red" />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-neutral-white">Atención 24/7</h3>
-                <p className="text-neutral-gray-light text-xs">Soporte técnico</p>
+                <h3 className="text-base font-semibold text-neutral-white">Atención Personalizada</h3>
+                <p className="text-neutral-gray-light text-xs">Lun - Sáb: 8AM a 5PM</p>
               </div>
             </div>
           </div>
