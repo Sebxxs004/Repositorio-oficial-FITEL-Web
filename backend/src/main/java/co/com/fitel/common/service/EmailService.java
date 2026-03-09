@@ -143,6 +143,21 @@ public class EmailService {
                             border: 1px solid #e5e7eb;
                             font-size: 14px;
                         }
+                        .legal-box {
+                            margin-top: 24px;
+                            padding: 16px;
+                            background-color: #fffbeb;
+                            border-radius: 8px;
+                            border: 1px solid #fcd34d;
+                            font-size: 13px;
+                            color: #92400e;
+                        }
+                        .legal-box h4 {
+                            margin: 0 0 8px 0;
+                            font-size: 13px;
+                            font-weight: 700;
+                            color: #78350f;
+                        }
                         .footer {
                             margin-top: 24px;
                             font-size: 12px;
@@ -171,6 +186,21 @@ public class EmailService {
                                 Si tiene dudas adicionales o requiere más información, puede responder a este correo
                                 o comunicarse con nosotros a través de nuestros canales de atención.
                             </p>
+                            <div class="legal-box">
+                                <h4>⚖️ Derecho a Recurso de Reposición y en Subsidio de Apelación</h4>
+                                <p style="margin: 0;">
+                                    De conformidad con la <strong>Ley 1480 de 2011 (Estatuto del Consumidor)</strong> y la
+                                    <strong>Resolución CRC 5111 de 2017</strong>, usted tiene derecho a interponer
+                                    <strong>Recurso de Reposición</strong> ante FITEL dentro de los
+                                    <strong>quince (15) días hábiles</strong> siguientes a la notificación de esta respuesta,
+                                    si no está de acuerdo con la misma.<br/><br/>
+                                    En caso de que el recurso de reposición no sea favorable a sus intereses, podrá interponer
+                                    <strong>Recurso de Apelación en subsidio</strong> ante la
+                                    <strong>Superintendencia de Industria y Comercio (SIC)</strong>,
+                                    entidad encargada de la vigilancia y control de los derechos de los consumidores
+                                    en Colombia.
+                                </p>
+                            </div>
                         </div>
                         <div class="footer">
                             Este es un correo automático del sistema de PQR de FITEL.
