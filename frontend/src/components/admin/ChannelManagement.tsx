@@ -8,7 +8,7 @@ interface Channel {
   name: string
   number: number
   category: string
-  logo?: string
+  logoUrl?: string
   description?: string
   active: boolean
   createdAt?: string
@@ -19,7 +19,7 @@ interface ChannelFormData {
   name: string
   number: number
   category: string
-  logo?: string
+  logoUrl?: string
   description?: string
   active: boolean
 }
@@ -34,7 +34,7 @@ export function ChannelManagement() {
     name: '',
     number: 1,
     category: 'ENTRETENIMIENTO',
-    logo: '',
+    logoUrl: '',
     description: '',
     active: true,
   })
@@ -70,7 +70,7 @@ export function ChannelManagement() {
       
       const data = await response.json()
       if (data.success && data.data) {
-        setFormData((prev) => ({ ...prev, logo: data.data }))
+        setFormData((prev) => ({ ...prev, logoUrl: data.data }))
       } else {
         alert('Error al subir la imagen: ' + (data.message || 'Error desconocido'))
       }
@@ -158,7 +158,7 @@ export function ChannelManagement() {
       name: channel.name,
       number: channel.number,
       category: channel.category,
-      logo: channel.logo || '',
+      logoUrl: channel.logoUrl || '',
       description: channel.description || '',
       active: channel.active,
     })
@@ -211,7 +211,7 @@ export function ChannelManagement() {
       name: '',
       number: 1,
       category: 'ENTRETENIMIENTO',
-      logo: '',
+      logoUrl: '',
       description: '',
       active: true,
     })
@@ -336,16 +336,16 @@ export function ChannelManagement() {
                   
                   {isUploading ? (
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-red"></div>
-                  ) : formData.logo ? (
+                  ) : formData.logoUrl ? (
                      <div className="text-center w-full">
                         <div className="h-20 flex items-center justify-center mb-2">
                           <img 
-                            src={formData.logo} 
+                            src={formData.logoUrl} 
                             alt="Preview" 
                             className="max-h-full max-w-full object-contain"
                           />
                         </div>
-                        <p className="text-xs text-green-600 font-semibold truncate px-2">{formData.logo.split('/').pop()}</p>
+                        <p className="text-xs text-green-600 font-semibold truncate px-2">{formData.logoUrl.split('/').pop()}</p>
                         <p className="text-xs text-gray-400 mt-1">Clic o arrastrar para cambiar</p>
                      </div>
                   ) : (
@@ -463,9 +463,9 @@ export function ChannelManagement() {
                       {channel.number}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {channel.logo ? (
+                      {channel.logoUrl ? (
                         <img
-                          src={channel.logo}
+                          src={channel.logoUrl}
                           alt={channel.name}
                           className="h-8 w-auto object-contain"
                           onError={(e) => {
