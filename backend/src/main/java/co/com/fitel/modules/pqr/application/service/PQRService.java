@@ -276,12 +276,6 @@ public class PQRService {
         pqr.setAppealReason(request.getReason());
         pqr.setUpdatedAt(LocalDateTime.now());
         
-        // Opcional: Agregar como nota interna también o descripción
-        String note = "\n\n[SOLICITUD DE REANÁLISIS - " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "]\n" + request.getReason();
-        if (pqr.getDescription() != null) {
-            pqr.setDescription(pqr.getDescription() + note);
-        }
-        
         PQR savedPqr = pqrRepository.save(pqr);
         log.info("PQR {} re-opened for analysis", cun);
         
@@ -341,6 +335,8 @@ public class PQRService {
             .resourceType(pqr.getResourceType())
             .internalNotes(pqr.getInternalNotes())
             .response(pqr.getResponse())
+            .responseAttachmentPath(pqr.getResponseAttachmentPath())
+            .appealReason(pqr.getAppealReason())
             .createdAt(pqr.getCreatedAt())
             .updatedAt(pqr.getUpdatedAt())
             .responseDate(pqr.getResponseDate())

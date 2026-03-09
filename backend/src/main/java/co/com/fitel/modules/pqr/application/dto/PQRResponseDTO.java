@@ -36,6 +36,7 @@ public class PQRResponseDTO {
     private String internalNotes;
     private String response;
     private String responseAttachmentPath;
+    private String appealReason;
     
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;

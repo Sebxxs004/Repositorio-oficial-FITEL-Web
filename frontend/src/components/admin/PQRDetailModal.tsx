@@ -21,6 +21,7 @@ interface PQR {
   internalNotes?: string
   response?: string
   responseAttachmentPath?: string
+  appealReason?: string
   createdAt: string
   slaDeadline?: string
 }
@@ -441,7 +442,12 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
                 {(() => {
                   const parts = pqr.description.split('--- Archivos Adjuntos ---')
                   const descriptionText = parts[0].trim()
-                  const attachments = parts.length > 1 ? parts[1].trim().split('\n').filter(url => url.trim().length > 0) : []
+                  const attachments = parts.length > 1
+                    ? parts[1].trim().split('\n').filter(url => {
+                        const t = url.trim()
+                        return t.length > 0 && (t.startsWith('/') || t.startsWith('http'))
+                      })
+                    : []
                   
                   return (
                     <div className="space-y-4">
@@ -483,6 +489,19 @@ export function PQRDetailModal({ pqr, isOpen, onClose, onUpdate }: PQRDetailModa
               </div>
             </div>
           </div>
+
+          {/* Motivo de Reanálisis */}
+          {pqr.appealReason && (
+            <div className="border-t border-neutral-gray-light pt-6">
+              <h3 className="font-semibold text-neutral-dark mb-3 flex items-center space-x-2">
+                <AlertTriangle className="w-5 h-5 text-primary-red" />
+                <span>Solicitud de Reanálisis del Usuario</span>
+              </h3>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-neutral-dark whitespace-pre-wrap text-sm">{pqr.appealReason}</p>
+              </div>
+            </div>
+          )}
 
           {/* Formulario de Gestión */}
           <div className="border-t border-neutral-gray-light pt-6">

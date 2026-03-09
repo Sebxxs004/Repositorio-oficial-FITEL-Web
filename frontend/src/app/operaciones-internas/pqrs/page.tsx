@@ -24,6 +24,7 @@ interface PQR {
   resourceType?: string
   internalNotes?: string
   response?: string
+  appealReason?: string
   createdAt: string
   updatedAt?: string
   responseDate?: string
