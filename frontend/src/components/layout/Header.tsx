@@ -20,7 +20,7 @@ const INFO_LINKS = [
   { label: 'Procedimiento y trámite de PQR', href: '/pqrs' },
 ]
 
-export function Header() {
+export function Header({ whatsappUrl = FITEL_WHATSAPP_URL }: { whatsappUrl?: string }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isInfoOpen, setIsInfoOpen] = useState(false)
@@ -55,7 +55,7 @@ export function Header() {
   const navigationItems = NavigationService.getNavigationItems()
 
   const handleWhatsApp = () => {
-    window.open(FITEL_WHATSAPP_URL, '_blank')
+    window.open(whatsappUrl, '_blank')
   }
 
   const handleSpeedTest = () => {
