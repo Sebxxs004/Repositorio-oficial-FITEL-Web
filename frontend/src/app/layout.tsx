@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import 'leaflet/dist/leaflet.css'
 import { Header } from '@/components/layout/Header'
-import { FITEL_WHATSAPP_URL, FITEL_PHONE_NUMBER } from '@/config/constants'
+import { FITEL_WHATSAPP_URL } from '@/config/constants'
 import { Footer } from '@/components/layout/Footer'
 import { AdminRouteHandler } from '@/components/admin/AdminRouteHandler'
 import { ChatBotWrapper } from '@/components/chatbot/ChatBotWrapper'
@@ -26,8 +26,10 @@ async function getWhatsAppUrl(): Promise<string> {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
     const res = await fetch(`${apiUrl}/config/contact`, { next: { revalidate: 60 } })
     if (!res.ok) return FITEL_WHATSAPP_URL
-    const data = await res.json()
-    if (data?.phone) return `https://wa.me/${data.phone}`
+    const json = await res.json()
+    const contact = json?.data
+    if (contact?.whatsapp) return `https://wa.me/${contact.whatsapp}`
+    if (contact?.phone) return `https://wa.me/${contact.phone}`
     return FITEL_WHATSAPP_URL
   } catch {
     return FITEL_WHATSAPP_URL
