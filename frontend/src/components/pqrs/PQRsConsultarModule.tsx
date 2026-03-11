@@ -23,7 +23,13 @@ import { PQRSearchResults } from './consultar/PQRSearchResults'
 import { PQRSearchError } from './consultar/PQRSearchError'
 import { PQRSearchInfo } from './consultar/PQRSearchInfo'
 
-export function PQRsConsultarModule() {
+interface PQRsConsultarModuleProps {
+  phoneDisplay: string
+  phoneTel: string
+  whatsappUrl: string
+}
+
+export function PQRsConsultarModule({ phoneDisplay, phoneTel, whatsappUrl }: PQRsConsultarModuleProps) {
   const {
     searchValue,
     isSearching,
@@ -63,7 +69,7 @@ export function PQRsConsultarModule() {
         )}
 
         {/* Información adicional */}
-        <PQRSearchInfo />
+        <PQRSearchInfo phoneDisplay={phoneDisplay} phoneTel={phoneTel} whatsappUrl={whatsappUrl} />
       </div>
     </section>
   )
