@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { BarChart3, Users, FileText, Settings, LogOut, Shield, User, LayoutDashboard, ChevronDown, ChevronRight, Package, Tv } from 'lucide-react'
 
@@ -19,13 +19,18 @@ interface AdminLayoutProps {
 export function AdminLayout({ children, title }: AdminLayoutProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [isGestionOpen, setIsGestionOpen] = useState(false)
+  const [isPqrsOpen, setIsPqrsOpen] = useState(false)
 
   // Mantener el menú de gestión abierto si estamos en alguna de sus páginas
   useEffect(() => {
+    if (pathname?.startsWith('/operaciones-internas/pqrs')) {
+      setIsPqrsOpen(true)
+    }
     if (pathname?.startsWith('/operaciones-internas/planes') || 
         pathname?.startsWith('/operaciones-internas/canales')) {
       setIsGestionOpen(true)
@@ -109,12 +114,6 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
       roles: ['ADMIN', 'OPERARIO']
     },
     {
-      icon: FileText,
-      label: 'Gestión de PQRs',
-      path: '/operaciones-internas/pqrs',
-      roles: ['ADMIN', 'OPERARIO']
-    },
-    {
       icon: Settings,
       label: 'Configuración',
       path: '/operaciones-internas/configuracion',
@@ -143,6 +142,19 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
     },
   ]
 
+  const pqrsSubmenuItems = [
+    {
+      label: 'Gestionar y Revisar PQRs',
+      href: '/operaciones-internas/pqrs?view=manage',
+      view: 'manage'
+    },
+    {
+      label: 'Crear PQR',
+      href: '/operaciones-internas/pqrs?view=create',
+      view: 'create'
+    },
+  ]
+
   // Filtrar items según rol
   const visibleMenuItems = menuItems.filter(item => 
     !item.roles || (userInfo?.role && item.roles.includes(userInfo.role))
@@ -151,6 +163,9 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
   const visibleGestionItems = gestionSubmenuItems.filter(item =>
     !item.roles || (userInfo?.role && item.roles.includes(userInfo.role))
   )
+
+  const pqrView = searchParams?.get('view') || 'manage'
+  const isPqrsRoute = pathname?.startsWith('/operaciones-internas/pqrs')
 
   return (
     <div className="min-h-screen bg-neutral-gray-light flex">
@@ -180,6 +195,49 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
         {/* Menú de Navegación */}
         <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
+          <div>
+            <button
+              onClick={() => setIsPqrsOpen(!isPqrsOpen)}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
+                isPqrsRoute
+                  ? 'bg-primary-red text-neutral-white'
+                  : 'text-neutral-gray-light hover:bg-neutral-gray/20 hover:text-neutral-white'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <FileText className="w-5 h-5" />
+                <span className="font-medium">Gestión de PQRs</span>
+              </div>
+              {isPqrsOpen ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+
+            {isPqrsOpen && (
+              <div className="mt-2 ml-4 space-y-1">
+                {pqrsSubmenuItems.map((item) => {
+                  const isActive = isPqrsRoute && pqrView === item.view
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors text-sm ${
+                        isActive
+                          ? 'bg-primary-red/80 text-neutral-white'
+                          : 'text-neutral-gray-light hover:bg-neutral-gray/20 hover:text-neutral-white'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
           {visibleMenuItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.path || pathname?.startsWith(item.path + '/')

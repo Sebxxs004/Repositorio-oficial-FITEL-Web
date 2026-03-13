@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { AdminLayout } from '@/components/admin/AdminLayout'
 import { PQRDetailModal } from '@/components/admin/PQRDetailModal'
 import { PQRsModule } from '@/components/pqrs/PQRsModule'
-import { FileText, Search, Filter, CheckCircle, Clock, XCircle, AlertCircle, AlertTriangle } from 'lucide-react'
+import { FileText, Search, CheckCircle, Clock, XCircle, AlertCircle, AlertTriangle } from 'lucide-react'
 
 interface PQR {
   id: number
@@ -34,6 +35,7 @@ interface PQR {
 }
 
 export default function PQRsManagementPage() {
+  const searchParams = useSearchParams()
   const [pqrs, setPqrs] = useState<PQR[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeSubmenu, setActiveSubmenu] = useState<'manage' | 'create'>('manage')
@@ -50,6 +52,15 @@ export default function PQRsManagementPage() {
     fetchPQRs()
     fetchAlerts()
   }, [])
+
+  useEffect(() => {
+    const view = searchParams?.get('view')
+    if (view === 'create' || view === 'manage') {
+      setActiveSubmenu(view)
+    } else {
+      setActiveSubmenu('manage')
+    }
+  }, [searchParams])
 
   const fetchAlerts = async () => {
     try {
@@ -159,23 +170,6 @@ export default function PQRsManagementPage() {
 
   return (
     <AdminLayout title="Gestión de PQRs">
-      <div className="mb-6 bg-neutral-white border border-neutral-gray-light rounded-xl p-4 shadow-sm">
-        <div className="max-w-sm">
-          <label htmlFor="pqrs-submenu" className="block text-sm font-semibold text-neutral-dark mb-2">
-            Submenú de Gestión de PQRs
-          </label>
-          <select
-            id="pqrs-submenu"
-            value={activeSubmenu}
-            onChange={(e) => setActiveSubmenu(e.target.value as 'manage' | 'create')}
-            className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red focus:border-transparent bg-white text-sm"
-          >
-            <option value="manage">Gestionar y Revisar PQRs</option>
-            <option value="create">Crear PQR</option>
-          </select>
-        </div>
-      </div>
-
       {activeSubmenu === 'manage' ? (
         <>
           {/* Alertas de SLA */}
