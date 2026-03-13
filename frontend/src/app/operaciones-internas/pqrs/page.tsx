@@ -49,11 +49,6 @@ export default function PQRsManagementPage() {
   })
 
   useEffect(() => {
-    fetchPQRs()
-    fetchAlerts()
-  }, [])
-
-  useEffect(() => {
     const view = searchParams?.get('view')
     if (view === 'create' || view === 'manage') {
       setActiveSubmenu(view)
@@ -61,6 +56,13 @@ export default function PQRsManagementPage() {
       setActiveSubmenu('manage')
     }
   }, [searchParams])
+
+  useEffect(() => {
+    if (activeSubmenu === 'manage') {
+      fetchPQRs()
+      fetchAlerts()
+    }
+  }, [activeSubmenu])
 
   const fetchAlerts = async () => {
     try {
@@ -385,7 +387,7 @@ export default function PQRsManagementPage() {
         </>
       ) : (
         <div className="bg-neutral-white rounded-xl shadow-lg border border-neutral-gray-light overflow-hidden">
-          <PQRsModule />
+          <PQRsModule mode="admin" />
         </div>
       )}
 
