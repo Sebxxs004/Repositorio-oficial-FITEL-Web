@@ -120,8 +120,13 @@ const pqrFormSchema = z.object({
 
 type PQRFormData = z.infer<typeof pqrFormSchema>
 
-export function PQRsModule() {
+interface PQRsModuleProps {
+  mode?: 'public' | 'admin'
+}
+
+export function PQRsModule({ mode = 'public' }: PQRsModuleProps) {
   const sectionRef = useRef<HTMLElement>(null)
+  const isAdminMode = mode === 'admin'
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCUNModal, setShowCUNModal] = useState(false)
   const [cunCopied, setCunCopied] = useState(false)
@@ -377,40 +382,42 @@ export function PQRsModule() {
         </div>
       )}
 
-      <section ref={sectionRef} id="pqrs" className="section-padding bg-transparent">
-      <div className="container-custom">
-        <div className="text-center mb-16 animate-on-scroll">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            <span className="text-gradient">PQRs</span>
-          </h1>
-          <p className="text-lg text-neutral-gray max-w-3xl mx-auto mb-6">
-            Presenta tus <strong>Peticiones, Quejas o Recursos</strong>. Estamos comprometidos con la atención y resolución oportuna de tus solicitudes.
-          </p>
-          
-          {/* Información sobre PQRs */}
-          <div className="max-w-4xl mx-auto mt-8 p-6 bg-gradient-to-r from-primary-red/10 to-secondary-blue/10 border border-primary-red/20 rounded-xl">
-            <div className="flex items-start space-x-4">
-              <Info className="w-6 h-6 text-secondary-blue flex-shrink-0 mt-1" />
-              <div className="text-left">
-                <h3 className="text-lg font-bold text-neutral-dark mb-3">¿Qué es una PQR?</h3>
-                <div className="space-y-2 text-sm text-neutral-gray">
-                  <p><strong>Petición:</strong> Solicitud de información, documentos o servicios.</p>
-                  <p><strong>Queja:</strong> Manifestación de insatisfacción con el servicio recibido.</p>
-                  <p><strong>Recurso:</strong> Impugnación de decisiones o actuaciones de la empresa.</p>
+      <section ref={sectionRef} id="pqrs" className={isAdminMode ? 'bg-transparent pt-4 pb-6' : 'section-padding bg-transparent'}>
+      <div className={isAdminMode ? '' : 'container-custom'}>
+        {!isAdminMode && (
+          <div className="text-center mb-16 animate-on-scroll">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+              <span className="text-gradient">PQRs</span>
+            </h1>
+            <p className="text-lg text-neutral-gray max-w-3xl mx-auto mb-6">
+              Presenta tus <strong>Peticiones, Quejas o Recursos</strong>. Estamos comprometidos con la atención y resolución oportuna de tus solicitudes.
+            </p>
+
+            {/* Información sobre PQRs */}
+            <div className="max-w-4xl mx-auto mt-8 p-6 bg-gradient-to-r from-primary-red/10 to-secondary-blue/10 border border-primary-red/20 rounded-xl">
+              <div className="flex items-start space-x-4">
+                <Info className="w-6 h-6 text-secondary-blue flex-shrink-0 mt-1" />
+                <div className="text-left">
+                  <h3 className="text-lg font-bold text-neutral-dark mb-3">¿Qué es una PQR?</h3>
+                  <div className="space-y-2 text-sm text-neutral-gray">
+                    <p><strong>Petición:</strong> Solicitud de información, documentos o servicios.</p>
+                    <p><strong>Queja:</strong> Manifestación de insatisfacción con el servicio recibido.</p>
+                    <p><strong>Recurso:</strong> Impugnación de decisiones o actuaciones de la empresa.</p>
+                  </div>
+                  <p className="text-xs text-neutral-gray mt-4">
+                    De acuerdo con la normativa vigente, nos comprometemos a responder tu PQR en un plazo máximo de 15 días hábiles.
+                  </p>
                 </div>
-                <p className="text-xs text-neutral-gray mt-4">
-                  De acuerdo con la normativa vigente, nos comprometemos a responder tu PQR en un plazo máximo de 15 días hábiles.
-                </p>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Formulario de PQRs */}
-        <div className="max-w-4xl mx-auto mb-16">
+        <div className={isAdminMode ? 'max-w-5xl mx-auto mt-2 mb-6' : 'max-w-4xl mx-auto mb-16'}>
           <div className="bg-neutral-white rounded-xl shadow-lg p-8 border border-neutral-gray-light animate-on-scroll">
-            <h2 className="text-2xl font-bold text-neutral-dark mb-6 text-center">
-              <span className="text-gradient">Formulario de PQR</span>
+            <h2 className={`text-2xl font-bold text-neutral-dark mb-6 ${isAdminMode ? 'text-left' : 'text-center'}`}>
+              {isAdminMode ? 'Crear nueva PQR' : <span className="text-gradient">Formulario de PQR</span>}
             </h2>
             
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -812,7 +819,7 @@ export function PQRsModule() {
               )}
 
               {/* Botón de envío */}
-              <div className="pt-4">
+              <div className={isAdminMode ? 'pt-6 pb-2' : 'pt-4'}>
                 <button
                   type="submit"
                   disabled={isSubmitting}
@@ -906,7 +913,7 @@ export function PQRsModule() {
         )}
 
         {/* Información adicional */}
-        {!constancy && (
+        {!constancy && !isAdminMode && (
           <div className="max-w-4xl mx-auto animate-on-scroll">
             <div className="bg-neutral-white rounded-xl shadow-lg p-8 border border-neutral-gray-light">
               <h3 className="text-xl font-bold text-neutral-dark mb-4 flex items-center space-x-2">
