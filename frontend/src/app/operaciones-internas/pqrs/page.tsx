@@ -160,42 +160,19 @@ export default function PQRsManagementPage() {
   return (
     <AdminLayout title="Gestión de PQRs">
       <div className="mb-6 bg-neutral-white border border-neutral-gray-light rounded-xl p-4 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setActiveSubmenu('manage')}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                activeSubmenu === 'manage'
-                  ? 'bg-primary-red text-neutral-white'
-                  : 'bg-neutral-gray-light text-neutral-dark hover:bg-neutral-gray/40'
-              }`}
-            >
-              Gestionar y Revisar PQRs
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSubmenu('create')}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                activeSubmenu === 'create'
-                  ? 'bg-primary-red text-neutral-white'
-                  : 'bg-neutral-gray-light text-neutral-dark hover:bg-neutral-gray/40'
-              }`}
-            >
-              Crear PQR
-            </button>
-          </div>
-
-          <div className="md:hidden">
-            <select
-              value={activeSubmenu}
-              onChange={(e) => setActiveSubmenu(e.target.value as 'manage' | 'create')}
-              className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red focus:border-transparent bg-white text-sm"
-            >
-              <option value="manage">Gestionar y Revisar PQRs</option>
-              <option value="create">Crear PQR</option>
-            </select>
-          </div>
+        <div className="max-w-sm">
+          <label htmlFor="pqrs-submenu" className="block text-sm font-semibold text-neutral-dark mb-2">
+            Submenú de Gestión de PQRs
+          </label>
+          <select
+            id="pqrs-submenu"
+            value={activeSubmenu}
+            onChange={(e) => setActiveSubmenu(e.target.value as 'manage' | 'create')}
+            className="w-full px-4 py-2 border border-neutral-gray-light rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-red focus:border-transparent bg-white text-sm"
+          >
+            <option value="manage">Gestionar y Revisar PQRs</option>
+            <option value="create">Crear PQR</option>
+          </select>
         </div>
       </div>
 
