@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { BarChart3, Users, FileText, Settings, LogOut, Shield, User, LayoutDashboard, ChevronDown, ChevronRight, Package, Tv } from 'lucide-react'
 
@@ -19,17 +19,21 @@ interface AdminLayoutProps {
 export function AdminLayout({ children, title }: AdminLayoutProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [isGestionOpen, setIsGestionOpen] = useState(false)
   const [isPqrsOpen, setIsPqrsOpen] = useState(false)
+  const [pqrView, setPqrView] = useState<'manage' | 'create'>('manage')
 
   // Mantener el menú de gestión abierto si estamos en alguna de sus páginas
   useEffect(() => {
     if (pathname?.startsWith('/operaciones-internas/pqrs')) {
       setIsPqrsOpen(true)
+      if (typeof window !== 'undefined') {
+        const view = new URLSearchParams(window.location.search).get('view')
+        setPqrView(view === 'create' ? 'create' : 'manage')
+      }
     }
     if (pathname?.startsWith('/operaciones-internas/planes') || 
         pathname?.startsWith('/operaciones-internas/canales')) {
@@ -164,7 +168,6 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
     !item.roles || (userInfo?.role && item.roles.includes(userInfo.role))
   )
 
-  const pqrView = searchParams?.get('view') || 'manage'
   const isPqrsRoute = pathname?.startsWith('/operaciones-internas/pqrs')
 
   return (
@@ -224,6 +227,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
                     <Link
                       key={item.href}
                       href={item.href}
+                      onClick={() => setPqrView(item.view as 'manage' | 'create')}
                       className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors text-sm ${
                         isActive
                           ? 'bg-primary-red/80 text-neutral-white'

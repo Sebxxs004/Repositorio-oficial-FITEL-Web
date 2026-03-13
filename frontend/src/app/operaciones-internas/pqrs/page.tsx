@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AdminLayout } from '@/components/admin/AdminLayout'
 import { PQRDetailModal } from '@/components/admin/PQRDetailModal'
@@ -34,7 +34,7 @@ interface PQR {
   slaDeadline?: string
 }
 
-export default function PQRsManagementPage() {
+function PQRsManagementContent() {
   const searchParams = useSearchParams()
   const [pqrs, setPqrs] = useState<PQR[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -402,5 +402,24 @@ export default function PQRsManagementPage() {
         onUpdate={handlePQRUpdate}
       />
     </AdminLayout>
+  )
+}
+
+export default function PQRsManagementPage() {
+  return (
+    <Suspense
+      fallback={
+        <AdminLayout title="Gestión de PQRs">
+          <div className="flex items-center justify-center py-16">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-red mx-auto mb-3"></div>
+              <p className="text-neutral-gray text-sm">Cargando módulo de PQRs...</p>
+            </div>
+          </div>
+        </AdminLayout>
+      }
+    >
+      <PQRsManagementContent />
+    </Suspense>
   )
 }
