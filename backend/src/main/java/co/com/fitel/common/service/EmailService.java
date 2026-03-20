@@ -22,6 +22,7 @@ import java.util.Properties;
 public class EmailService {
     
     private final EmailConfigRepository emailConfigRepository;
+    private static final String COMPANY_NOTIFICATION_EMAIL = "atencion.usuarios@fitelcolombia.com";
     
     /**
      * Obtiene la configuración de email desde la base de datos
@@ -486,9 +487,11 @@ public class EmailService {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.starttls.required", "true");
-        props.put("mail.smtp.connectiontimeout", "5000");
-        props.put("mail.smtp.timeout", "5000");
-        props.put("mail.smtp.writetimeout", "5000");
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        props.put("mail.smtp.ssl.trust", "smtp.office365.com");
+        props.put("mail.smtp.connectiontimeout", "30000");
+        props.put("mail.smtp.timeout", "30000");
+        props.put("mail.smtp.writetimeout", "30000");
         
         return mailSender;
     }
@@ -645,9 +648,7 @@ public class EmailService {
                                             String cun, String type, String subject, String description,
                                             String radicationDate, String maxResponseDate) {
         try {
-            // Obtener el email de la empresa desde la configuración
-            EmailConfig config = getEmailConfig();
-            String companyEmail = config.getEmail();
+            String companyEmail = COMPANY_NOTIFICATION_EMAIL;
             
             // Convertir tipo a español para el email
             String typeSpanish = switch (type.toUpperCase()) {
@@ -1238,9 +1239,7 @@ public class EmailService {
     public void sendContactFormNotification(String customerName, String customerEmail,
                                            String customerPhone, String subject, String message) {
         try {
-            // Obtener el email de la empresa desde la configuración
-            EmailConfig config = getEmailConfig();
-            String companyEmail = config.getEmail();
+            String companyEmail = COMPANY_NOTIFICATION_EMAIL;
             
             String htmlContent = buildContactFormNotificationEmail(customerName, customerEmail,
                 customerPhone, subject, message);
