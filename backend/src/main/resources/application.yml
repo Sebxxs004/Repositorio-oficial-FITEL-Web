@@ -24,7 +24,7 @@ spring:
       location: ${java.io.tmpdir}
   
   datasource:
-    url: ${DATABASE_URL:jdbc:mariadb://localhost:3307/fitel_db}
+    url: ${DATABASE_URL:jdbc:mariadb://localhost:3307/fitel_db?characterEncoding=utf8mb4&connectionCollation=utf8mb4_unicode_ci}
     username: ${DATABASE_USERNAME:fitel}
     password: ${DATABASE_PASSWORD:fiteladmin123}
     driver-class-name: org.mariadb.jdbc.Driver
