@@ -28,25 +28,13 @@ spring:
     username: ${DATABASE_USERNAME:fitel}
     password: ${DATABASE_PASSWORD:fiteladmin123}
     driver-class-name: org.mariadb.jdbc.Driver
-
-storage:
-  # Opciones: local, azure
-  provider: ${STORAGE_PROVIDER:local}
-  local:
-    location: uploads
-  base-url: ${STORAGE_BASE_URL:http://localhost:8080}
-
-azure:
-  storage:
-    connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
-    container-name: ${AZURE_STORAGE_CONTAINER_NAME:fitel-documents}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
-  
+
   jpa:
     hibernate:
       ddl-auto: ${DDL_AUTO:update}
@@ -57,7 +45,7 @@ azure:
         format_sql: true
         use_sql_comments: true
     open-in-view: false
-  
+
   security:
     jwt:
       secret: ${JWT_SECRET:your-secret-key-change-in-production-min-256-bits}
@@ -82,6 +70,18 @@ azure:
           timeout: 5000
           writetimeout: 5000
     from: ${MAIL_FROM:} # Email desde el cual se envían los correos
+
+storage:
+  # Opciones: local, azure
+  provider: ${STORAGE_PROVIDER:local}
+  local:
+    location: uploads
+  base-url: ${STORAGE_BASE_URL:http://localhost:8080}
+
+azure:
+  storage:
+    connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
+    container-name: ${AZURE_STORAGE_CONTAINER_NAME:fitel-documents}
 
 server:
   port: ${SERVER_PORT:8080}
