@@ -1,0 +1,41 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="https://WSConsultaOperador/">    
+	<soap:Body>       
+		<ns1:consultaCUNResponse xmlns:ns1="http://WSConsultaOperador/">
+			<parameters xsi:type="tns:consultaCUNResponse">
+				<respuesta xsi:type="xsd:string"> 			
+					<![CDATA[ 			
+						<tns:ArrayOfIntegracionCUN xmlns:tns="http://ws.wso2.org/dataservice"> 
+							<tns:IntegracionCUN>
+								<tns:nombreOperador>OPERADOR</tns:nombreOperador>
+								<tns:codigoUnicoNumerico> 
+									<tns:identificadorOperador>1234</tns:identificadorOperador>
+									<tns:anoRadicacionCun>14</tns:anoRadicacionCun>
+									<tns:ConsecutivoRadCun>0000000002</tns:ConsecutivoRadCun>
+								</tns:codigoUnicoNumerico>
+								<tns:nomPersona>
+									<tns:primerNombre>NOMBRE_1</tns:primerNombre>
+									<tns:segundoNombre>NOMBRE_2</tns:segundoNombre>
+									<tns:primerApellido>APELLIDO_1</tns:primerApellido>
+									<tns:segundoApellido>APELLIDO_2</tns:segundoApellido>
+								</tns:nomPersona>
+								<tns:tipoIdNacionalPersona>
+									<tns:codTipoIdNacionalPersona>CC</tns:codTipoIdNacionalPersona>
+									<tns:nomTipoIdentificacionNacionalPersona>CEDULA DE CIUDADANIA</tns:nomTipoIdentificacionNacionalPersona>
+								</tns:tipoIdNacionalPersona>
+								<tns:grupoNumeroIdentificacion>1044999999</tns:grupoNumeroIdentificacion>
+								<tns:descripcionEstado>ANALISIS POR PARTE DEL OPERADOR</tns:descripcionEstado>
+								<tns:fechaAsignacion>2013-04-11T00:00:00</tns:fechaAsignacion>
+								<tns:fechaEstRespuesta>2013-04-11<tns:fechaEstRespuesta>
+								<tns:razonSocial></tns:razonSocial>
+								<tns:tipoQuejaSic>
+									<tns:nomTipoQuejaSic>ACTIVACION DE LINEAS ACTIVACION DE LINEAS</tns:nomTipoQuejaSic>
+									<tns:codTipoQuejaSic>1</tns:codTipoQuejaSic>
+								</tns:tipoQuejaSic>
+							</tns:IntegracionCUN>
+						</tns:ArrayOfIntegracionCUN>
+					]]> 		
+				</respuesta>
+			</parameters>
+		</ns1:consultaCUNResponse>    
+	</soap:Body> 
+</soap:Envelope>

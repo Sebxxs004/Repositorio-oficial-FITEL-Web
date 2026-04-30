@@ -1,0 +1,12 @@
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+<SOAP-ENV:Header/>
+<SOAP-ENV:Body>
+<ns:consultaCUN xmlns:ns="http://tempuri.org/">
+      <ns:identificadorOperador>0</ns:identificadorOperador>
+     <ns:anoRadicacionCun>0</ns:anoRadicacionCun>
+     <ns:ConsecutivoRadCun>0</ns:ConsecutivoRadCun>
+     <ns:tipoIdentificacion>NI</ns:tipoIdentificacion>
+     <ns:numeroIdentificacion>800209179</ns:numeroIdentificacion>
+</ns:consultaCUN>
+</SOAP-ENV:Body></SOAP-ENV:Envelope>
+

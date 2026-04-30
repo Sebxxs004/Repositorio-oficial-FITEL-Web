@@ -52,20 +52,47 @@
     <!-- Tipo que representa cada registro de PQR -->
     <xs:complexType name="IntegracionCUN">
         <xs:sequence>
-            <!-- Nombre(s) completo(s) del peticionario -->
-            <xs:element name="nombres"            type="xs:string"/>
-            <!-- Número de identificación -->
-            <xs:element name="identificacion"     type="xs:string"/>
-            <!-- Código Único Numérico de la PQR -->
-            <xs:element name="cun"                type="xs:string"/>
-            <!-- Fecha de radicación / asignación (yyyy-MM-dd) -->
-            <xs:element name="fechaAsignacion"    type="xs:string"/>
-            <!-- Clasificación: PETICION, QUEJA, RECURSO, RECLAMO -->
-            <xs:element name="tipoQueja"          type="xs:string"/>
-            <!-- Estado actual: PENDIENTE, EN_PROCESO, RESPONDIDA, CERRADA -->
-            <xs:element name="estadoTramite"      type="xs:string"/>
-            <!-- Fecha de respuesta oficial (vacío si aún no hay) -->
-            <xs:element name="fechaRespuesta"     type="xs:string" minOccurs="0"/>
+            <xs:element name="nombreOperador" type="xs:string"/>
+            <xs:element name="codigoUnicoNumerico" type="tns:CodigoUnicoNumerico"/>
+            <xs:element name="nomPersona" type="tns:NomPersona"/>
+            <xs:element name="tipoIdNacionalPersona" type="tns:TipoIdNacionalPersona"/>
+            <xs:element name="grupoNumeroIdentificacion" type="xs:string"/>
+            <xs:element name="descripcionEstado" type="xs:string"/>
+            <xs:element name="fechaAsignacion" type="xs:string"/>
+            <xs:element name="fechaEstRespuesta" type="xs:string" minOccurs="0"/>
+            <xs:element name="razonSocial" type="xs:string"/>
+            <xs:element name="tipoQuejaSic" type="tns:TipoQuejaSic"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="CodigoUnicoNumerico">
+        <xs:sequence>
+            <xs:element name="identificadorOperador" type="xs:string"/>
+            <xs:element name="anoRadicacionCun" type="xs:string"/>
+            <xs:element name="ConsecutivoRadCun" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="NomPersona">
+        <xs:sequence>
+            <xs:element name="primerNombre" type="xs:string"/>
+            <xs:element name="segundoNombre" type="xs:string"/>
+            <xs:element name="primerApellido" type="xs:string"/>
+            <xs:element name="segundoApellido" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TipoIdNacionalPersona">
+        <xs:sequence>
+            <xs:element name="codTipoIdNacionalPersona" type="xs:string"/>
+            <xs:element name="nomTipoIdentificacionNacionalPersona" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TipoQuejaSic">
+        <xs:sequence>
+            <xs:element name="nomTipoQuejaSic" type="xs:string"/>
+            <xs:element name="codTipoQuejaSic" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
 

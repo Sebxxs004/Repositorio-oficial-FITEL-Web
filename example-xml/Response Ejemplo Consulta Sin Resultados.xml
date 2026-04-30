@@ -1,0 +1,13 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="https://WSConsultaOperador/">    
+<soap:Body>       
+  <ns1:consultaCUNResponse xmlns:ns1="http://WSConsultaOperador/">
+    <parameters xsi:type="tns:consultaCUNResponse">
+		<respuesta xsi:type="xsd:string">			
+		<![CDATA[ 			
+			<tns:ArrayOfIntegracionCUN xmlns:tns=http://ws.wso2.org/dataservice /> 
+		]]> 		
+		</respuesta>
+    </parameters>
+   </ns1:consultaCUNResponse>   
+  </soap:Body> 
+</soap:Envelope>
