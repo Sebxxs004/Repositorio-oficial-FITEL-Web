@@ -2,7 +2,6 @@ services:
   # MariaDB Database
   mariadb:
     image: mariadb:10.11
-    command: --skip-grant-tables
     container_name: fitel-mariadb
     environment:
       MYSQL_DATABASE: fitel_db
