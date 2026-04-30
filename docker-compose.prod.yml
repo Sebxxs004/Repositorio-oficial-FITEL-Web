@@ -40,6 +40,8 @@ services:
       MAIL_FROM: ${MAIL_FROM}
       # Configuración de URLs para correos y redirecciones
       APP_FRONTEND_URL: https://${SERVER_IP}
+      # IPs permitidas para el servicio SOAP de la SIC (separadas por coma)
+      FITEL_SIC_ALLOWED_IPS: ${FITEL_SIC_ALLOWED_IPS:-127.0.0.1}
     depends_on:
       mariadb:
         condition: service_healthy
