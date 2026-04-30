@@ -1,0 +1,27 @@
+### Petición SIC - Búsqueda por CUN (AA y CR)
+POST http://localhost:8080/ws
+Content-Type: text/xml; charset=utf-8
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://fitel.com.co/pqr/soap">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <soap:consultaCUNRequest>
+         <soap:AA>2026</soap:AA>
+         <soap:CR>12345</soap:CR>
+      </soap:consultaCUNRequest>
+   </soapenv:Body>
+</soapenv:Envelope>
+
+### Petición SIC - Búsqueda por Tipo y Número de Identificación (NIT/CC)
+POST http://localhost:8080/ws
+Content-Type: text/xml; charset=utf-8
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://fitel.com.co/pqr/soap">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <soap:consultaCUNRequest>
+         <soap:TipoId>CC</soap:TipoId>
+         <soap:NumId>1001234567</soap:NumId>
+      </soap:consultaCUNRequest>
+   </soapenv:Body>
+</soapenv:Envelope>

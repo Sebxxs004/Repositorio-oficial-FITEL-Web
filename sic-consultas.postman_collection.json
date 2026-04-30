@@ -1,0 +1,78 @@
+{
+	"info": {
+		"_postman_id": "b3e94582-841f-4903-88cd-a6124e4c27a2",
+		"name": "SIC Consultas SOAP",
+		"description": "Colección para auditar el Web Service SOAP de la SIC.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Búsqueda por CUN (AA y CR)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:soap=\"http://fitel.com.co/pqr/soap\">\n   <soapenv:Header/>\n   <soapenv:Body>\n      <soap:consultaCUNRequest>\n         <soap:AA>2026</soap:AA>\n         <soap:CR>12345</soap:CR>\n      </soap:consultaCUNRequest>\n   </soapenv:Body>\n</soapenv:Envelope>",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ws",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ws"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Búsqueda por Tipo y Num Id",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:soap=\"http://fitel.com.co/pqr/soap\">\n   <soapenv:Header/>\n   <soapenv:Body>\n      <soap:consultaCUNRequest>\n         <soap:TipoId>CC</soap:TipoId>\n         <soap:NumId>1001234567</soap:NumId>\n      </soap:consultaCUNRequest>\n   </soapenv:Body>\n</soapenv:Envelope>",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ws",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ws"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

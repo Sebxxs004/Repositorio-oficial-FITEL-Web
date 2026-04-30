@@ -114,3 +114,7 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+
+fitel:
+  sic:
+    allowed-ips: 127.0.0.1, 192.168.1.10

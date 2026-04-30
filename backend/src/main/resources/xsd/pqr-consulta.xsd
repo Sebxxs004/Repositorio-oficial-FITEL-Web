@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://fitel.com.co/pqr/soap"
+           targetNamespace="http://fitel.com.co/pqr/soap"
+           elementFormDefault="qualified">
+
+    <!-- ====================================================== -->
+    <!-- WSConsultaOperador – Esquema para integración SIC       -->
+    <!-- Basado en la Circular 0005 de 2022 de la SIC            -->
+    <!-- ====================================================== -->
+
+    <!-- ─── Request ─────────────────────────────────────────── -->
+    <xs:element name="consultaCUNRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <!-- Identificador del Operador asignado por la SIC -->
+                <xs:element name="IO"                   type="xs:string"/>
+                <!-- Año de asignación (AAAA) -->
+                <xs:element name="AA"                   type="xs:string"/>
+                <!-- Consecutivo de radicación -->
+                <xs:element name="CR"                   type="xs:string"/>
+                <!-- Tipo de documento: CC, CE, NIT, TI, PP, etc. -->
+                <xs:element name="tipoIdentificacion"   type="xs:string"/>
+                <!-- Número de documento del peticionario -->
+                <xs:element name="numeroIdentificacion" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- ─── Response ────────────────────────────────────────── -->
+    <xs:element name="consultaCUNResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <!-- La respuesta en crudo con formato String y CDATA -->
+                <xs:element name="respuesta" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Elemento raíz para el array de integración para forzar a JAXB a generarlo -->
+    <xs:element name="ArrayOfIntegracionCUN" type="tns:ArrayOfIntegracionCUN"/>
+
+    <!-- Array wrapper -->
+    <xs:complexType name="ArrayOfIntegracionCUN">
+        <xs:sequence>
+            <xs:element name="IntegracionCUN"
+                        type="tns:IntegracionCUN"
+                        minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Tipo que representa cada registro de PQR -->
+    <xs:complexType name="IntegracionCUN">
+        <xs:sequence>
+            <!-- Nombre(s) completo(s) del peticionario -->
+            <xs:element name="nombres"            type="xs:string"/>
+            <!-- Número de identificación -->
+            <xs:element name="identificacion"     type="xs:string"/>
+            <!-- Código Único Numérico de la PQR -->
+            <xs:element name="cun"                type="xs:string"/>
+            <!-- Fecha de radicación / asignación (yyyy-MM-dd) -->
+            <xs:element name="fechaAsignacion"    type="xs:string"/>
+            <!-- Clasificación: PETICION, QUEJA, RECURSO, RECLAMO -->
+            <xs:element name="tipoQueja"          type="xs:string"/>
+            <!-- Estado actual: PENDIENTE, EN_PROCESO, RESPONDIDA, CERRADA -->
+            <xs:element name="estadoTramite"      type="xs:string"/>
+            <!-- Fecha de respuesta oficial (vacío si aún no hay) -->
+            <xs:element name="fechaRespuesta"     type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

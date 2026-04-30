@@ -30,6 +30,9 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @Autowired
+    private co.com.fitel.common.security.SicIpFilter sicIpFilter;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -49,6 +52,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(sicIpFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -58,6 +62,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Permitir explícitamente pre-flight requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                
+                // SOAP Web Service (integración SIC) — sin autenticación JWT
+                .requestMatchers("/ws/**", "/api/ws/**").permitAll()
                 
                 // Endpoints Públicos (Login, Frontend público, Archivos)
                 .requestMatchers("/api/auth/admin/login").permitAll()

@@ -73,6 +73,7 @@ public class ApiPrefixRewriteFilter extends OncePerRequestFilter {
         if (path.startsWith("/api/") || path.equals("/api")) return false;
         if (path.startsWith("/uploads/")) return false;
         if (path.startsWith("/actuator/")) return false;
+        if (path.startsWith("/ws/") || path.equals("/ws")) return false;
         // Recursos estáticos de Spring Boot
         if (path.startsWith("/static/") || path.startsWith("/public/static/")) return false;
         // Llamadas de Next.js que podrían llegar al backend accidentalmente
