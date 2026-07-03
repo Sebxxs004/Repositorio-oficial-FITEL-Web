@@ -1,6 +1,10 @@
-# FITEL Web - Plataforma Oficial
+# FITEL Web — Official Platform
 
-Plataforma web oficial de FITEL, proveedora de servicios de Internet y Televisión en Bogotá.
+Full-stack web platform for FITEL, an ISP and TV provider in Bogotá, Colombia.
+Beyond a landing page — includes a PQRS complaint system integrated with 
+Colombia's SIC government API, an admin panel, and automated email notifications.
+
+🌐 **Live:** [fitelcolombia.com](https://fitelcolombia.com)
 
 ## 🏗️ Arquitectura
 
@@ -346,8 +350,3 @@ Desarrollado con principios SOLID y arquitectura modular para facilitar el mante
 ## 📞 Soporte
 
 Para soporte técnico, contactar al equipo de desarrollo de FITEL.
-
----
-
-**Versión**: 1.0.0  
-**Última actualización**: Enero 2026
