@@ -38,6 +38,23 @@ Cuando ejecutas `docker-compose up`, MariaDB:
    - NO ejecuta los scripts automáticamente (comportamiento por defecto de MariaDB)
    - El script `always-run.sql` se puede ejecutar manualmente para actualizar
 
+Si cambiaste `MYSQL_USER` o `MYSQL_PASSWORD` y luego ves un error de acceso denegado al conectar desde el backend, la causa más común es que el volumen `mariadb_data` conserva usuarios y permisos de una ejecución anterior.
+
+Para conservar los datos, no elimines el volumen. Corrige el usuario directamente sobre la base existente conectándote como root al contenedor y ejecutando:
+
+```bash
+docker exec -it fitel-mariadb mysql -uroot -prootpassword123
+```
+
+```sql
+CREATE USER IF NOT EXISTS 'fitel'@'%' IDENTIFIED BY 'fiteladmin123';
+ALTER USER 'fitel'@'%' IDENTIFIED BY 'fiteladmin123';
+GRANT ALL PRIVILEGES ON fitel_db.* TO 'fitel'@'%';
+FLUSH PRIVILEGES;
+```
+
+Luego reinicia el backend para que vuelva a tomar la conexión con las credenciales corregidas.
+
 ## Actualización Manual
 
 Si necesitas actualizar la base de datos después de cambios:

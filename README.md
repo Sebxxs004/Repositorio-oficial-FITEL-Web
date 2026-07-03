@@ -114,6 +114,23 @@ docker-compose up -d mariadb
 - **Usuario**: `fitel`
 - **Contraseña**: `fiteladmin123`
 
+Si aparece un error de acceso denegado para el usuario `fitel` desde Docker, normalmente significa que el volumen `mariadb_data` ya tiene una base inicializada con credenciales anteriores.
+
+Si necesitas conservar las tablas y los datos, no borres el volumen. En su lugar, entra a MariaDB como root y corrige el usuario dentro de la base existente:
+
+```bash
+docker exec -it fitel-mariadb mysql -uroot -prootpassword123
+```
+
+```sql
+CREATE USER IF NOT EXISTS 'fitel'@'%' IDENTIFIED BY 'fiteladmin123';
+ALTER USER 'fitel'@'%' IDENTIFIED BY 'fiteladmin123';
+GRANT ALL PRIVILEGES ON fitel_db.* TO 'fitel'@'%';
+FLUSH PRIVILEGES;
+```
+
+Después reinicia solo el backend con `docker-compose restart backend`.
+
 **Scripts SQL:**
 ```bash
 # Ejecutar todos los scripts

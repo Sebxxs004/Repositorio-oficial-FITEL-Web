@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
 
     try {
       // Llamar al endpoint de autenticación del backend
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api'
       const response = await fetch(`${apiUrl}/auth/admin/login`, {
         method: 'POST',
         headers: {
