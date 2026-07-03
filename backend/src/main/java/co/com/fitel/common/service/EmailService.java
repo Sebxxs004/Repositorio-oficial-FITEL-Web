@@ -678,7 +678,7 @@ public class EmailService {
                 customerPhone, customerDocumentType, customerDocumentNumber, customerAddress,
                 cun, typeSpanish, subject, description, radicationDate, maxResponseDate);
             
-            sendHtmlEmail(companyEmail, "Nueva PQR Recibida - CUN: " + cun, htmlContent);
+            sendHtmlEmail(companyEmail, "Nueva PQR Recibida - CUN: " + cun, htmlContent, NO_REPLY_FROM_EMAIL, NO_REPLY_FROM_NAME);
             log.info("Notificación de PQR enviada a la empresa: {}", companyEmail);
         } catch (RuntimeException e) {
             // Si el email está deshabilitado o no configurado, solo loguear el warning
