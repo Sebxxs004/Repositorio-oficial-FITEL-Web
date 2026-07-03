@@ -23,6 +23,8 @@ public class EmailService {
     
     private final EmailConfigRepository emailConfigRepository;
     private static final String COMPANY_NOTIFICATION_EMAIL = "atencion.usuarios@fitelcolombia.com";
+    private static final String NO_REPLY_FROM_EMAIL = "no-reply@fitelcolombia.com";
+    private static final String NO_REPLY_FROM_NAME = "FITEL";
     
     /**
      * Obtiene la configuración de email desde la base de datos
@@ -70,13 +72,12 @@ public class EmailService {
                                           String responseText,
                                           String attachmentAbsolutePath) {
         try {
-            EmailConfig config = getEmailConfig();
             JavaMailSender configuredSender = getConfiguredMailSender();
 
             MimeMessage message = configuredSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, attachmentAbsolutePath != null && !attachmentAbsolutePath.isBlank());
 
-            helper.setFrom(config.getEmail());
+            helper.setFrom(NO_REPLY_FROM_EMAIL, NO_REPLY_FROM_NAME);
             helper.setTo(to);
             helper.setSubject("Respuesta a su PQR - CUN: " + cun);
 
@@ -290,7 +291,7 @@ public class EmailService {
                 </html>
                 """.formatted(customerName, typeSpanish, cun, subject, statusSpanishOld, statusSpanishNew);
 
-            sendHtmlEmail(to, "Actualización del estado de su PQR - CUN: " + cun, html);
+            sendHtmlEmail(to, "Actualización del estado de su PQR - CUN: " + cun, html, NO_REPLY_FROM_EMAIL, NO_REPLY_FROM_NAME);
         } catch (Exception e) {
             log.error("Error enviando notificación de cambio de estado de PQR al cliente {}: {}", to, e.getMessage(), e);
             throw new RuntimeException("Error al enviar notificación de cambio de estado de PQR: " + e.getMessage(), e);
@@ -599,6 +600,13 @@ public class EmailService {
      * Envía un correo HTML
      */
     public void sendHtmlEmail(String to, String subject, String htmlContent) {
+        sendHtmlEmail(to, subject, htmlContent, null, null);
+    }
+
+    /**
+     * Envía un correo HTML usando un remitente explícito.
+     */
+    public void sendHtmlEmail(String to, String subject, String htmlContent, String fromEmail, String fromName) {
         try {
             JavaMailSender configuredSender = getConfiguredMailSender();
             EmailConfig config = getEmailConfig();
@@ -606,7 +614,15 @@ public class EmailService {
             MimeMessage message = configuredSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             
-            helper.setFrom(config.getEmail());
+            if (fromEmail != null && !fromEmail.isBlank()) {
+                if (fromName != null && !fromName.isBlank()) {
+                    helper.setFrom(fromEmail, fromName);
+                } else {
+                    helper.setFrom(fromEmail);
+                }
+            } else {
+                helper.setFrom(config.getEmail());
+            }
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlContent, true);
@@ -636,7 +652,7 @@ public class EmailService {
         String htmlContent = buildPQRConstancyEmail(customerName, cun, typeSpanish, subject, 
                                                     radicationDate, maxResponseDate, silenceText);
         
-        sendHtmlEmail(to, "Constancia de Radicación de PQR - FITEL", htmlContent);
+        sendHtmlEmail(to, "Constancia de Radicación de PQR - FITEL", htmlContent, NO_REPLY_FROM_EMAIL, NO_REPLY_FROM_NAME);
     }
     
     /**
