@@ -629,7 +629,7 @@ public class EmailService {
             
             configuredSender.send(message);
             log.info("Email HTML enviado exitosamente a: {}", to);
-        } catch (MessagingException e) {
+        } catch (MessagingException | java.io.UnsupportedEncodingException e) {
             log.error("Error enviando email HTML a {}: {}", to, e.getMessage(), e);
             throw new RuntimeException("Error al enviar email: " + e.getMessage(), e);
         }
