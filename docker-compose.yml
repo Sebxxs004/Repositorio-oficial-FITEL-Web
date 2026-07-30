@@ -40,6 +40,8 @@ services:
       MAIL_USERNAME: ${MAIL_USERNAME:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-zspgebdrjeoducpz}
       MAIL_FROM: ${MAIL_FROM:-}
+      FITEL_SIC_ALLOWED_IPS: ${FITEL_SIC_ALLOWED_IPS:-127.0.0.1}
+      FITEL_SIC_ALLOWED-IPS: ${FITEL_SIC_ALLOWED_IPS:-127.0.0.1}
     ports:
       - "8080:8080"
     depends_on:
