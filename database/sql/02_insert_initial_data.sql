@@ -48,7 +48,7 @@ VALUES
     ('business_hours', 'Lunes a Viernes: 8:00 AM - 8:00 PM', 'STRING', 'Horarios de atención', 'system'),
     ('pqr_enabled', 'true', 'BOOLEAN', 'Habilitar módulo PQR', 'system'),
     ('installation_request_enabled', 'true', 'BOOLEAN', 'Habilitar solicitudes de instalación', 'system'),
-    ('pqr_convenio_number', '12345', 'STRING', 'Número de convenio de la empresa para PQRs (SIC)', 'system')
+    ('pqr_convenio_number', '7456', 'STRING', 'Número de convenio de la empresa para PQRs (SIC)', 'system')
 ON DUPLICATE KEY UPDATE 
     config_value = VALUES(config_value),
     updated_at = CURRENT_TIMESTAMP;

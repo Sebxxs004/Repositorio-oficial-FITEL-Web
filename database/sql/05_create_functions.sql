@@ -44,11 +44,11 @@ BEGIN
     INTO sequence_num
     FROM pqr
     WHERE cun COLLATE utf8mb4_unicode_ci LIKE cun_pattern COLLATE utf8mb4_unicode_ci
-    AND LENGTH(cun) >= LENGTH(convenio_number) + 8  -- Mínimo: convenio + año (2) + secuencia (6)
-    AND cun COLLATE utf8mb4_unicode_ci REGEXP CONCAT('^', convenio_number COLLATE utf8mb4_unicode_ci, '[0-9]{2}[0-9]{6}$') COLLATE utf8mb4_unicode_ci;
+    AND LENGTH(cun) >= LENGTH(convenio_number) + 12  -- Mínimo: convenio + año (2) + secuencia (10)
+    AND cun COLLATE utf8mb4_unicode_ci REGEXP CONCAT('^', convenio_number COLLATE utf8mb4_unicode_ci, '[0-9]{2}[0-9]{10}$') COLLATE utf8mb4_unicode_ci;
     
-    -- Formato: Número de Convenio + Año (2 dígitos) + Secuencia (6 dígitos)
-    SET new_cun = CONCAT(convenio_number, year_code, LPAD(sequence_num, 6, '0'));
+    -- Formato: Número de Convenio + Año (2 dígitos) + Secuencia (10 dígitos)
+    SET new_cun = CONCAT(convenio_number, year_code, LPAD(sequence_num, 10, '0'));
     
     RETURN new_cun;
 END //
