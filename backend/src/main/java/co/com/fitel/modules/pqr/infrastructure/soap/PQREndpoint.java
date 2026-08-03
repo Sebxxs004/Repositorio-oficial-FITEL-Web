@@ -52,7 +52,7 @@ public class PQREndpoint {
         }
         
         String tipoId = request.getTipoIdentificacion() != null ? request.getTipoIdentificacion() : "";
-        String numeroId = request.getNumeroIdentificacion() != null ? request.getNumeroIdentificacion() : "";
+        String numeroId = String.valueOf(request.getNumeroIdentificacion());
         
         // Consultar el servicio
         List<IntegracionCUN> resultados = pqrSoapService.consultarTramites(aa, cr, tipoId, numeroId);

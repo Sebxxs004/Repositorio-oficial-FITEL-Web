@@ -25,20 +25,33 @@ public class PQRToSicXmlMapper {
         
         // Mapeo CodigoUnicoNumerico
         CodigoUnicoNumerico codigoUnicoNumerico = factory.createCodigoUnicoNumerico();
-        codigoUnicoNumerico.setIdentificadorOperador("7456");
+        codigoUnicoNumerico.setIdentificadorOperador(7456);
         String cun = pqr.getCun();
-        if (cun != null && cun.length() >= 6) {
-            // Últimos 6 dígitos
-            codigoUnicoNumerico.setConsecutivoRadCun(cun.substring(cun.length() - 6));
-            // Los 2 anteriores a los últimos 6
-            if (cun.length() >= 8) {
-                codigoUnicoNumerico.setAnoRadicacionCun(cun.substring(cun.length() - 8, cun.length() - 6));
-            } else {
-                codigoUnicoNumerico.setAnoRadicacionCun("00");
+        if (cun != null) {
+            try {
+                if (cun.length() >= 12) {
+                    // Estructura nueva: secuencia de 10 dígitos
+                    codigoUnicoNumerico.setConsecutivoRadCun(Integer.parseInt(cun.substring(cun.length() - 10)));
+                    codigoUnicoNumerico.setAnoRadicacionCun(Integer.parseInt(cun.substring(cun.length() - 12, cun.length() - 10)));
+                } else if (cun.length() >= 6) {
+                    // Estructura antigua: secuencia de 6 dígitos
+                    codigoUnicoNumerico.setConsecutivoRadCun(Integer.parseInt(cun.substring(cun.length() - 6)));
+                    if (cun.length() >= 8) {
+                        codigoUnicoNumerico.setAnoRadicacionCun(Integer.parseInt(cun.substring(cun.length() - 8, cun.length() - 6)));
+                    } else {
+                        codigoUnicoNumerico.setAnoRadicacionCun(0);
+                    }
+                } else {
+                    codigoUnicoNumerico.setAnoRadicacionCun(0);
+                    codigoUnicoNumerico.setConsecutivoRadCun(0);
+                }
+            } catch (NumberFormatException e) {
+                codigoUnicoNumerico.setAnoRadicacionCun(0);
+                codigoUnicoNumerico.setConsecutivoRadCun(0);
             }
         } else {
-            codigoUnicoNumerico.setAnoRadicacionCun("00");
-            codigoUnicoNumerico.setConsecutivoRadCun("000000");
+            codigoUnicoNumerico.setAnoRadicacionCun(0);
+            codigoUnicoNumerico.setConsecutivoRadCun(0);
         }
         integracionCUN.setCodigoUnicoNumerico(codigoUnicoNumerico);
         

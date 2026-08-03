@@ -20,9 +20,9 @@
                 <!-- Consecutivo de radicación -->
                 <xs:element name="CR"                   type="xs:string"/>
                 <!-- Tipo de documento: CC, CE, NIT, TI, PP, etc. -->
-                <xs:element name="tipoIdentificacion"   type="xs:string"/>
+                <xs:element name="tipoIdentificacion"   type="xs:string" default="%%"/>
                 <!-- Número de documento del peticionario -->
-                <xs:element name="numeroIdentificacion" type="xs:string"/>
+                <xs:element name="numeroIdentificacion" type="xs:int" default="0"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -67,9 +67,9 @@
 
     <xs:complexType name="CodigoUnicoNumerico">
         <xs:sequence>
-            <xs:element name="identificadorOperador" type="xs:string"/>
-            <xs:element name="anoRadicacionCun" type="xs:string"/>
-            <xs:element name="ConsecutivoRadCun" type="xs:string"/>
+            <xs:element name="identificadorOperador" type="xs:int" default="0"/>
+            <xs:element name="anoRadicacionCun" type="xs:int" default="0"/>
+            <xs:element name="ConsecutivoRadCun" type="xs:int" default="0"/>
         </xs:sequence>
     </xs:complexType>
 
