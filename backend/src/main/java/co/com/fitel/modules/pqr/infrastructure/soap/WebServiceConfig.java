@@ -70,6 +70,7 @@ public class WebServiceConfig extends WsConfigurerAdapter {
         definition.setLocationUri("/ws");
         definition.setTargetNamespace(NAMESPACE_URI);
         definition.setSchema(pqrConsultaSchema);
+        definition.setRequestSuffix("");
         return definition;
     }
 
