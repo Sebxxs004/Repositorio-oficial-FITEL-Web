@@ -28,7 +28,7 @@ import java.util.List;
 @Configuration
 public class WebServiceConfig extends WsConfigurerAdapter {
 
-    private static final String NAMESPACE_URI = "https://WSConsultaOperador/";
+    private static final String NAMESPACE_URI = "http://tempuri.org/";
     
     private final CdataResponseInterceptor cdataResponseInterceptor;
 
