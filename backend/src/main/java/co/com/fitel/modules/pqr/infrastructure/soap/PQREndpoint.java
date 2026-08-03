@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PQREndpoint {
 
-    private static final String NAMESPACE_URI = "http://tempuri.org/";
+    private static final String NAMESPACE_URI = "http://WSConsultaOperador/";
     
     private final PQRSoapService pqrSoapService;
     private final XmlStringConverter xmlStringConverter;

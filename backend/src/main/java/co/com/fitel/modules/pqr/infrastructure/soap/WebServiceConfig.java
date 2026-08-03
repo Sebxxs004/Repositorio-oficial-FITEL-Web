@@ -29,7 +29,7 @@ import java.util.List;
 @Configuration
 public class WebServiceConfig extends WsConfigurerAdapter {
 
-    private static final String NAMESPACE_URI = "http://tempuri.org/";
+    private static final String NAMESPACE_URI = "http://WSConsultaOperador/";
     
     private final CdataResponseInterceptor cdataResponseInterceptor;
 
@@ -52,7 +52,7 @@ public class WebServiceConfig extends WsConfigurerAdapter {
 
         MessageDispatcherServlet servlet = new MessageDispatcherServlet();
         servlet.setApplicationContext(applicationContext);
-        servlet.setTransformWsdlLocations(true);
+        servlet.setTransformWsdlLocations(false);
         return new ServletRegistrationBean<>(servlet, "/ws/*");
     }
 

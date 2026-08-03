@@ -1,44 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
-                  xmlns:tns="http://tempuri.org/" 
+                  xmlns:tns="http://WSConsultaOperador/" 
                   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
                   xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
                   name="WSConsultaOperador" 
-                  targetNamespace="http://tempuri.org/">
+                  targetNamespace="http://WSConsultaOperador/">
     <wsdl:types>
         <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" 
-                    targetNamespace="http://tempuri.org/" 
+                    targetNamespace="http://WSConsultaOperador/" 
                     elementFormDefault="qualified">
             
-            <xsd:element name="consultaCUN">
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="identificadorOperador" type="xsd:int" default="0"/>
-                        <xsd:element name="anoRadicacionCun"      type="xsd:int" default="0"/>
-                        <xsd:element name="ConsecutivoRadCun"     type="xsd:int" default="0"/>
-                        <xsd:element name="tipoIdentificacion"    type="xsd:string" default="%%"/>
-                        <xsd:element name="numeroIdentificacion"  type="xsd:int" default="0"/>
-                    </xsd:sequence>
-                </xsd:complexType>
-            </xsd:element>
+            <xsd:complexType name="consultaCUN">
+                <xsd:sequence>
+                    <xsd:element name="identificadorOperador" type="xsd:int" default="0"/>
+                    <xsd:element name="anoRadicacionCun"      type="xsd:int" default="0"/>
+                    <xsd:element name="ConsecutivoRadCun"     type="xsd:int" default="0"/>
+                    <xsd:element name="tipoIdentificacion"    type="xsd:string" default="%%"/>
+                    <xsd:element name="numeroIdentificacion"  type="xsd:int" default="0"/>
+                </xsd:sequence>
+            </xsd:complexType>
             
-            <xsd:element name="consultaCUNResponse">
-                <xsd:complexType>
-                    <xsd:sequence>
-                        <xsd:element name="respuesta" type="xsd:string"/>
-                    </xsd:sequence>
-                </xsd:complexType>
-            </xsd:element>
+            <xsd:complexType name="consultaCUNResponse">
+                <xsd:sequence>
+                    <xsd:element name="respuesta" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
             
+            <!-- Elementos para compatibilidad JAXB -->
+            <xsd:element name="consultaCUN" type="tns:consultaCUN"/>
+            <xsd:element name="consultaCUNResponse" type="tns:consultaCUNResponse"/>
         </xsd:schema>
     </wsdl:types>
     
     <wsdl:message name="consultaCUNRequest">
-        <wsdl:part element="tns:consultaCUN" name="parameters"/>
+        <wsdl:part name="parameters" type="tns:consultaCUN"/>
     </wsdl:message>
     
     <wsdl:message name="consultaCUNResponse">
-        <wsdl:part element="tns:consultaCUNResponse" name="parameters"/>
+        <wsdl:part name="parameters" type="tns:consultaCUNResponse"/>
     </wsdl:message>
     
     <wsdl:portType name="WSConsultaOperador">
@@ -49,14 +48,14 @@
     </wsdl:portType>
     
     <wsdl:binding name="WSConsultaOperadorSOAP" type="tns:WSConsultaOperador">
-        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
         <wsdl:operation name="consultaCUN">
-            <soap:operation soapAction="http://tempuri.org/consultaCUN"/>
+            <soap:operation soapAction="http://WSConsultaOperador/consultaCUN"/>
             <wsdl:input>
-                <soap:body use="literal"/>
+                <soap:body use="literal" namespace="http://WSConsultaOperador/"/>
             </wsdl:input>
             <wsdl:output>
-                <soap:body use="literal"/>
+                <soap:body use="literal" namespace="http://WSConsultaOperador/"/>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
