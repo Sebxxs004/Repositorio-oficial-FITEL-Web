@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns:tns="http://fitel.com.co/pqr/soap"
-           targetNamespace="http://fitel.com.co/pqr/soap"
+           xmlns:tns="https://WSConsultaOperador/"
+           targetNamespace="https://WSConsultaOperador/"
            elementFormDefault="qualified">
 
     <!-- ====================================================== -->
@@ -10,19 +10,14 @@
     <!-- ====================================================== -->
 
     <!-- ─── Request ─────────────────────────────────────────── -->
-    <xs:element name="consultaCUNRequest">
+    <xs:element name="consultaCUN">
         <xs:complexType>
             <xs:sequence>
-                <!-- Identificador del Operador asignado por la SIC -->
-                <xs:element name="IO"                   type="xs:string"/>
-                <!-- Año de asignación (AAAA) -->
-                <xs:element name="AA"                   type="xs:string"/>
-                <!-- Consecutivo de radicación -->
-                <xs:element name="CR"                   type="xs:string"/>
-                <!-- Tipo de documento: CC, CE, NIT, TI, PP, etc. -->
-                <xs:element name="tipoIdentificacion"   type="xs:string" default="%%"/>
-                <!-- Número de documento del peticionario -->
-                <xs:element name="numeroIdentificacion" type="xs:int" default="0"/>
+                <xs:element name="identificadorOperador" type="xs:int" default="0"/>
+                <xs:element name="anoRadicacionCun"      type="xs:int" default="0"/>
+                <xs:element name="ConsecutivoRadCun"     type="xs:int" default="0"/>
+                <xs:element name="tipoIdentificacion"    type="xs:string" default="%%"/>
+                <xs:element name="numeroIdentificacion"  type="xs:int" default="0"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>

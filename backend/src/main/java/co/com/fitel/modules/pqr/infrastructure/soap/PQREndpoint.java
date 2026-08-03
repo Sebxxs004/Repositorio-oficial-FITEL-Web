@@ -2,7 +2,7 @@ package co.com.fitel.modules.pqr.infrastructure.soap;
 
 import co.com.fitel.modules.pqr.application.service.PQRSoapService;
 import co.com.fitel.modules.pqr.infrastructure.soap.gen.ArrayOfIntegracionCUN;
-import co.com.fitel.modules.pqr.infrastructure.soap.gen.ConsultaCUNRequest;
+import co.com.fitel.modules.pqr.infrastructure.soap.gen.ConsultaCUN;
 import co.com.fitel.modules.pqr.infrastructure.soap.gen.ConsultaCUNResponse;
 import co.com.fitel.modules.pqr.infrastructure.soap.gen.IntegracionCUN;
 import co.com.fitel.modules.pqr.infrastructure.soap.gen.ObjectFactory;
@@ -20,36 +20,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PQREndpoint {
 
-    private static final String NAMESPACE_URI = "http://fitel.com.co/pqr/soap";
+    private static final String NAMESPACE_URI = "https://WSConsultaOperador/";
     
     private final PQRSoapService pqrSoapService;
     private final XmlStringConverter xmlStringConverter;
     private final ObjectFactory objectFactory = new ObjectFactory();
 
-    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "consultaCUNRequest")
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "consultaCUN")
     @ResponsePayload
-    public ConsultaCUNResponse consultarTramites(@RequestPayload ConsultaCUNRequest request) {
-        log.info("Recibida petición SOAP consultaCUNRequest: AA={}, CR={}, IO={}, TipoId={}, NumId={}", 
-                request.getAA(), request.getCR(), request.getIO(), request.getTipoIdentificacion(), request.getNumeroIdentificacion());
+    public ConsultaCUNResponse consultarTramites(@RequestPayload ConsultaCUN request) {
+        log.info("Recibida petición SOAP consultaCUN: anoRadicacionCun={}, ConsecutivoRadCun={}, identificadorOperador={}, TipoId={}, NumId={}", 
+                request.getAnoRadicacionCun(), request.getConsecutivoRadCun(), request.getIdentificadorOperador(), request.getTipoIdentificacion(), request.getNumeroIdentificacion());
         
-        // Extraer parámetros (si vienen nulos, los tratamos como 0 o vacío)
-        Integer aa = 0;
-        if (request.getAA() != null && !request.getAA().isBlank()) {
-            try {
-                aa = Integer.parseInt(request.getAA());
-            } catch (NumberFormatException e) {
-                log.warn("El parámetro AA no es un número válido: {}", request.getAA());
-            }
-        }
-        
-        Integer cr = 0;
-        if (request.getCR() != null && !request.getCR().isBlank()) {
-            try {
-                cr = Integer.parseInt(request.getCR());
-            } catch (NumberFormatException e) {
-                log.warn("El parámetro CR no es un número válido: {}", request.getCR());
-            }
-        }
+        // Extraer parámetros (ya vienen como int por el nuevo esquema)
+        Integer aa = request.getAnoRadicacionCun();
+        Integer cr = request.getConsecutivoRadCun();
         
         String tipoId = request.getTipoIdentificacion() != null ? request.getTipoIdentificacion() : "";
         String numeroId = String.valueOf(request.getNumeroIdentificacion());
