@@ -51,9 +51,9 @@ class PQREndpointIntegrationTest {
         integracion.setNombreOperador("FITEL COLOMBIA");
 
         CodigoUnicoNumerico cod = factory.createCodigoUnicoNumerico();
-        cod.setIdentificadorOperador(operadorId);
-        cod.setAnoRadicacionCun(ano);
-        cod.setConsecutivoRadCun(consecutivo);
+        cod.setIdentificadorOperador(Integer.parseInt(operadorId));
+        cod.setAnoRadicacionCun(Integer.parseInt(ano));
+        cod.setConsecutivoRadCun(Integer.parseInt(consecutivo));
         integracion.setCodigoUnicoNumerico(cod);
 
         NomPersona nomPersona = factory.createNomPersona();
