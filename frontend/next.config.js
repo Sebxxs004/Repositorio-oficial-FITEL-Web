@@ -11,12 +11,7 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api',
     ALLOWED_ADMIN_IPS: process.env.ALLOWED_ADMIN_IPS || '', // IPs permitidas para panel admin
-    NEXT_PUBLIC_TURNSTILE_SITE_KEY:
-      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY &&
-      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY !== 'undefined' &&
-      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY !== ''
-        ? process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
-        : '0x4AAAAAAAEGabvaYEAnQAGre',
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: '0x4AAAAAAAEGabvaYEAnQAGre',
   },
   async rewrites() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
