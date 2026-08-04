@@ -34,20 +34,14 @@ public interface PQRRepository extends JpaRepository<PQR, Long> {
            "GROUP BY DATE(created_at) ORDER BY DATE(created_at)", nativeQuery = true)
     List<Object[]> countByDateGrouped(@Param("startDate") java.sql.Timestamp startDate, @Param("endDate") java.sql.Timestamp endDate);
 
-    default Optional<PQR> findByCunParts(Integer anio, Integer consecutivo) {
-        String pattern1 = "%" + (anio % 100) + String.format("%010d", consecutivo);
-        String pattern2 = "%" + (anio % 100) + String.format("%06d", consecutivo);
-        return findByCunPatterns(pattern1, pattern2);
-    }
-
     @Query(value = "SELECT p.*, " +
            "p.customer_name as nombres, " +
            "'' as apellidos, " +
            "p.customer_name as razon_social, " +
            "CASE WHEN p.customer_document_type = 'NIT' THEN 'JURIDICA' ELSE 'NATURAL' END as tipo_persona " +
-           "FROM pqr p WHERE p.cun LIKE :pattern1 OR p.cun LIKE :pattern2 LIMIT 1", 
+           "FROM pqr p WHERE (p.cun COLLATE utf8mb4_general_ci LIKE CONCAT('%', MOD(:anio, 100), LPAD(CONVERT(:consecutivo, CHAR), 10, '0')) COLLATE utf8mb4_general_ci) OR (p.cun COLLATE utf8mb4_general_ci LIKE CONCAT('%', MOD(:anio, 100), LPAD(CONVERT(:consecutivo, CHAR), 6, '0')) COLLATE utf8mb4_general_ci) LIMIT 1", 
            nativeQuery = true)
-    Optional<PQR> findByCunPatterns(@Param("pattern1") String pattern1, @Param("pattern2") String pattern2);
+    Optional<PQR> findByCunParts(@Param("anio") Integer anio, @Param("consecutivo") Integer consecutivo);
 
     @Query(value = "SELECT p.*, " +
            "p.customer_name as nombres, " +

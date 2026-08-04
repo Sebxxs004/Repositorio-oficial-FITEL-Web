@@ -58,15 +58,6 @@ export function Contact({ contact: contactProp }: ContactProps = {}) {
       (window as any).onTurnstileExpired = () => {
         setCaptchaToken(null)
       }
-
-      // Inicializar Turnstile implícitamente en navegación SPA
-      if ((window as any).turnstile) {
-        try {
-          (window as any).turnstile.implicitRender()
-        } catch (e) {
-          console.warn('Error rendering Turnstile implicitly:', e)
-        }
-      }
     }
   }, [])
 

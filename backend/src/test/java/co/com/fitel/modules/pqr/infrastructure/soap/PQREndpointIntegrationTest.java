@@ -28,7 +28,6 @@ import static org.springframework.ws.test.server.ResponseMatchers.noFault;
 import static org.springframework.ws.test.server.ResponseMatchers.xpath;
 
 @WebServiceServerTest(endpoints = PQREndpoint.class)
-@org.springframework.context.annotation.Import(XmlStringConverter.class)
 class PQREndpointIntegrationTest {
 
     @Autowired
@@ -104,7 +103,7 @@ class PQREndpointIntegrationTest {
 
         mockClient.sendRequest(withPayload(new StringSource(requestXml)))
                 .andExpect(noFault())
-                .andExpect(xpath("/wsc:consultaCUNResponse/wsc:respuesta",
+                .andExpect(xpath("/wsc:consultaCUNResponse/parameters/respuesta",
                                  Collections.singletonMap("wsc", "http://WSConsultaOperador/")).exists());
     }
 
@@ -135,7 +134,7 @@ class PQREndpointIntegrationTest {
 
         mockClient.sendRequest(withPayload(new StringSource(requestXml)))
                 .andExpect(noFault())
-                .andExpect(xpath("/wsc:consultaCUNResponse/wsc:respuesta",
+                .andExpect(xpath("/wsc:consultaCUNResponse/parameters/respuesta",
                                  Collections.singletonMap("wsc", "http://WSConsultaOperador/")).exists());
     }
 
@@ -157,7 +156,7 @@ class PQREndpointIntegrationTest {
 
         mockClient.sendRequest(withPayload(new StringSource(requestXml)))
                 .andExpect(noFault())
-                .andExpect(xpath("/wsc:consultaCUNResponse/wsc:respuesta",
+                .andExpect(xpath("/wsc:consultaCUNResponse/parameters/respuesta",
                                  Collections.singletonMap("wsc", "http://WSConsultaOperador/")).exists());
     }
 }

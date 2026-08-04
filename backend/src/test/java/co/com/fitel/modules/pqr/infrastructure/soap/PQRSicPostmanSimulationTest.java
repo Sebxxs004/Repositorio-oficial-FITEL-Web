@@ -29,18 +29,16 @@ public class PQRSicPostmanSimulationTest {
     @Test
     public void givenValidIp_whenPostmanSimulation_thenReturns200AndValidatesPayload() {
         String xmlPayload = """
-                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://WSConsultaOperador/">
+                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://fitel.com.co/pqr/soap">
                    <soapenv:Header/>
                    <soapenv:Body>
-                      <soap:consultaCUN>
-                         <parameters>
-                            <identificadorOperador>9999</identificadorOperador>
-                            <anoRadicacionCun>2026</anoRadicacionCun>
-                            <ConsecutivoRadCun>12345</ConsecutivoRadCun>
-                            <tipoIdentificacion></tipoIdentificacion>
-                            <numeroIdentificacion></numeroIdentificacion>
-                         </parameters>
-                      </soap:consultaCUN>
+                      <soap:consultaCUNRequest>
+                         <soap:IO>9999</soap:IO>
+                         <soap:AA>2026</soap:AA>
+                         <soap:CR>12345</soap:CR>
+                         <soap:tipoIdentificacion></soap:tipoIdentificacion>
+                         <soap:numeroIdentificacion></soap:numeroIdentificacion>
+                      </soap:consultaCUNRequest>
                    </soapenv:Body>
                 </soapenv:Envelope>
                 """;
@@ -52,13 +50,13 @@ public class PQRSicPostmanSimulationTest {
 
         HttpEntity<String> request = new HttpEntity<>(xmlPayload, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange("/ws/", HttpMethod.POST, request, String.class);
+        ResponseEntity<String> response = restTemplate.exchange("/ws", HttpMethod.POST, request, String.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "El HTTP Status debe ser 200 OK");
         
         String body = response.getBody();
         assertTrue(body != null, "El body no debe ser nulo");
-        assertTrue(body.contains("respuesta"), "El body debe contener la etiqueta de respuesta");
+        assertTrue(body.contains("<ns2:respuesta>"), "El body debe contener la etiqueta <ns2:respuesta>");
         assertTrue(body.contains("<![CDATA["), "Dentro de la respuesta debe existir el texto <![CDATA[");
         assertTrue(body.contains("ArrayOfIntegracionCUN"), "Dentro de la respuesta debe existir <tns:ArrayOfIntegracionCUN> o equivalente");
     }
@@ -66,18 +64,16 @@ public class PQRSicPostmanSimulationTest {
     @Test
     public void givenInvalidIp_whenPostmanSimulation_thenReturns403Forbidden() {
         String xmlPayload = """
-                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://WSConsultaOperador/">
+                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://fitel.com.co/pqr/soap">
                    <soapenv:Header/>
                    <soapenv:Body>
-                      <soap:consultaCUN>
-                         <parameters>
-                            <identificadorOperador>9999</identificadorOperador>
-                            <anoRadicacionCun>2026</anoRadicacionCun>
-                            <ConsecutivoRadCun>12345</ConsecutivoRadCun>
-                            <tipoIdentificacion></tipoIdentificacion>
-                            <numeroIdentificacion></numeroIdentificacion>
-                         </parameters>
-                      </soap:consultaCUN>
+                      <soap:consultaCUNRequest>
+                         <soap:IO>9999</soap:IO>
+                         <soap:AA>2026</soap:AA>
+                         <soap:CR>12345</soap:CR>
+                         <soap:tipoIdentificacion></soap:tipoIdentificacion>
+                         <soap:numeroIdentificacion></soap:numeroIdentificacion>
+                      </soap:consultaCUNRequest>
                    </soapenv:Body>
                 </soapenv:Envelope>
                 """;
@@ -89,7 +85,7 @@ public class PQRSicPostmanSimulationTest {
 
         HttpEntity<String> request = new HttpEntity<>(xmlPayload, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange("/ws/", HttpMethod.POST, request, String.class);
+        ResponseEntity<String> response = restTemplate.exchange("/ws", HttpMethod.POST, request, String.class);
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode(), "El HTTP Status debe ser 403 Forbidden para IP no autorizada");
     }

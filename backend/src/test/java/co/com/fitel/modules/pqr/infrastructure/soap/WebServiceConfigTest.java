@@ -39,17 +39,17 @@ class WebServiceConfigTest {
                 "Debe contener la raíz <wsdl:definitions>");
 
         // Verificar que el namespace del servicio está presente
-        assertTrue(body.contains("http://WSConsultaOperador/"),
+        assertTrue(body.contains("http://fitel.com.co/pqr/soap"),
                 "Debe contener el targetNamespace del servicio");
 
         // Verificar que los elementos del request/response están definidos
-        assertTrue(body.contains("consultaCUNRequest") || body.contains("consultaCUN"),
+        assertTrue(body.contains("consultaCUNRequest"),
                 "Debe contener el elemento consultaCUNRequest");
         assertTrue(body.contains("consultaCUNResponse"),
                 "Debe contener el elemento consultaCUNResponse");
 
         // Verificar el port type del servicio
-        assertTrue(body.contains("WSConsultaOperadorSOAP") || body.contains("WSConsultaOperador"),
-                "Debe contener el portType WSConsultaOperador");
+        assertTrue(body.contains("WSConsultaOperadorPort"),
+                "Debe contener el portType WSConsultaOperadorPort");
     }
 }

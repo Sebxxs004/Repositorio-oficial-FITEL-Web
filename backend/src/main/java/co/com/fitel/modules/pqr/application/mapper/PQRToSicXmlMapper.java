@@ -29,16 +29,12 @@ public class PQRToSicXmlMapper {
         String cun = pqr.getCun();
         if (cun != null && !cun.isBlank()) {
             try {
-                if (cun.length() >= 16) {
-                    // Estructura nueva (16 dígitos): secuencia de 10 dígitos (p. ej. 7456260000000001)
+                if (cun.length() >= 12) {
+                    // Estructura nueva: secuencia de 10 dígitos (p. ej. 7456260000000001)
                     codigoUnicoNumerico.setConsecutivoRadCun(Integer.parseInt(cun.substring(cun.length() - 10)));
                     codigoUnicoNumerico.setAnoRadicacionCun(Integer.parseInt(cun.substring(cun.length() - 12, cun.length() - 10)));
-                } else if (cun.length() >= 12) {
-                    // Estructura antigua estándar (12 dígitos): 4 de operador, 2 de año, 6 de consecutivo
-                    codigoUnicoNumerico.setConsecutivoRadCun(Integer.parseInt(cun.substring(cun.length() - 6)));
-                    codigoUnicoNumerico.setAnoRadicacionCun(Integer.parseInt(cun.substring(cun.length() - 8, cun.length() - 6)));
                 } else if (cun.length() >= 6) {
-                    // Estructura corta / simplificada
+                    // Estructura antigua: secuencia de 6 dígitos
                     codigoUnicoNumerico.setConsecutivoRadCun(Integer.parseInt(cun.substring(cun.length() - 6)));
                     if (cun.length() >= 8) {
                         codigoUnicoNumerico.setAnoRadicacionCun(Integer.parseInt(cun.substring(cun.length() - 8, cun.length() - 6)));
