@@ -47,8 +47,10 @@ public class PQREndpoint {
         ConsultaCUNResponse response = objectFactory.createConsultaCUNResponse();
         ArrayOfIntegracionCUN array = objectFactory.createArrayOfIntegracionCUN();
         
-        if (resultados != null && !resultados.isEmpty()) {
-            array.getIntegracionCUN().addAll(resultados);
+        if (resultados == null || resultados.isEmpty()) {
+            String emptyCdata = " \t\t\t\n\t\t\t<tns:ArrayOfIntegracionCUN xmlns:tns=\"http://ws.wso2.org/dataservice\" /> \n\t\t";
+            response.setRespuesta("<![CDATA[" + emptyCdata + "]]>");
+            return response;
         }
         
         try {
@@ -58,7 +60,7 @@ public class PQREndpoint {
             response.setRespuesta(cdataResponse);
         } catch (Exception e) {
             log.error("Error al convertir la respuesta a XML String", e);
-            response.setRespuesta("<![CDATA[]]>");
+            response.setRespuesta("<![CDATA[ \t\t\t\n\t\t\t<tns:ArrayOfIntegracionCUN xmlns:tns=\"http://ws.wso2.org/dataservice\" /> \n\t\t]]>");
         }
         
         return response;

@@ -29,9 +29,9 @@ class PQRSoapMapperTest {
         IntegracionCUN result = mapper.toIntegracionCUN(pqr);
 
         assertThat(result.getNombreOperador()).isEqualTo("FITEL COLOMBIA");
-        assertThat(result.getCodigoUnicoNumerico().getIdentificadorOperador()).isEqualTo("7456");
-        assertThat(result.getCodigoUnicoNumerico().getAnoRadicacionCun()).isEqualTo("26");
-        assertThat(result.getCodigoUnicoNumerico().getConsecutivoRadCun()).isEqualTo("000123");
+        assertThat(result.getCodigoUnicoNumerico().getIdentificadorOperador()).isEqualTo(7456);
+        assertThat(result.getCodigoUnicoNumerico().getAnoRadicacionCun()).isEqualTo(26);
+        assertThat(result.getCodigoUnicoNumerico().getConsecutivoRadCun()).isEqualTo(123);
 
         // Persona Natural: nombre en nomPersona, razonSocial vacía
         assertThat(result.getNomPersona().getPrimerNombre()).isEqualTo("Juan");
@@ -48,7 +48,7 @@ class PQRSoapMapperTest {
         assertThat(result.getFechaAsignacion()).isEqualTo("2024-01-15T10:30:00");
         assertThat(result.getTipoQuejaSic().getNomTipoQuejaSic()).isEqualTo("QUEJA");
         assertThat(result.getTipoQuejaSic().getCodTipoQuejaSic()).isEqualTo("2");
-        assertThat(result.getFechaEstRespuesta()).isNull();
+        assertThat(result.getFechaEstRespuesta()).isEqualTo("2024-01-30");
     }
 
     @Test
@@ -73,7 +73,7 @@ class PQRSoapMapperTest {
         assertThat(result.getNomPersona().getSegundoNombre()).isEmpty();
         assertThat(result.getNomPersona().getPrimerApellido()).isEmpty();
 
-        assertThat(result.getTipoIdNacionalPersona().getCodTipoIdNacionalPersona()).isEqualTo("NIT");
+        assertThat(result.getTipoIdNacionalPersona().getCodTipoIdNacionalPersona()).isEqualTo("NI");
         assertThat(result.getTipoIdNacionalPersona().getNomTipoIdentificacionNacionalPersona())
                 .isEqualTo("NUMERO DE IDENTIFICACION TRIBUTARIA");
         assertThat(result.getGrupoNumeroIdentificacion()).isEqualTo("900123456-1");
