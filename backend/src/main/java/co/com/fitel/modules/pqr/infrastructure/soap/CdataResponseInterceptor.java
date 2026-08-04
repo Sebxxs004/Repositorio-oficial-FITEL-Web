@@ -38,15 +38,33 @@ public class CdataResponseInterceptor implements EndpointInterceptor {
                     rawXml = textContent.substring(9, textContent.length() - 3);
                 }
 
-                // Limpiar el nodo actual para quitar el texto escapado (TextNode)
-                while (respuestaNode.hasChildNodes()) {
-                    respuestaNode.removeChild(respuestaNode.getFirstChild());
-                }
+                // Obtener el nodo padre (consultaCUNResponse)
+                Node parentNode = respuestaNode.getParentNode();
+                
+                // Remover el nodo de respuesta antiguo del padre
+                parentNode.removeChild(respuestaNode);
 
-                // Crear un verdadero CDATASection en el DOM de SAAJ para que no sea escapado
+                // Crear los nuevos elementos con la estructura y namespaces exactos requeridos
                 Document doc = soapMessage.getSOAPPart().getEnvelope().getOwnerDocument();
+                
+                // 1. Crear el elemento <parameters> con sus atributos xsi:type
+                org.w3c.dom.Element parametersElem = doc.createElement("parameters");
+                parametersElem.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+                parametersElem.setAttribute("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
+                parametersElem.setAttribute("xmlns:tns", "http://WSConsultaOperador/");
+                parametersElem.setAttribute("xsi:type", "tns:consultaCUNResponse");
+
+                // 2. Crear el elemento <respuesta> con xsi:type="xsd:string"
+                org.w3c.dom.Element respuestaElem = doc.createElement("respuesta");
+                respuestaElem.setAttribute("xsi:type", "xsd:string");
+
+                // 3. Crear el CDATA con el XML interno
                 CDATASection cdataSection = doc.createCDATASection(rawXml != null ? rawXml : "");
-                respuestaNode.appendChild(cdataSection);
+                respuestaElem.appendChild(cdataSection);
+
+                // 4. Armar el árbol DOM
+                parametersElem.appendChild(respuestaElem);
+                parentNode.appendChild(parametersElem);
             }
         }
         return true;
