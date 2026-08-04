@@ -461,7 +461,13 @@ export function Contact({ contact: contactProp }: ContactProps = {}) {
               <div className="flex justify-center py-2">
                 <div
                   className="cf-turnstile"
-                  data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAAEGabvaYEAnQAGre"}
+                  data-sitekey={
+                    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY &&
+                    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY !== 'undefined' &&
+                    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY !== ''
+                      ? process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+                      : "0x4AAAAAAAEGabvaYEAnQAGre"
+                  }
                   data-callback="onTurnstileSuccess"
                   data-expired-callback="onTurnstileExpired"
                 ></div>
