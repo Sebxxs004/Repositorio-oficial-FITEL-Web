@@ -96,15 +96,18 @@ public class PQRToSicXmlMapper {
         
         // Mapeo TipoIdNacionalPersona
         TipoIdNacionalPersona tipoIdNacionalPersona = factory.createTipoIdNacionalPersona();
-        tipoIdNacionalPersona.setCodTipoIdNacionalPersona(tipoDoc);
         if ("NIT".equals(tipoDoc)) {
+            tipoIdNacionalPersona.setCodTipoIdNacionalPersona("NI");
             tipoIdNacionalPersona.setNomTipoIdentificacionNacionalPersona("NUMERO DE IDENTIFICACION TRIBUTARIA");
-        } else if ("CC".equals(tipoDoc)) {
-            tipoIdNacionalPersona.setNomTipoIdentificacionNacionalPersona("CEDULA DE CIUDADANIA");
-        } else if ("CE".equals(tipoDoc)) {
-            tipoIdNacionalPersona.setNomTipoIdentificacionNacionalPersona("CEDULA DE EXTRANJERIA");
         } else {
-            tipoIdNacionalPersona.setNomTipoIdentificacionNacionalPersona("OTRO");
+            tipoIdNacionalPersona.setCodTipoIdNacionalPersona(tipoDoc);
+            if ("CC".equals(tipoDoc)) {
+                tipoIdNacionalPersona.setNomTipoIdentificacionNacionalPersona("CEDULA DE CIUDADANIA");
+            } else if ("CE".equals(tipoDoc)) {
+                tipoIdNacionalPersona.setNomTipoIdentificacionNacionalPersona("CEDULA DE EXTRANJERIA");
+            } else {
+                tipoIdNacionalPersona.setNomTipoIdentificacionNacionalPersona("OTRO");
+            }
         }
         integracionCUN.setTipoIdNacionalPersona(tipoIdNacionalPersona);
         
