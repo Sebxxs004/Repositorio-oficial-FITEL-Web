@@ -45,20 +45,23 @@ public class PQREndpoint {
         
         // Construir la respuesta
         ConsultaCUNResponse response = objectFactory.createConsultaCUNResponse();
-        ArrayOfIntegracionCUN array = objectFactory.createArrayOfIntegracionCUN();
         
         if (resultados != null && !resultados.isEmpty()) {
+            ArrayOfIntegracionCUN array = objectFactory.createArrayOfIntegracionCUN();
             array.getIntegracionCUN().addAll(resultados);
-        }
-        
-        try {
-            String rawXml = xmlStringConverter.convertToString(array);
-            // Envolver en CDATA
-            String cdataResponse = "<![CDATA[" + rawXml + "]]>";
-            response.setRespuesta(cdataResponse);
-        } catch (Exception e) {
-            log.error("Error al convertir la respuesta a XML String", e);
-            response.setRespuesta("<![CDATA[]]>");
+            try {
+                String rawXml = xmlStringConverter.convertToString(array);
+                // Envolver en CDATA
+                String cdataResponse = "<![CDATA[" + rawXml + "]]>";
+                response.setRespuesta(cdataResponse);
+            } catch (Exception e) {
+                log.error("Error al convertir la respuesta a XML String", e);
+                response.setRespuesta("<![CDATA[]]>");
+            }
+        } else {
+            // Respuesta exacta para consulta sin resultados según la directiva
+            String noResultsXml = " \t\t\t\n\t\t\t<tns:ArrayOfIntegracionCUN xmlns:tns=http://ws.wso2.org/dataservice /> \n\t\t";
+            response.setRespuesta("<![CDATA[" + noResultsXml + "]]>");
         }
         
         return response;
