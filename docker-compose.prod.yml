@@ -64,6 +64,7 @@ services:
       args:
         # Importante: Next.js 'quema' esta variable al momento de construir (build)
         NEXT_PUBLIC_API_URL: https://${SERVER_IP}/api
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY}
     container_name: fitel-frontend
     environment:
       NODE_ENV: production

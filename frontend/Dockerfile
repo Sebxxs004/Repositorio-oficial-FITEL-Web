@@ -18,9 +18,12 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# Argumento de construcción para la URL del API
+# Argumento de construcción para la URL del API y la Site Key del Captcha
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
+ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
+ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=${NEXT_PUBLIC_TURNSTILE_SITE_KEY}
 
 RUN npm run build
 
