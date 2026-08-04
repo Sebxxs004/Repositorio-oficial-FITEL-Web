@@ -119,6 +119,12 @@ public class PQRToSicXmlMapper {
         
         if (pqr.getResponseDate() != null) {
             integracionCUN.setFechaEstRespuesta(pqr.getResponseDate().format(DATE_ONLY_FORMATTER));
+        } else if (pqr.getSlaDeadline() != null) {
+            integracionCUN.setFechaEstRespuesta(pqr.getSlaDeadline().format(DATE_ONLY_FORMATTER));
+        } else if (pqr.getCreatedAt() != null) {
+            integracionCUN.setFechaEstRespuesta(pqr.getCreatedAt().plusDays(15).format(DATE_ONLY_FORMATTER));
+        } else {
+            integracionCUN.setFechaEstRespuesta("");
         }
         
         // Mapeo TipoQuejaSic

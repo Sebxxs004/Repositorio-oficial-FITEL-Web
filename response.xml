@@ -1,0 +1,12 @@
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+    <SOAP-ENV:Header />
+    <SOAP-ENV:Body>
+        <ns2:consultaCUNResponse xmlns:ns2="http://WSConsultaOperador/">
+            <parameters xsi:type="tns:consultaCUNResponse" xmlns:tns="http://WSConsultaOperador/"
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <respuesta xsi:type="xsd:string"><![CDATA[<tns:ns2:ArrayOfIntegracionCUN xmlns:ns2="http://WSConsultaOperador/"><tns:ns2:IntegracionCUN><tns:ns2:nombreOperador>FITEL COLOMBIA</tns:ns2:nombreOperador><tns:ns2:codigoUnicoNumerico><tns:ns2:identificadorOperador>7456</tns:ns2:identificadorOperador><tns:ns2:anoRadicacionCun>26</tns:ns2:anoRadicacionCun><tns:ns2:ConsecutivoRadCun>1</tns:ns2:ConsecutivoRadCun></tns:ns2:codigoUnicoNumerico><tns:ns2:nomPersona><tns:ns2:primerNombre>JUAN</tns:ns2:primerNombre><tns:ns2:segundoNombre></tns:ns2:segundoNombre><tns:ns2:primerApellido>CANO</tns:ns2:primerApellido><tns:ns2:segundoApellido></tns:ns2:segundoApellido></tns:ns2:nomPersona><tns:ns2:tipoIdNacionalPersona><tns:ns2:codTipoIdNacionalPersona>CC</tns:ns2:codTipoIdNacionalPersona><tns:ns2:nomTipoIdentificacionNacionalPersona>CEDULA DE CIUDADANIA</tns:ns2:nomTipoIdentificacionNacionalPersona></tns:ns2:tipoIdNacionalPersona><tns:ns2:grupoNumeroIdentificacion>1093594550</tns:ns2:grupoNumeroIdentificacion><tns:ns2:descripcionEstado>ANALISIS POR PARTE DEL OPERADOR</tns:ns2:descripcionEstado><tns:ns2:fechaAsignacion>2026-07-03T23:55:00</tns:ns2:fechaAsignacion><tns:ns2:razonSocial></tns:ns2:razonSocial><tns:ns2:tipoQuejaSic><tns:ns2:nomTipoQuejaSic>QUEJA</tns:ns2:nomTipoQuejaSic><tns:ns2:codTipoQuejaSic>2</tns:ns2:codTipoQuejaSic></tns:ns2:tipoQuejaSic></tns:ns2:IntegracionCUN></tns:ns2:ArrayOfIntegracionCUN>]]></respuesta>
+            </parameters>
+        </ns2:consultaCUNResponse>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
