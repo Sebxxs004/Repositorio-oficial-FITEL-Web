@@ -42,14 +42,14 @@ public class XmlStringConverter {
         // 2. Reemplazar el namespace con prefijo por el requerido por la SIC (http://ws.wso2.org/dataservice)
         xml = xml.replaceAll("xmlns:[^=]+=\"[^\"]+\"", "xmlns:tns=\"http://ws.wso2.org/dataservice\"");
         
-        // 3. Formatear ConsecutivoRadCun a 10 dígitos con ceros a la izquierda para cumplir la especificación de la SIC
+        // 3. Formatear ConsecutivoRadCun a 10 dígitos con ceros a la izquierda para cumplir la especificación de la SIC en todos los items
         java.util.regex.Pattern p = java.util.regex.Pattern.compile("<tns:ConsecutivoRadCun>(\\d+)</tns:ConsecutivoRadCun>");
         java.util.regex.Matcher m = p.matcher(xml);
-        if (m.find()) {
-            String val = m.group(1);
+        xml = m.replaceAll(matchResult -> {
+            String val = matchResult.group(1);
             String padded = String.format("%010d", Long.parseLong(val));
-            xml = m.replaceFirst("<tns:ConsecutivoRadCun>" + padded + "</tns:ConsecutivoRadCun>");
-        }
+            return "<tns:ConsecutivoRadCun>" + padded + "</tns:ConsecutivoRadCun>";
+        });
         
         return xml;
     }
