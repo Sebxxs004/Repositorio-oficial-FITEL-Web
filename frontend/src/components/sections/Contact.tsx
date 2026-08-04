@@ -461,7 +461,7 @@ export function Contact({ contact: contactProp }: ContactProps = {}) {
               <div className="flex justify-center py-2">
                 <div
                   className="cf-turnstile"
-                  data-sitekey="0x4AAAAAAAEGabvaYEAnQAGre"
+                  data-sitekey="0x4AAAAAAEGccDaGG_g-pPtt"
                   data-callback="onTurnstileSuccess"
                   data-expired-callback="onTurnstileExpired"
                 ></div>

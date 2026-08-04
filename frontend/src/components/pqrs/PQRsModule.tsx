@@ -848,7 +848,7 @@ export function PQRsModule({ mode = 'public' }: PQRsModuleProps) {
                   <div className="flex justify-center py-2">
                     <div
                       className="cf-turnstile"
-                      data-sitekey="0x4AAAAAAAEGabvaYEAnQAGre"
+                      data-sitekey="0x4AAAAAAEGccDaGG_g-pPtt"
                       data-callback="onPqrTurnstileSuccess"
                       data-expired-callback="onPqrTurnstileExpired"
                     ></div>
