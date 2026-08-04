@@ -29,6 +29,7 @@ public class XmlStringConverter {
         Marshaller marshaller = jaxbContext.createMarshaller();
         // Evitar la declaración XML <?xml version="1.0" ... ?> para que sea solo el nodo
         marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         
         // Envolver el objeto en un JAXBElement para suplir la falta de @XmlRootElement
         JAXBElement<ArrayOfIntegracionCUN> jaxbElement = objectFactory.createArrayOfIntegracionCUN(arrayObject);
