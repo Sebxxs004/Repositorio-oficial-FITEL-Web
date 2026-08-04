@@ -30,6 +30,8 @@ public class ContactFormRequest {
     @Size(max = 5000, message = "El mensaje no puede exceder 5000 caracteres")
     private String message;
 
+    private String captchaToken;
+
     public ContactFormRequest() {}
 
     public ContactFormRequest(String name, String email, String phone, String subject, String message) {
@@ -50,4 +52,6 @@ public class ContactFormRequest {
     public void setSubject(String subject) { this.subject = subject; }
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
+    public String getCaptchaToken() { return captchaToken; }
+    public void setCaptchaToken(String captchaToken) { this.captchaToken = captchaToken; }
 }

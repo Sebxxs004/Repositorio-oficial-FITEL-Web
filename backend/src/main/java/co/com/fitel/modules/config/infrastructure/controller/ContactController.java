@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class ContactController {
     
     private final EmailService emailService;
+    private final co.com.fitel.common.security.CaptchaService captchaService;
     
     /**
      * Procesa el formulario de contacto y envía notificación a la empresa
@@ -28,6 +29,11 @@ public class ContactController {
     @PostMapping
     public ResponseEntity<ApiResponse<String>> submitContactForm(@Valid @RequestBody ContactFormRequest request) {
         log.info("POST /api/contact - Processing contact form from: {}", request.getEmail());
+        
+        if (!captchaService.verifyToken(request.getCaptchaToken())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("Verificación de seguridad (Captcha) inválida."));
+        }
         
         try {
             // Obtener el label del asunto

@@ -61,4 +61,6 @@ public class CreatePQRRequest {
     
     @Size(max = 500)
     private String expectedResolution; // Resolución esperada (opcional)
+
+    private String captchaToken;
 }

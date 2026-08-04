@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 public class PQRController {
     
     private final PQRService pqrService;
+    private final co.com.fitel.common.security.CaptchaService captchaService;
     
     // Método PostConstruct para logging de inicialización
     @jakarta.annotation.PostConstruct
@@ -61,6 +62,12 @@ public class PQRController {
                 log.error("Request body is null");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.error("El cuerpo de la petición está vacío"));
+            }
+
+            // Validar captcha antes de crear la PQR
+            if (!captchaService.verifyToken(request.getCaptchaToken())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("Verificación de seguridad (Captcha) inválida."));
             }
             
             log.debug("PQR Request details - Type: {}, Name: {}, Email: {}", 

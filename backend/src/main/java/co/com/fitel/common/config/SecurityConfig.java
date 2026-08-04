@@ -33,6 +33,9 @@ public class SecurityConfig {
     @Autowired
     private co.com.fitel.common.security.SicIpFilter sicIpFilter;
 
+    @Autowired
+    private co.com.fitel.common.security.RateLimitingFilter rateLimitingFilter;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -52,6 +55,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(sicIpFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .csrf(csrf -> csrf.disable())
