@@ -34,7 +34,11 @@ public class PQRSoapService {
         }
 
         log.debug("Buscando PQR por identificación del cliente");
-        List<PQR> pqrs = pqrRepository.findByIdentificacion(tipoId, numeroId);
+        String normalizedTipoId = tipoId;
+        if ("NI".equalsIgnoreCase(tipoId)) {
+            normalizedTipoId = "NIT";
+        }
+        List<PQR> pqrs = pqrRepository.findByIdentificacion(normalizedTipoId, numeroId);
         return pqrs.stream()
                    .map(mapper::toIntegracionCUN)
                    .collect(Collectors.toList());
