@@ -39,7 +39,7 @@ public interface PQRRepository extends JpaRepository<PQR, Long> {
            "'' as apellidos, " +
            "p.customer_name as razon_social, " +
            "CASE WHEN p.customer_document_type = 'NIT' THEN 'JURIDICA' ELSE 'NATURAL' END as tipo_persona " +
-           "FROM pqr p WHERE (p.cun COLLATE utf8mb4_general_ci LIKE CONCAT('%', MOD(:anio, 100), LPAD(CONVERT(:consecutivo, CHAR), 10, '0')) COLLATE utf8mb4_general_ci) OR (p.cun COLLATE utf8mb4_general_ci LIKE CONCAT('%', MOD(:anio, 100), LPAD(CONVERT(:consecutivo, CHAR), 6, '0')) COLLATE utf8mb4_general_ci)", 
+           "FROM pqr p WHERE (p.cun COLLATE utf8mb4_general_ci LIKE CONCAT('%', MOD(:anio, 100), LPAD(CONVERT(:consecutivo, CHAR), 10, '0')) COLLATE utf8mb4_general_ci) OR (p.cun COLLATE utf8mb4_general_ci LIKE CONCAT('%', MOD(:anio, 100), LPAD(CONVERT(:consecutivo, CHAR), 6, '0')) COLLATE utf8mb4_general_ci) LIMIT 1", 
            nativeQuery = true)
     Optional<PQR> findByCunParts(@Param("anio") Integer anio, @Param("consecutivo") Integer consecutivo);
 
