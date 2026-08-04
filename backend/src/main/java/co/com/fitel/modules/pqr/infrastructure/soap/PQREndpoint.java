@@ -29,15 +29,16 @@ public class PQREndpoint {
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "consultaCUN")
     @ResponsePayload
     public ConsultaCUNResponse consultarTramites(@RequestPayload ConsultaCUN request) {
+        ConsultaCUN.Parameters params = request.getParameters();
+        
+        Integer aa = params != null ? params.getAnoRadicacionCun() : 0;
+        Integer cr = params != null ? params.getConsecutivoRadCun() : 0;
+        Integer io = params != null ? params.getIdentificadorOperador() : 0;
+        String tipoId = params != null && params.getTipoIdentificacion() != null ? params.getTipoIdentificacion() : "";
+        String numeroId = params != null ? String.valueOf(params.getNumeroIdentificacion()) : "0";
+
         log.info("Recibida petición SOAP consultaCUN: anoRadicacionCun={}, ConsecutivoRadCun={}, identificadorOperador={}, TipoId={}, NumId={}", 
-                request.getAnoRadicacionCun(), request.getConsecutivoRadCun(), request.getIdentificadorOperador(), request.getTipoIdentificacion(), request.getNumeroIdentificacion());
-        
-        // Extraer parámetros (ya vienen como int por el nuevo esquema)
-        Integer aa = request.getAnoRadicacionCun();
-        Integer cr = request.getConsecutivoRadCun();
-        
-        String tipoId = request.getTipoIdentificacion() != null ? request.getTipoIdentificacion() : "";
-        String numeroId = String.valueOf(request.getNumeroIdentificacion());
+                aa, cr, io, tipoId, numeroId);
         
         // Consultar el servicio
         List<IntegracionCUN> resultados = pqrSoapService.consultarTramites(aa, cr, tipoId, numeroId);

@@ -85,37 +85,41 @@ class PQREndpointIntegrationTest {
     @DisplayName("A) Debe procesar petición por CUN válido y retornar respuesta sin fault")
     void testPeticionPorCunValido() throws Exception {
         String requestXml =
-            "<soap:consultaCUNRequest xmlns:soap=\"http://fitel.com.co/pqr/soap\">" +
-            "  <soap:IO>12345</soap:IO>" +
-            "  <soap:AA>24</soap:AA>" +
-            "  <soap:CR>1</soap:CR>" +
-            "  <soap:tipoIdentificacion></soap:tipoIdentificacion>" +
-            "  <soap:numeroIdentificacion></soap:numeroIdentificacion>" +
-            "</soap:consultaCUNRequest>";
+            "<wsc:consultaCUN xmlns:wsc=\"http://WSConsultaOperador/\">" +
+            "  <parameters>" +
+            "    <wsc:identificadorOperador>12345</wsc:identificadorOperador>" +
+            "    <wsc:anoRadicacionCun>24</wsc:anoRadicacionCun>" +
+            "    <wsc:ConsecutivoRadCun>1</wsc:ConsecutivoRadCun>" +
+            "    <wsc:tipoIdentificacion></wsc:tipoIdentificacion>" +
+            "    <wsc:numeroIdentificacion>0</wsc:numeroIdentificacion>" +
+            "  </parameters>" +
+            "</wsc:consultaCUN>";
 
         IntegracionCUN mockIntegracion = buildMockIntegracion(
                 "7456", "24", "000001", "Juan", "CC", "101010",
                 "ANALISIS POR PARTE DEL OPERADOR", "QUEJA", "2");
 
-        when(pqrSoapService.consultarTramites(24, 1, "", "")).thenReturn(List.of(mockIntegracion));
+        when(pqrSoapService.consultarTramites(24, 1, "", "0")).thenReturn(List.of(mockIntegracion));
 
         mockClient.sendRequest(withPayload(new StringSource(requestXml)))
                 .andExpect(noFault())
-                .andExpect(xpath("/soap:consultaCUNResponse/soap:respuesta",
-                                 Collections.singletonMap("soap", "http://fitel.com.co/pqr/soap")).exists());
+                .andExpect(xpath("/wsc:consultaCUNResponse/parameters/respuesta",
+                                 Collections.singletonMap("wsc", "http://WSConsultaOperador/")).exists());
     }
 
     @Test
     @DisplayName("B) Debe procesar petición por Cédula y retornar respuesta sin fault con múltiples items")
     void testPeticionPorCedula() throws Exception {
         String requestXml =
-            "<soap:consultaCUNRequest xmlns:soap=\"http://fitel.com.co/pqr/soap\">" +
-            "  <soap:IO></soap:IO>" +
-            "  <soap:AA>0</soap:AA>" +
-            "  <soap:CR>0</soap:CR>" +
-            "  <soap:tipoIdentificacion>CC</soap:tipoIdentificacion>" +
-            "  <soap:numeroIdentificacion>101010</soap:numeroIdentificacion>" +
-            "</soap:consultaCUNRequest>";
+            "<wsc:consultaCUN xmlns:wsc=\"http://WSConsultaOperador/\">" +
+            "  <parameters>" +
+            "    <wsc:identificadorOperador>0</wsc:identificadorOperador>" +
+            "    <wsc:anoRadicacionCun>0</wsc:anoRadicacionCun>" +
+            "    <wsc:ConsecutivoRadCun>0</wsc:ConsecutivoRadCun>" +
+            "    <wsc:tipoIdentificacion>CC</wsc:tipoIdentificacion>" +
+            "    <wsc:numeroIdentificacion>101010</wsc:numeroIdentificacion>" +
+            "  </parameters>" +
+            "</wsc:consultaCUN>";
 
         IntegracionCUN mockIntegracion1 = buildMockIntegracion(
                 "7456", "24", "000001", "Juan", "CC", "101010",
@@ -130,27 +134,29 @@ class PQREndpointIntegrationTest {
 
         mockClient.sendRequest(withPayload(new StringSource(requestXml)))
                 .andExpect(noFault())
-                .andExpect(xpath("/soap:consultaCUNResponse/soap:respuesta",
-                                 Collections.singletonMap("soap", "http://fitel.com.co/pqr/soap")).exists());
+                .andExpect(xpath("/wsc:consultaCUNResponse/parameters/respuesta",
+                                 Collections.singletonMap("wsc", "http://WSConsultaOperador/")).exists());
     }
 
     @Test
     @DisplayName("C) Debe retornar ArrayOfIntegracionCUN vacío si no hay datos, sin dar error 500")
     void testPeticionSinDatos() throws Exception {
         String requestXml =
-            "<soap:consultaCUNRequest xmlns:soap=\"http://fitel.com.co/pqr/soap\">" +
-            "  <soap:IO></soap:IO>" +
-            "  <soap:AA>99</soap:AA>" +
-            "  <soap:CR>999</soap:CR>" +
-            "  <soap:tipoIdentificacion></soap:tipoIdentificacion>" +
-            "  <soap:numeroIdentificacion></soap:numeroIdentificacion>" +
-            "</soap:consultaCUNRequest>";
+            "<wsc:consultaCUN xmlns:wsc=\"http://WSConsultaOperador/\">" +
+            "  <parameters>" +
+            "    <wsc:identificadorOperador>0</wsc:identificadorOperador>" +
+            "    <wsc:anoRadicacionCun>99</wsc:anoRadicacionCun>" +
+            "    <wsc:ConsecutivoRadCun>999</wsc:ConsecutivoRadCun>" +
+            "    <wsc:tipoIdentificacion></wsc:tipoIdentificacion>" +
+            "    <wsc:numeroIdentificacion>0</wsc:numeroIdentificacion>" +
+            "  </parameters>" +
+            "</wsc:consultaCUN>";
 
-        when(pqrSoapService.consultarTramites(99, 999, "", "")).thenReturn(Collections.emptyList());
+        when(pqrSoapService.consultarTramites(99, 999, "", "0")).thenReturn(Collections.emptyList());
 
         mockClient.sendRequest(withPayload(new StringSource(requestXml)))
                 .andExpect(noFault())
-                .andExpect(xpath("/soap:consultaCUNResponse/soap:respuesta",
-                                 Collections.singletonMap("soap", "http://fitel.com.co/pqr/soap")).exists());
+                .andExpect(xpath("/wsc:consultaCUNResponse/parameters/respuesta",
+                                 Collections.singletonMap("wsc", "http://WSConsultaOperador/")).exists());
     }
 }

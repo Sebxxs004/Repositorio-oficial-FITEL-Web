@@ -13,11 +13,17 @@
     <xs:element name="consultaCUN">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="identificadorOperador" type="xs:int" default="0"/>
-                <xs:element name="anoRadicacionCun"      type="xs:int" default="0"/>
-                <xs:element name="ConsecutivoRadCun"     type="xs:int" default="0"/>
-                <xs:element name="tipoIdentificacion"    type="xs:string" default="%%"/>
-                <xs:element name="numeroIdentificacion"  type="xs:int" default="0"/>
+                <xs:element name="parameters" form="unqualified">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="identificadorOperador" type="xs:int" default="0"/>
+                            <xs:element name="anoRadicacionCun"      type="xs:int" default="0"/>
+                            <xs:element name="ConsecutivoRadCun"     type="xs:int" default="0"/>
+                            <xs:element name="tipoIdentificacion"    type="xs:string" default="%%"/>
+                            <xs:element name="numeroIdentificacion"  type="xs:int" default="0"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
