@@ -39,3 +39,5 @@ yarn-error.log*
 
 # Docker
 docker-compose.override.yml
+PersonaNaturalEjemplo.xml
+PersonaJuridicaEjemplo.xml
