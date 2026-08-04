@@ -35,6 +35,13 @@ public class XmlStringConverter {
         
         StringWriter writer = new StringWriter();
         marshaller.marshal(jaxbElement, writer);
-        return writer.toString();
+        
+        String xml = writer.toString();
+        // 1. Agregar el prefijo tns: a todas las etiquetas XML
+        xml = xml.replaceAll("<(/??)([^\\s>/]+)(/??)([^>]*)>", "<$1tns:$2$3$4>");
+        // 2. Reemplazar el namespace por el requerido por la SIC (http://ws.wso2.org/dataservice)
+        xml = xml.replaceAll("xmlns=\"[^\"]+\"", "xmlns:tns=\"http://ws.wso2.org/dataservice\"");
+        
+        return xml;
     }
 }

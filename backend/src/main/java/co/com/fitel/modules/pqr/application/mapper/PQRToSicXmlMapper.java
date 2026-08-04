@@ -27,10 +27,10 @@ public class PQRToSicXmlMapper {
         CodigoUnicoNumerico codigoUnicoNumerico = factory.createCodigoUnicoNumerico();
         codigoUnicoNumerico.setIdentificadorOperador(7456);
         String cun = pqr.getCun();
-        if (cun != null) {
+        if (cun != null && !cun.isBlank()) {
             try {
                 if (cun.length() >= 12) {
-                    // Estructura nueva: secuencia de 10 dígitos
+                    // Estructura nueva: secuencia de 10 dígitos (p. ej. 7456260000000001)
                     codigoUnicoNumerico.setConsecutivoRadCun(Integer.parseInt(cun.substring(cun.length() - 10)));
                     codigoUnicoNumerico.setAnoRadicacionCun(Integer.parseInt(cun.substring(cun.length() - 12, cun.length() - 10)));
                 } else if (cun.length() >= 6) {
@@ -42,16 +42,13 @@ public class PQRToSicXmlMapper {
                         codigoUnicoNumerico.setAnoRadicacionCun(0);
                     }
                 } else {
-                    codigoUnicoNumerico.setAnoRadicacionCun(0);
-                    codigoUnicoNumerico.setConsecutivoRadCun(0);
+                    fallbackCunValues(codigoUnicoNumerico, pqr);
                 }
             } catch (NumberFormatException e) {
-                codigoUnicoNumerico.setAnoRadicacionCun(0);
-                codigoUnicoNumerico.setConsecutivoRadCun(0);
+                fallbackCunValues(codigoUnicoNumerico, pqr);
             }
         } else {
-            codigoUnicoNumerico.setAnoRadicacionCun(0);
-            codigoUnicoNumerico.setConsecutivoRadCun(0);
+            fallbackCunValues(codigoUnicoNumerico, pqr);
         }
         integracionCUN.setCodigoUnicoNumerico(codigoUnicoNumerico);
         
@@ -67,12 +64,33 @@ public class PQRToSicXmlMapper {
             nomPersona.setPrimerApellido("");
             nomPersona.setSegundoApellido("");
         } else {
-            // Intentar separar el nombre en partes
-            String[] parts = pqr.getCustomerName() != null ? pqr.getCustomerName().split(" ") : new String[0];
-            nomPersona.setPrimerNombre(parts.length > 0 ? parts[0] : "");
-            nomPersona.setSegundoNombre(parts.length > 1 ? parts[1] : "");
-            nomPersona.setPrimerApellido(parts.length > 2 ? parts[2] : "");
-            nomPersona.setSegundoApellido(parts.length > 3 ? parts[3] : "");
+            String[] parts = pqr.getCustomerName() != null ? pqr.getCustomerName().trim().split("\\s+") : new String[0];
+            if (parts.length == 1) {
+                nomPersona.setPrimerNombre(parts[0]);
+                nomPersona.setSegundoNombre("");
+                nomPersona.setPrimerApellido("");
+                nomPersona.setSegundoApellido("");
+            } else if (parts.length == 2) {
+                nomPersona.setPrimerNombre(parts[0]);
+                nomPersona.setSegundoNombre("");
+                nomPersona.setPrimerApellido(parts[1]);
+                nomPersona.setSegundoApellido("");
+            } else if (parts.length == 3) {
+                nomPersona.setPrimerNombre(parts[0]);
+                nomPersona.setSegundoNombre(parts[1]);
+                nomPersona.setPrimerApellido(parts[2]);
+                nomPersona.setSegundoApellido("");
+            } else if (parts.length >= 4) {
+                nomPersona.setPrimerNombre(parts[0]);
+                nomPersona.setSegundoNombre(parts[1]);
+                nomPersona.setPrimerApellido(parts[2]);
+                nomPersona.setSegundoApellido(parts[3]);
+            } else {
+                nomPersona.setPrimerNombre("");
+                nomPersona.setSegundoNombre("");
+                nomPersona.setPrimerApellido("");
+                nomPersona.setSegundoApellido("");
+            }
         }
         integracionCUN.setNomPersona(nomPersona);
         
@@ -124,5 +142,19 @@ public class PQRToSicXmlMapper {
             case "CERRADA" -> "CERRADA";
             default -> "ANALISIS POR PARTE DEL OPERADOR";
         };
+    }
+
+    private void fallbackCunValues(CodigoUnicoNumerico codigoUnicoNumerico, PQR pqr) {
+        int year = 26; // por defecto 2026
+        if (pqr.getCreatedAt() != null) {
+            year = pqr.getCreatedAt().getYear() % 100;
+        }
+        codigoUnicoNumerico.setAnoRadicacionCun(year);
+        
+        int consecutivo = 0;
+        if (pqr.getId() != null) {
+            consecutivo = pqr.getId().intValue();
+        }
+        codigoUnicoNumerico.setConsecutivoRadCun(consecutivo);
     }
 }
