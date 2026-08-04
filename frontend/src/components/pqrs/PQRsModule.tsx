@@ -9,6 +9,7 @@ import { FileText, Send, Loader2, AlertCircle, CheckCircle, Info, Download, Uplo
 import { PQRService } from '@/services/pqr/PQRService'
 import type { PQRConstancy, PQRType } from '@/types/pqr.types'
 import { FITEL_PHONE_DISPLAY } from '@/config/constants'
+import Script from 'next/script'
 
 // Opciones de tipo de PQR
 export const PQR_TYPE_OPTIONS = [
@@ -135,6 +136,19 @@ export function PQRsModule({ mode = 'public' }: PQRsModuleProps) {
   const [createdCUN, setCreatedCUN] = useState<string | null>(null)
   const [files, setFiles] = useState<File[]>([])
   const [dragActive, setDragActive] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+
+  // Registrar callbacks de Turnstile para PQRs
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).onPqrTurnstileSuccess = (token: string) => {
+        setCaptchaToken(token)
+      }
+      (window as any).onPqrTurnstileExpired = () => {
+        setCaptchaToken(null)
+      }
+    }
+  }, [])
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
@@ -259,6 +273,11 @@ export function PQRsModule({ mode = 'public' }: PQRsModuleProps) {
   // ... (sigue igual)
 
   const onSubmit = async (data: PQRFormData) => {
+    if (!captchaToken) {
+      setSubmitError('Por favor, completa la verificación de seguridad (Captcha).')
+      return
+    }
+
     setIsSubmitting(true)
     setSubmitError(null)
     setShowCUNModal(false)
@@ -284,6 +303,7 @@ export function PQRsModule({ mode = 'public' }: PQRsModuleProps) {
         description: data.description,
         expectedResolution: data.expectedResolution,
         files: files,
+        captchaToken: captchaToken,
       })
 
       if (response.success && response.data) {
@@ -816,6 +836,24 @@ export function PQRsModule({ mode = 'public' }: PQRsModuleProps) {
                   <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                   <p className="text-red-800 text-sm">{submitError}</p>
                 </div>
+              )}
+
+              {/* Cloudflare Turnstile Captcha (solo para usuarios públicos) */}
+              {!isAdminMode && (
+                <>
+                  <Script
+                    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+                    strategy="afterInteractive"
+                  />
+                  <div className="flex justify-center py-2">
+                    <div
+                      className="cf-turnstile"
+                      data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAAEGabvaYEAnQAGre"}
+                      data-callback="onPqrTurnstileSuccess"
+                      data-expired-callback="onPqrTurnstileExpired"
+                    ></div>
+                  </div>
+                </>
               )}
 
               {/* Botón de envío */}

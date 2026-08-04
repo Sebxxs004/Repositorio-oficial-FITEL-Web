@@ -2,6 +2,10 @@
 node_modules/
 frontend/node_modules/
 backend/target/
+.venv/
+venv/
+env/
+ENV/
 
 # Build outputs
 .next/

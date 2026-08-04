@@ -63,6 +63,7 @@ export interface CreatePQRRequest {
   description: string
   resourceType?: string
   expectedResolution?: string
+  captchaToken?: string
 }
 
 export interface PQRSearchRequest {

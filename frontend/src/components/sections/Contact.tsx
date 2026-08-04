@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { Phone, Mail, MessageCircle, MapPin, Clock, Send, Loader2, Copy, Check } from 'lucide-react'
 import { ContactForm } from '@/types'
 import { FITEL_PHONE_NUMBER, FITEL_PHONE_DISPLAY, FITEL_EMAIL } from '@/config/constants'
+import Script from 'next/script'
 
 interface ContactData {
   phone: string
@@ -21,26 +22,21 @@ interface ContactProps {
 
 // Opciones de asunto para el formulario de contacto
 export const CONTACT_SUBJECT_OPTIONS = [
-  { value: 'plan-informacion', label: 'Información sobre Planes' },
-  { value: 'plan-contratacion', label: 'Contratar un Plan' },
-  { value: 'cobertura', label: 'Consulta de Cobertura' },
-  { value: 'soporte-tecnico', label: 'Soporte Técnico' },
-  { value: 'facturacion', label: 'Facturación y Pagos' },
-  { value: 'cambio-plan', label: 'Cambio o Actualización de Plan' },
-  { value: 'servicios-adicionales', label: 'Servicios Adicionales' },
-  { value: 'promociones', label: 'Promociones y Ofertas' },
-  { value: 'otro', label: 'Otro' },
-] as const
+  { value: 'VENTAS', label: 'Ventas y Contratación' },
+  { value: 'SOPORTE', label: 'Soporte Técnico' },
+  { value: 'FACTURACION', label: 'Facturación y Pagos' },
+  { value: 'INFORMACION', label: 'Información General' },
+]
 
 // Esquema de validación con Zod
 const contactFormSchema = z.object({
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  email: z.string().email('Ingresa un email válido'),
-  phone: z.string().min(10, 'Ingresa un teléfono válido'),
+  name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres').max(200),
+  email: z.string().email('Email inválido').max(255),
+  phone: z.string().min(7, 'El teléfono debe tener al menos 7 caracteres').max(20),
   subject: z.enum(CONTACT_SUBJECT_OPTIONS.map(opt => opt.value) as [string, ...string[]], {
-    errorMap: () => ({ message: 'Por favor selecciona un asunto' }),
+    required_error: 'Selecciona un asunto',
   }),
-  message: z.string().min(10, 'El mensaje debe tener al menos 10 caracteres'),
+  message: z.string().min(10, 'El mensaje debe tener al menos 10 caracteres').max(5000),
 })
 
 type ContactFormData = z.infer<typeof contactFormSchema>
@@ -51,6 +47,19 @@ export function Contact({ contact: contactProp }: ContactProps = {}) {
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [phoneCopied, setPhoneCopied] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+
+  // Registrar funciones globales de callback para Turnstile
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).onTurnstileSuccess = (token: string) => {
+        setCaptchaToken(token)
+      }
+      (window as any).onTurnstileExpired = () => {
+        setCaptchaToken(null)
+      }
+    }
+  }, [])
 
   const contact: ContactData = contactProp ?? {
     phone: FITEL_PHONE_NUMBER,
@@ -89,6 +98,11 @@ export function Contact({ contact: contactProp }: ContactProps = {}) {
   }, [])
 
   const onSubmit = async (data: ContactFormData) => {
+    if (!captchaToken) {
+      setSubmitError('Por favor, completa la verificación de seguridad (Captcha).')
+      return
+    }
+
     setIsSubmitting(true)
     setSubmitError(null)
     setSubmitSuccess(false)
@@ -107,6 +121,7 @@ export function Contact({ contact: contactProp }: ContactProps = {}) {
           phone: data.phone,
           subject: data.subject,
           message: data.message,
+          captchaToken: captchaToken,
         }),
       })
 
@@ -437,6 +452,20 @@ export function Contact({ contact: contactProp }: ContactProps = {}) {
                   <p className="text-red-800 text-sm">{submitError}</p>
                 </div>
               )}
+
+              {/* Cloudflare Turnstile Captcha */}
+              <Script
+                src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+                strategy="afterInteractive"
+              />
+              <div className="flex justify-center py-2">
+                <div
+                  className="cf-turnstile"
+                  data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAAAEGabvaYEAnQAGre"}
+                  data-callback="onTurnstileSuccess"
+                  data-expired-callback="onTurnstileExpired"
+                ></div>
+              </div>
 
               {/* Botones de acción */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
